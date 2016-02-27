@@ -1,0 +1,29 @@
+<Corridor_2>
+	<threshold>149</threshold>
+	<blur>4</blur>
+	<number_of_erosions>1</number_of_erosions>
+	<number_of_dilations>1</number_of_dilations>
+	<min_Blob_Area>10</min_Blob_Area>
+	<max_Blob_Area>790000</max_Blob_Area>
+	<threshold_image>1</threshold_image>
+	<tracking>1</tracking>
+	<info>0</info>
+	<Point_0>210, 128</Point_0>
+	<Point_1>640, 0</Point_1>
+	<Point_2>588, 512</Point_2>
+	<Point_3>170, 512</Point_3>
+<Corridor_2/>
+<Threshold>28</Threshold>
+	<Blur>8</Blur>
+	<Number_of_erosions>0</Number_of_erosions>
+	<Number_of_dilations>0</Number_of_dilations>
+	<Min_Blob_Area>6</Min_Blob_Area>
+	<Max_Blob_Area>50000</Max_Blob_Area>
+	<Persistence>15</Persistence>
+	<Max_Distance>32</Max_Distance>
+	<Threshold_image>1</Threshold_image>
+	<Contours>1</Contours>
+	<Info>0</Info>
+<Draw_threshold>1</Draw_threshold>
+	<Draw_Contours>1</Draw_Contours>
+</Corridor_2>
