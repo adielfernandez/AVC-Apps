@@ -1,30 +1,30 @@
 #include "ofApp.h"
 
+using namespace ofxCv;
+
+
 //--------------------------------------------------------------
+void ofApp::exit(){
+    
+    for(int i = 0; i < corridors.size(); i++){
+        corridors[i] -> closeFeed();
+        
+        cout << "Closing Feed: " + ofToString(i) << endl;
+    }
+    
+}
+
+
+
 void ofApp::setup(){
 
     ofSetFrameRate(200);
     ofSetVerticalSync(false);
     ofSetLogLevel(OF_LOG_VERBOSE);
     
-    numCorridors = 1;
-//    corridors.resize(numCorridors);
-//    corridors[0].setup("192.168.1.5", "Corridor 2");
-//    corridors[1].setup("192.168.1.5", "Corridor 3");
-//    corridors[2].setup("192.168.1.5", "Corridor 4");
-//    corridors[3].setup("192.168.1.5", "Corridor 5");
-    
-    
-    bScaleDown = true;
-    
-    testCorridor.bScaleDown = bScaleDown;
-    testCorridor.setup("192.168.1.5", "Corridor 2");
     
     feedWidth = 640;
     feedHeight = 512;
-    
-    
-    
     
     //-----UI-----
     leftMargin = 230;
@@ -45,12 +45,85 @@ void ofApp::setup(){
     viewMode = 0;
     
     
+    titleFont.load("fonts/Aller_Rg.ttf", 50, true);
+    smallerFont.load("fonts/Aller_Rg.ttf", 20, true);
     
-    titleFont.load("font/Aller_Rg.ttf", 50, true);
+
+    
+    
+    //if we're using image scaling for faster processing
+    bScaleDown = true;
+
+    
+    //IP Addresses
+    //these will eventually be different
+    vector<string> addresses;
+    addresses.resize(4);
+
+    addresses[0] = "192.168.1.4";
+    addresses[1] = "192.168.1.2";
+    addresses[2] = "192.168.1.4";
+    addresses[3] = "192.168.1.4";
+    
+    
+    
+    //Background Colors
+    //holds a dark then a light color for the gradient background
+    vector<ofColor> backgroundCols;
+    backgroundCols.resize(4 * 2);
+    
+    int high = 80;  //the high value of the primary colors
+    int low = 30;   //the low value
+    
+    //first corridor is red
+    backgroundCols[0].set(high, 0, 0);
+    backgroundCols[1].set(low, 0, 0);
+    //then yellow
+    backgroundCols[2].set(high, high, 0);
+    backgroundCols[3].set(low, low, 0);
+    //then green
+    backgroundCols[4].set(0, high, 0);
+    backgroundCols[5].set(0, low, 0);
+    //then blue
+    backgroundCols[6].set(0, 0, high);
+    backgroundCols[7].set(0, 0, low);
+    
+    
+    //set up the corridors
+    for(int i = 0; i < numFeeds; i++){
+        
+        //create shared_ptr to a corridor
+        auto cor = std::make_shared<Corridor>();
+
+        //corridor 2 = corridors[0] so add 2 to i to get the right corridor name
+        
+        //only set certain corridors to a feed
+        bool thisFeedorMovie;
+        if(i == 0 || i == 1){
+            thisFeedorMovie = true;
+        } else {
+            thisFeedorMovie = false;
+        }
+        
+        cor -> setup(addresses[i], "Corridor " + ofToString(i + 2), bScaleDown, thisFeedorMovie);
+        cor -> adjustedQuadOrigin = rawImagePos;
+        cor -> backgroundIn.set(backgroundCols[i * 2]);
+        cor -> backgroundOut.set(backgroundCols[i * 2 + 1]);
+        
+        corridors.push_back(cor);
+
+        
+    }
+    
+
+    
     
     //-----Data-----
     oscHandler.setup("localhost");
     
+    //time between sending system snapshots (in ms)
+    dataPerSec = 3;
+    lastSendTime = 0;
     
 }
 
@@ -58,65 +131,57 @@ void ofApp::setup(){
 void ofApp::update(){
 
     
-    testCorridor.update();
 
-    if(viewMode == 0){
-        testCorridor.bEnableQuadMapping = true;
-        testCorridor.adjustedQuadOrigin = rawImagePos;
+
+    if(viewMode >= 0 && viewMode <= numFeeds){
+        
+        
+        //only enable quad mapping if we're the one on screen
+        for(int i = 0; i < corridors.size(); i++){
+
+            if(viewMode == i){
+                corridors[i] -> bEnableQuadMapping = true;
+            } else {
+                corridors[i] -> bEnableQuadMapping = false;
+            }
+            
+        }
+        
+        
     } else {
-        //make sure we're not checking the mouse
-        //if the corridor isn't the active one
-        testCorridor.bEnableQuadMapping = false;
+        
+
+        
     }
     
     
-    //update all corridors regardless of view
-//    for(int i = 0; i < corridors.size(); i++){
-//        corridors[i].update();
-//    }
+    
+    //update everything regardless of other functionalities
+    for(int i = 0; i < corridors.size(); i++){
+        
+        corridors[i] -> update();
+        
+    }
+
+    
     
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-//    ofColor one(0, 23, 69);
-//    ofColor two(0, 12, 36);
 
-    ofColor one(80, 0, 0);
-    ofColor two(30, 0, 0);
-    
-    ofBackgroundGradient(one, two);
 
     
-//    if(viewMode >= 0 && viewMode <= 3){
-//        
-//        //add 2 to viewMode to get actual Corridor Name
-//        ofSetColor(255);
-//        titleFont.drawString(corridors[viewMode].name, rawImagePos.x, rawImagePos.y - 5);
-//        
-//        
-//        corridors[viewMode].drawRaw(rawImagePos);
-//        corridors[viewMode].drawCV(cvImagePos);
-//        corridors[viewMode].drawGui();
-//        
-//        
-//        
-//        
-//    } else {
-//        
-//        //draw all CV images
-//        
-//        
-//    }
+    //draw the right corridor
+    if(viewMode >= 0 && viewMode < numFeeds){
     
-    
-    if(viewMode == 0){
-    
-        ofSetColor(255);
-        titleFont.drawString(testCorridor.name, rawImagePos.x, rawImagePos.y - 10);
+        ofBackgroundGradient(corridors[viewMode] -> backgroundIn, corridors[viewMode] -> backgroundOut);
         
-        testCorridor.drawRaw(rawImagePos);
+        ofSetColor(255);
+        titleFont.drawString(corridors[viewMode] -> name, rawImagePos.x, rawImagePos.y - 10);
+        
+        corridors[viewMode] -> drawRaw(rawImagePos);
 
         float scale;
         if(bScaleDown){
@@ -125,32 +190,169 @@ void ofApp::draw(){
             scale = 0.5;
         }
         
-        testCorridor.drawCV(cvImagePos, scale);
-        testCorridor.drawGui(15, topMargin);
+        corridors[viewMode] -> drawCV(cvImagePos, scale);
+        
+        //draw num blobs under CV image
+        ofSetColor(255);
+        ofDrawBitmapString("Num Blobs: " + ofToString(corridors[viewMode] -> contours.size()), cvImagePos.x, cvImagePos.y + feedHeight/2 + 20);
+        
+        corridors[viewMode] -> drawGui(15, topMargin);
+        
+        ofSetColor(255);
+        ofDrawBitmapString("Framerate: " + ofToString(ofGetFrameRate()), 15, 30);
+        ofDrawBitmapString("Current Feed FPS: " + ofToString(corridors[viewMode] -> cameraFPS), 15, 45);
+        
+        string msg;
+        if(bScaleDown){
+            msg = "CV Scaled Down";
+        } else {
+            msg = "CV NOT Scaled Down";
+        }
+        
+        msg += "\nCurrent CV resolution: " + ofToString(corridors[viewMode] -> threshPix.getWidth()) + " x " + ofToString(corridors[viewMode] -> threshPix.getHeight());
+        
+        ofDrawBitmapString(msg, 800, 30);
+        
+        
 
-    }
-    
-    ofSetColor(255);
-    ofDrawBitmapString("Framerate: " + ofToString(ofGetFrameRate()), 15, 30);
-    ofDrawBitmapString("Current Feed FPS: " + ofToString(testCorridor.cameraFPS), 15, 45);
-    
-    string msg;
-    if(bScaleDown){
-        msg = "CV Scaled Down";
     } else {
-        msg = "CV NOT Scaled Down";
+        
+        
+        //draw all the corridors
+        ofBackgroundGradient(80, 30);
+
+        //positions to make everything look pretty
+        float spacing = 10;
+        float topSpacing = 30;
+        float frameWidth = ofGetWidth()/4 - spacing*2;
+        float frameHeight = frameWidth * feedHeight/feedWidth;
+        float guiSpacer = 210;
+        float fontSpacing = 5;
+        
+        //positions of each of the corridor "frames"
+        vector<ofVec2f> pts;
+        pts.reserve(numFeeds);
+        for(int i = 0; i < numFeeds; i++){
+            pts[i].set(spacing + i * ofGetWidth()/4, topSpacing);
+        }
+        
+        float frameScaling;
+        
+        if(bScaleDown){
+            frameScaling = frameWidth/float(feedWidth/2);
+        } else {
+            frameScaling = frameWidth/float(feedWidth);
+        }
+        
+        //draw color coded rects behind everything
+        float trans = 100;
+        
+        for(int i = 0; i < corridors.size(); i++){
+            
+            //draw color coded background rect
+            ofFill();
+            ofSetColor(corridors[i] -> backgroundIn, trans);
+            ofDrawRectangle(i * ofGetWidth()/4, 0, ofGetWidth()/4, ofGetHeight());
+            
+            //draw CV
+            corridors[i] -> drawCV(pts[i], frameScaling);
+            
+            //draw GUIs
+            corridors[i] -> drawGui(pts[i].x, pts[i].y + frameHeight + spacing);
+        
+            //draw num blobs under CV image
+            ofSetColor(255);
+            ofDrawBitmapString("Num Blobs:\n" + ofToString(corridors[i] -> contours.size()), pts[i].x + guiSpacer, pts[i].y + frameHeight + spacing*2);
+            
+            //draw titles
+            ofSetColor(255);
+            smallerFont.drawString(corridors[i] -> name, pts[i].x, pts[i].y - fontSpacing);
+
+        }
+        
+
+        ofSetColor(255);
+        ofDrawBitmapString("Overall Framerate: " + ofToString(ofGetFrameRate()), spacing, ofGetHeight() - 15);
+        
+    }
+
+    
+    
+    
+    //OSC Data sending
+    //only send according to sendInterval (200 ms, i.e. 5X per second)
+    if(ofGetElapsedTimeMillis() - lastSendTime > (1000/dataPerSec)){
+    
+        
+        // go through each corridor
+        for(int i = 0; i < corridors.size(); i++){
+            
+            //the go through each blob
+            for(int j = 0; j < corridors[i] -> contours.size(); j++){
+            
+                //get relevant data
+                ofPoint center = toOf(corridors[i] -> contours.getCenter(j));
+                int label = corridors[i] -> contours.getLabel(j);
+                ofVec2f velocity = toOf(corridors[i] -> contours.getVelocity(j));
+                
+                //then send the blob
+                oscHandler.sendBlob(2, label, center, velocity);
+                
+            
+            }
+            
+        }
+        
     }
     
-    msg += "\nCurrent CV resolution: " + ofToString(testCorridor.threshPix.getWidth()) + " x " + ofToString(testCorridor.threshPix.getHeight());
-    
-    ofDrawBitmapString(msg, 800, 30);
     
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-
-
+    
+    if(key == '1'){
+        viewMode = 0;
+    } else if(key == '2'){
+        viewMode = 1;
+    } else if(key == '3'){
+        viewMode = 2;
+    } else if(key == '4'){
+        viewMode = 3;
+    } else if(key == '0'){
+        viewMode = 4;
+    }
+    
+    //cycle right
+    if(key == OF_KEY_RIGHT){
+        viewMode++;
+        if(viewMode > 4) viewMode = 0;
+    }
+    
+    //cycle left
+    if(key == OF_KEY_LEFT){
+        viewMode--;
+        if(viewMode < 0) viewMode = 4;
+    }
+    
+    //save all
+    if(key == 's'){
+        
+        for(int i = 0; i < corridors.size(); i++){
+            corridors[i] -> corridorGui.gui.saveToFile(corridors[i] -> name + ".xml");
+        }
+        
+    }
+    
+//    if(key == 'c'){
+//        corridors[0] -> closeFeed();
+//    }
+//    
+//    if(key == 'o'){
+//        corridors[0] -> setupFeed();
+//    }
+    
+    
 }
 
 //--------------------------------------------------------------
@@ -171,6 +373,8 @@ void ofApp::mouseDragged(int x, int y, int button){
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
 
+    
+    
 }
 
 //--------------------------------------------------------------

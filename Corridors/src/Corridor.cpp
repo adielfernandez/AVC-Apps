@@ -16,29 +16,60 @@ Corridor::Corridor(){
 }
 
 
-void Corridor::setup(string IP, string _name){
-    
-    //-----Camera Stream-----
-    feedWidth = 640;
-    feedHeight = 512;
+void Corridor::setupFeed(){
     
     gst.setPipeline("rtspsrc location=rtsp://admin:admin@" + IP + ":554/cam/realmonitor?channel=1&subtype=1 latency=0 ! queue2 max-size-buffers=2 ! decodebin ! videoconvert", OF_PIXELS_MONO, true, feedWidth, feedHeight);
     
     gst.startPipeline();
     gst.play();
     
+}
+
+
+void Corridor::closeFeed(){
+    gst.close();
+}
+
+void Corridor::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed){
+    
+    //-----Camera Stream-----
+    feedWidth = 640;
+    feedHeight = 512;
+    
+    bScaleDown = _scaleDown;
+    useLiveFeed = _useLiveFeed;
+    
+    IP = _IP;
+    
+    if(useLiveFeed){
+    
+        setupFeed();
+
+        
+    } else {
+        movie.load("movies/flir_gray.mov");
+        movie.setLoopState(OF_LOOP_NORMAL);
+        movie.setPosition(ofRandom(movie.getTotalNumFrames())/movie.getTotalNumFrames());
+        movie.play();
+        
+    }
+    
+    
+    
+    
+    
+    
     
     
     //-----Corridor UI-----
     name = _name;
     
-    circleCol.set(46, 203, 255);
+    circleCol.set(255, 0, 255);
     circleGrab.set(0, 255, 0);
     
     
     //-----CV Objects && Image Processing-----
 
-//    bScaleDown = true;
     
     bEnableQuadMapping = false;
     
@@ -104,6 +135,7 @@ void Corridor::setup(string IP, string _name){
     corridorGui.setup(name);
     corridorGui.load(name + ".xml");
     
+    
 }
 
 
@@ -154,16 +186,27 @@ void Corridor::update(){
     
     
     //update the feed
-    gst.update();
+    
+    if(useLiveFeed){
+        gst.update();
+    } else {
+        movie.update();
+    }
+    
     
     //get image from gst pipeline
-    if(gst.isFrameNew()){
+    if(movie.isFrameNew() || gst.isFrameNew()){
         
         cameraFPS = (int)(1/(ofGetElapsedTimef() - lastFrameTime));
         lastFrameTime = ofGetElapsedTimef();
         
         //get texture from feed
-        rawTex.loadData(gst.getPixels());
+        if(useLiveFeed){
+            rawTex.loadData(gst.getPixels());
+        } else {
+            rawTex.loadData(movie.getPixels());  
+        }
+        
         
         //clear out the old mesh and remap the texture
         //to the control points we've set
@@ -257,8 +300,17 @@ void Corridor::drawRaw(ofVec2f pos){
     rawTex.draw(0, 0);
     
     ofNoFill();
-    ofSetLineWidth(1);
+    ofSetLineWidth(2);
     ofDrawRectangle(0, 0, feedWidth, feedHeight);
+    
+    //draw lines between points
+    ofPolyline quadMap(imageQuad);
+    quadMap.close();
+    
+    ofSetLineWidth(1);
+    
+    ofSetColor(circleCol);
+    quadMap.draw();
     
     //draw mapping points
     ofPushStyle();
@@ -275,17 +327,10 @@ void Corridor::drawRaw(ofVec2f pos){
         ofNoFill();
         ofSetColor(c);
         ofDrawCircle(imageQuad[i], mapPtRad);
+        ofSetColor(255);
+        ofDrawBitmapString(ofToString(i), imageQuad[i].x + mapPtRad, imageQuad[i].y - mapPtRad);
         
     }
-    
-    //draw lines between points
-    ofPolyline quadMap(imageQuad);
-    quadMap.close();
-    
-    ofSetLineWidth(0.5);
-    
-    ofSetColor(255, 255, 0);
-    quadMap.draw();
     
     ofPopStyle();
 
@@ -354,6 +399,7 @@ void Corridor::drawCV(ofVec2f pos, float scale){
 
 void Corridor::mousePressed(ofMouseEventArgs &args){
 
+    cout << "Mouse Pressed" << endl;
     
     //handle mouse interaction with quadMap points
     for(int i = 0; i < imageQuad.size(); i++){

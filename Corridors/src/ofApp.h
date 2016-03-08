@@ -13,7 +13,8 @@ class ofApp : public ofBaseApp{
 		void setup();
 		void update();
 		void draw();
-
+    
+        void exit();
 		void keyPressed(int key);
 		void keyReleased(int key);
 		void mouseMoved(int x, int y );
@@ -35,16 +36,17 @@ class ofApp : public ofBaseApp{
     
     
     //-----CORRIDORS-----
-    int numCorridors;
-//    vector<Corridor> corridors;
+    const int numFeeds = 2;
 
-    Corridor testCorridor;
+    vector<shared_ptr<Corridor>> corridors;
+
 
     
     //-----UI-----
     int viewMode;
     ofTrueTypeFont titleFont;
-
+    ofTrueTypeFont smallerFont;
+    
     int feedWidth, feedHeight;
     int leftMargin;
     int topMargin;
@@ -57,6 +59,8 @@ class ofApp : public ofBaseApp{
     
     //-----Data-----
     Osc oscHandler;
+    int dataPerSec;
+    unsigned long long lastSendTime;
     
     
 };

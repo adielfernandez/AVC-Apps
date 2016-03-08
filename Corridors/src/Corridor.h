@@ -21,8 +21,12 @@
 #include "Osc.h"
 #include "ofGstVideoPlayer.h"
 #include "ofxCv.h"
+#include "ofxOpencv.h"
 
 #pragma once
+
+
+
 
 class Corridor{
     
@@ -39,7 +43,10 @@ public:
     //=========================
     
     Corridor();
-    void setup(string IP, string _corridorName);
+    void setup(string _IP, string _corridorName, bool _scaleDown, bool _useLiveFeed);
+    
+    void setupFeed();
+    void closeFeed();
     void update();
     
     void drawRaw(ofVec2f pos);
@@ -51,13 +58,18 @@ public:
     
     //-----Corridor UI-----
     string name;
+    string IP;
     ofColor circleCol, circleGrab;
-    
+    ofColor backgroundIn, backgroundOut;
     
     //-----Camera Stream-----
     int feedWidth, feedHeight;
     
+
     ofGstVideoUtils gst;
+    ofVideoPlayer movie;
+    bool useLiveFeed;
+    
     
     
     //-----CV && Image Processing-----
@@ -81,6 +93,9 @@ public:
     ofPixels blurredPix;
     ofPixels threshPix;
     ofImage thresholdImg;
+    
+    cv::BackgroundSubtractorMOG2 background;
+    
     
     
     //----------EXPERIMENTAL----------
