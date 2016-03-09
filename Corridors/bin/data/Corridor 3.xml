@@ -7,12 +7,16 @@
 	<Max_Blob_Area>50000</Max_Blob_Area>
 	<Persistence>15</Persistence>
 	<Max_Distance>32</Max_Distance>
-	<Draw_threshold>0</Draw_threshold>
+	<Draw_threshold>1</Draw_threshold>
 	<Draw_Contours>1</Draw_Contours>
 	<Info>0</Info>
-	<Point_0>53, 74</Point_0>
-	<Point_1>605, 129</Point_1>
-	<Point_2>603, 433</Point_2>
-	<Point_3>22, 377</Point_3>
+	<Point_0>0, 0</Point_0>
+	<Point_1>640, 0</Point_1>
+	<Point_2>640, 512</Point_2>
+	<Point_3>0, 512</Point_3>
 <Corridor_3/>
+<Blob_Info>0</Blob_Info>
+	<Smart_Background>1</Smart_Background>
+	<Learning_Rate>0.000185</Learning_Rate>
+	<Background_Thresh>95</Background_Thresh>
 </Corridor_3>

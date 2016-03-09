@@ -1106,15 +1106,15 @@
 		E4B69E1C0A3A1BDC003C02F2 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				D70B0D7A1C889CBB001A4DEA /* Corridor.cpp */,
-				D70B0D7B1C889CBB001A4DEA /* Corridor.h */,
 				E4B69E1D0A3A1BDC003C02F2 /* main.cpp */,
 				E4B69E1F0A3A1BDC003C02F2 /* ofApp.h */,
 				E4B69E1E0A3A1BDC003C02F2 /* ofApp.cpp */,
-				D7FCC2691C7FD6DD005E3DE3 /* Osc.h */,
-				D7FCC2681C7FD6DD005E3DE3 /* Osc.cpp */,
+				D70B0D7B1C889CBB001A4DEA /* Corridor.h */,
+				D70B0D7A1C889CBB001A4DEA /* Corridor.cpp */,
 				D7FCC26C1C7FDAC2005E3DE3 /* Gui.h */,
 				D7FCC26B1C7FDAC2005E3DE3 /* Gui.cpp */,
+				D7FCC2691C7FD6DD005E3DE3 /* Osc.h */,
+				D7FCC2681C7FD6DD005E3DE3 /* Osc.cpp */,
 			);
 			path = src;
 			sourceTree = SOURCE_ROOT;

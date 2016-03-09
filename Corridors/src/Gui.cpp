@@ -24,7 +24,12 @@ void Gui::setup(string name){
     gui.add(maxDistanceSlider.setup("Max Distance", 32, 0, 100));
     gui.add(drawThresholdToggle.setup("Draw threshold", false));
     gui.add(drawContoursToggle.setup("Draw Contours", true));
-    gui.add(showInfoToggle.setup("Info", false));
+    gui.add(showInfoToggle.setup("Blob Info", false));
+    
+    gui.add(backgroundSubtract.setup("Smart Background", true));
+    gui.add(backgroundLearnRate.setup("Learning Rate", 0.0, 0.0, 0.0005));
+    gui.add(varThreshold.setup("Background Thresh", 50, 0, 255));
+    
     gui.add(quadPt0.setup("Point 0", ofVec2f(0, 0), ofVec2f(0, 0), ofVec2f(640, 512)));
     gui.add(quadPt1.setup("Point 1", ofVec2f(640, 0), ofVec2f(0, 0), ofVec2f(640, 512)));
     gui.add(quadPt2.setup("Point 2", ofVec2f(640, 512), ofVec2f(0, 0), ofVec2f(640, 512)));

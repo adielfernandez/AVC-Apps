@@ -89,13 +89,17 @@ public:
     ofFbo fbo;
 
     ofxCv::ContourFinder contours;
+    
+    ofPixels fboPix;
     ofPixels grayPix;
     ofPixels blurredPix;
     ofPixels threshPix;
+    ofPixels foreground;
+    
     ofImage thresholdImg;
     
-    cv::BackgroundSubtractorMOG2 background;
-    
+    cv::BackgroundSubtractorMOG2 *bgSubMOG2;
+    bool useBackgroundSubtract;
     
     
     //----------EXPERIMENTAL----------

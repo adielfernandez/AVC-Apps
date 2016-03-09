@@ -58,9 +58,6 @@ void Corridor::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFee
     
     
     
-    
-    
-    
     //-----Corridor UI-----
     name = _name;
     
@@ -107,6 +104,7 @@ void Corridor::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFee
         
         subTex.allocate(feedWidth/2, feedHeight/2, GL_LUMINANCE);
         
+        fboPix.allocate(feedWidth/2, feedHeight/2, 1);
         grayPix.allocate(feedWidth/2, feedHeight/2, 1);
         blurredPix.allocate(feedWidth/2, feedHeight/2, 1);
         threshPix.allocate(feedWidth/2, feedHeight/2, 1);
@@ -118,6 +116,7 @@ void Corridor::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFee
         
         subTex.allocate(feedWidth, feedHeight, GL_LUMINANCE);
         
+        fboPix.allocate(feedWidth, feedHeight, 1);
         grayPix.allocate(feedWidth, feedHeight, 1);
         blurredPix.allocate(feedWidth, feedHeight, 1);
         threshPix.allocate(feedWidth, feedHeight, 1);
@@ -135,6 +134,10 @@ void Corridor::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFee
     corridorGui.setup(name);
     corridorGui.load(name + ".xml");
     
+    
+    
+    //BACKGROUND SUBTRACTOR
+    bgSubMOG2 = new cv::BackgroundSubtractorMOG2(1000, corridorGui.varThreshold, false);
     
 }
 
@@ -161,23 +164,14 @@ void Corridor::update(){
             
             //Update the gui so the values are stored when we save
             if(i == 0){
-                
                 corridorGui.quadPt0 = imageQuad[i];
-                
             } else if(i == 1){
-                
                 corridorGui.quadPt1 = imageQuad[i];
-                
             } else if(i == 2){
-                
                 corridorGui.quadPt2 = imageQuad[i];
-                
             } else {
-                
                 corridorGui.quadPt3 = imageQuad[i];
-
             }
-            
             
         }
         
@@ -232,10 +226,31 @@ void Corridor::update(){
         
         
         //get the pixels from the fbo
-        fbo.readToPixels(grayPix);
+        fbo.readToPixels(fboPix);
+        
+        
+        //Convert to color
+        convertColor(fboPix, grayPix, CV_RGBA2GRAY);
+        
+        if(corridorGui.backgroundSubtract){
+            
+            //Do some background subtraction
+            cv::Mat grayMat = toCv(grayPix);
+            cv::Mat fg;
+            
+            bgSubMOG2 -> varThreshold = corridorGui.varThreshold;
+            bgSubMOG2 ->operator()(grayMat, fg, corridorGui.backgroundLearnRate);
+            
+            toOf(fg, foreground);
+
+        } else {
+            foreground = fboPix;
+        }
+        
+        
         
         //blur it
-        GaussianBlur(grayPix, blurredPix, corridorGui.blurAmountSlider);
+        GaussianBlur(foreground, blurredPix, corridorGui.blurAmountSlider);
         
         //threshold it
         threshold(blurredPix, threshPix, corridorGui.thresholdSlider);
@@ -259,6 +274,8 @@ void Corridor::update(){
         
         // an object can move up to 32 pixels per frame
         contours.getTracker().setMaximumDistance(corridorGui.maxDistanceSlider);
+        
+//        cv::Mat mat = cv::Mat( feedHeight/2, feedWidth/2, CV_8UC1, threshPix.getData(), 0);
         
         contours.findContours(threshPix);
         

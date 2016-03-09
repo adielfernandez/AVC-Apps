@@ -33,6 +33,11 @@ public:
     ofxToggle drawThresholdToggle;
     ofxToggle drawContoursToggle;
     ofxToggle showInfoToggle;
+
+    ofxToggle backgroundSubtract;
+    ofxFloatSlider backgroundLearnRate;
+    ofxIntSlider varThreshold;
+    
     ofxVec2Slider quadPt0;
     ofxVec2Slider quadPt1;
     ofxVec2Slider quadPt2;

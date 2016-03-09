@@ -99,7 +99,7 @@ void ofApp::setup(){
         
         //only set certain corridors to a feed
         bool thisFeedorMovie;
-        if(i == 0 || i == 1){
+        if(i == 0){
             thisFeedorMovie = true;
         } else {
             thisFeedorMovie = false;
