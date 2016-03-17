@@ -73,6 +73,8 @@ public:
     
     int staggerTime;
     bool started;
+    unsigned long long numFramesRec;    
+    
     
     //-----CV && Image Processing-----
     //for remapping a subImage from the feed

@@ -1,6 +1,6 @@
 <Lobby_1_Cam_4>
-	<Threshold>17</Threshold>
-	<Blur>1</Blur>
+	<Threshold>130</Threshold>
+	<Blur>28</Blur>
 	<Number_of_erosions>0</Number_of_erosions>
 	<Number_of_dilations>0</Number_of_dilations>
 	<Min_Blob_Area>135</Min_Blob_Area>
@@ -10,9 +10,9 @@
 	<Draw_threshold>0</Draw_threshold>
 	<Draw_Contours>1</Draw_Contours>
 	<Info>0</Info>
-	<Point_0>0, 54</Point_0>
-	<Point_1>640, 0</Point_1>
+	<Point_0>0, 0</Point_0>
+	<Point_1>589, 45</Point_1>
 	<Point_2>640, 512</Point_2>
-	<Point_3>0, 354</Point_3>
+	<Point_3>0, 512</Point_3>
 <Lobby_1_Cam_4/>
 </Lobby_1_Cam_4>

@@ -18,7 +18,13 @@ Camera::Camera(){
 
 void Camera::setupFeed(){
     
-    gst.setPipeline("rtspsrc location=rtsp://admin:admin@" + IP + ":554/cam/realmonitor?channel=1&subtype=1 latency=0 ! queue2 max-size-buffers=2 ! decodebin ! videoconvert", OF_PIXELS_MONO, true, feedWidth, feedHeight);
+    
+    cout << "\n\n\n\n\n" << endl;
+    cout << "Setting up: " + name << endl;
+    cout << "\n\n\n\n\n" << endl;
+    
+    
+    gst.setPipeline("rtspsrc location=rtsp://admin:admin@" + IP + ":554/cam/realmonitor?channel=1&subtype=1 latency=100 ! queue2 max-size-buffers=2 ! decodebin ! videoconvert", OF_PIXELS_MONO, true, feedWidth, feedHeight);
     
     gst.startPipeline();
     gst.play();
@@ -27,6 +33,12 @@ void Camera::setupFeed(){
 
 
 void Camera::closeFeed(){
+
+    
+    cout << "\n\n\n\n\n" << endl;
+    cout << "Closing feed:  " + name << endl;
+    cout << "\n\n\n\n\n" << endl;
+    
     gst.close();
 }
 
@@ -139,6 +151,7 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     
     
     started = false;
+    numFramesRec = 0;
     
 }
 
@@ -203,6 +216,8 @@ void Camera::update(){
     //get image from gst pipeline
     if(movie.isFrameNew() || gst.isFrameNew()){
         
+        numFramesRec++;
+        
         cameraFPS = (int)(1/(ofGetElapsedTimef() - lastFrameTime));
         lastFrameTime = ofGetElapsedTimef();
         
@@ -212,6 +227,7 @@ void Camera::update(){
         } else {
             rawTex.loadData(movie.getPixels());  
         }
+        
         
         
         //clear out the old mesh and remap the texture

@@ -183,6 +183,7 @@ void Aggregator::drawRaw(int x, int y){
         ofSetColor(255);
         ofDrawBitmapString("Cam " + ofToString(i + 1), positions[i].x + 5, positions[i].y + 12);
         
+        
     }
     
     

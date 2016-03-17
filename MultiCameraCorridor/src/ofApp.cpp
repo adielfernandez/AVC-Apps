@@ -60,12 +60,12 @@ void ofApp::setup(){
     vector<string> addresses;
     addresses.resize(6);
     
-    addresses[0] = "192.168.187.35";
+    addresses[0] = "192.168.187.39";
     addresses[1] = "192.168.187.37";
     addresses[2] = "192.168.187.39";
     addresses[3] = "192.168.187.34";
-    addresses[4] = "192.168.187.38";
-    addresses[5] = "192.168.187.45";
+    addresses[4] = "192.168.187.39";
+    addresses[5] = "192.168.187.39";
     
     
     
@@ -284,6 +284,19 @@ void ofApp::draw(){
     }
     
     
+    //frames acquired from each camera
+    
+    string frames;
+
+    
+    for(int i = 0; i < numFeeds; i++){
+        
+        frames += "Cam " + ofToString(i) + " Frames: " + ofToString(cameras[i] -> numFramesRec) + "\n";
+        
+    }
+    
+    ofSetColor(255);
+    ofDrawBitmapString(frames, leftMargin, ofGetHeight() - 120);
     
     
     //OSC Data sending

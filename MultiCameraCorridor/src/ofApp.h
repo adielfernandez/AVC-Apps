@@ -42,7 +42,7 @@ class ofApp : public ofBaseApp{
     
     
     //-----CAMERAS-----
-    const int numFeeds = 6;
+    const int numFeeds = 0;
     vector<shared_ptr<Camera>> cameras;
     
     //-----AGGREGATOR-----
