@@ -4,6 +4,7 @@
 
 #include "Osc.h"
 #include "Gui.h"
+#include "oscGui.hpp"
 
 #include "Corridor.h"
 
@@ -36,7 +37,7 @@ class ofApp : public ofBaseApp{
     
     
     //-----CORRIDORS-----
-    const int numFeeds = 2;
+    const int numFeeds = 4;
 
     vector<shared_ptr<Corridor>> corridors;
 
@@ -58,9 +59,9 @@ class ofApp : public ofBaseApp{
     
     
     //-----Data-----
-    Osc oscHandler;
+    oscGui senderGui;
+    Osc sender;
     int dataPerSec;
     unsigned long long lastSendTime;
-    
     
 };

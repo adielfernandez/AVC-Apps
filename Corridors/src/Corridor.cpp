@@ -229,7 +229,7 @@ void Corridor::update(){
         fbo.readToPixels(fboPix);
         
         
-        //Convert to color
+        //Convert to gray
         convertColor(fboPix, grayPix, CV_RGBA2GRAY);
         
         if(corridorGui.backgroundSubtract){

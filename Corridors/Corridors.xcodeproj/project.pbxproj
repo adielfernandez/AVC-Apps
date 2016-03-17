@@ -50,6 +50,7 @@
 		C602002DE761F9B52DB4400A /* ObjectFinder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AE75A3FBA2C2D87D14F06FE6 /* ObjectFinder.cpp */; };
 		D3301F6A0B43BB293ED97C1D /* ofxCvShortImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A4DD23693DFAB8EC05FAA5D /* ofxCvShortImage.cpp */; };
 		D70B0D7C1C889CBB001A4DEA /* Corridor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D70B0D7A1C889CBB001A4DEA /* Corridor.cpp */; };
+		D7615E661C8FD98D007BA4AF /* oscGui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D7615E641C8FD98D007BA4AF /* oscGui.cpp */; };
 		D7FCC26A1C7FD6DD005E3DE3 /* Osc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D7FCC2681C7FD6DD005E3DE3 /* Osc.cpp */; };
 		D7FCC26D1C7FDAC2005E3DE3 /* Gui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D7FCC26B1C7FDAC2005E3DE3 /* Gui.cpp */; };
 		DBCB84A37F9AECC254870D79 /* Wrappers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D347FB65D19015303863922A /* Wrappers.cpp */; };
@@ -327,6 +328,8 @@
 		D6426FE9886FD3B4A831A446 /* exposure_compensate.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = exposure_compensate.hpp; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/stitching/detail/exposure_compensate.hpp; sourceTree = SOURCE_ROOT; };
 		D70B0D7A1C889CBB001A4DEA /* Corridor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Corridor.cpp; sourceTree = "<group>"; };
 		D70B0D7B1C889CBB001A4DEA /* Corridor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Corridor.h; sourceTree = "<group>"; };
+		D7615E641C8FD98D007BA4AF /* oscGui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = oscGui.cpp; sourceTree = "<group>"; };
+		D7615E651C8FD98D007BA4AF /* oscGui.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = oscGui.hpp; sourceTree = "<group>"; };
 		D76A59E7B3601E76351C9BDB /* cvaux.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = cvaux.h; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv/cvaux.h; sourceTree = SOURCE_ROOT; };
 		D7FCC2681C7FD6DD005E3DE3 /* Osc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Osc.cpp; sourceTree = "<group>"; };
 		D7FCC2691C7FD6DD005E3DE3 /* Osc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Osc.h; sourceTree = "<group>"; };
@@ -1115,6 +1118,8 @@
 				D7FCC26B1C7FDAC2005E3DE3 /* Gui.cpp */,
 				D7FCC2691C7FD6DD005E3DE3 /* Osc.h */,
 				D7FCC2681C7FD6DD005E3DE3 /* Osc.cpp */,
+				D7615E651C8FD98D007BA4AF /* oscGui.hpp */,
+				D7615E641C8FD98D007BA4AF /* oscGui.cpp */,
 			);
 			path = src;
 			sourceTree = SOURCE_ROOT;
@@ -1304,6 +1309,7 @@
 				9D99424B122DE3C1D83A3670 /* ofGstVideoGrabber.cpp in Sources */,
 				F19063B0EC4D063E8E2588EC /* ofxGStreamer.cpp in Sources */,
 				856AA354D08AB4B323081444 /* ofxBaseGui.cpp in Sources */,
+				D7615E661C8FD98D007BA4AF /* oscGui.cpp in Sources */,
 				5CBB2AB3A60F65431D7B555D /* ofxButton.cpp in Sources */,
 				B266578FC55D23BFEBC042E7 /* ofxGuiGroup.cpp in Sources */,
 				483908258D00B98B4BE69F07 /* ofxLabel.cpp in Sources */,

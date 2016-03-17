@@ -55,15 +55,23 @@ void ofApp::setup(){
     bScaleDown = true;
 
     
+
+    //--------------------------------------------------------
+    //---------------------CORRIDOR SETUP---------------------
+    //--------------------------------------------------------
+    //---        A few local arrays so attributes can      ---
+    //---              all be set in the same place        ---
+    //--------------------------------------------------------
+    
     //IP Addresses
     //these will eventually be different
     vector<string> addresses;
     addresses.resize(4);
 
-    addresses[0] = "192.168.1.4";
-    addresses[1] = "192.168.1.2";
-    addresses[2] = "192.168.1.4";
-    addresses[3] = "192.168.1.4";
+    addresses[0] = "192.168.187.35";
+    addresses[1] = "192.168.187.37";
+    addresses[2] = "192.168.187.39";
+    addresses[3] = "192.168.187.34";
     
     
     
@@ -89,6 +97,16 @@ void ofApp::setup(){
     backgroundCols[7].set(0, 0, low);
     
     
+    //Which cameras will be live or with a video for debugging
+    vector<bool> useLiveorMovie;
+    useLiveorMovie.resize(4);
+    
+    useLiveorMovie[0] = true;
+    useLiveorMovie[1] = true;
+    useLiveorMovie[2] = true;
+    useLiveorMovie[3] = true;
+    
+    
     //set up the corridors
     for(int i = 0; i < numFeeds; i++){
         
@@ -97,15 +115,7 @@ void ofApp::setup(){
 
         //corridor 2 = corridors[0] so add 2 to i to get the right corridor name
         
-        //only set certain corridors to a feed
-        bool thisFeedorMovie;
-        if(i == 0){
-            thisFeedorMovie = true;
-        } else {
-            thisFeedorMovie = false;
-        }
-        
-        cor -> setup(addresses[i], "Corridor " + ofToString(i + 2), bScaleDown, thisFeedorMovie);
+        cor -> setup(addresses[i], "Corridor " + ofToString(i + 2), bScaleDown, useLiveorMovie[i]);
         cor -> adjustedQuadOrigin = rawImagePos;
         cor -> backgroundIn.set(backgroundCols[i * 2]);
         cor -> backgroundOut.set(backgroundCols[i * 2 + 1]);
@@ -119,7 +129,7 @@ void ofApp::setup(){
     
     
     //-----Data-----
-    oscHandler.setup("localhost");
+    sender.setup("localhost");
     
     //time between sending system snapshots (in ms)
     dataPerSec = 3;
@@ -213,8 +223,23 @@ void ofApp::draw(){
         
         ofDrawBitmapString(msg, 800, 30);
         
+        ofVec2f m;
         
-
+        m = ofVec2f(mouseX, mouseY) - rawImagePos;
+        
+        if(m.x > 0 && m.x < feedWidth && m.y > 0 && m.y < feedHeight){
+            
+            ofColor pixVal = corridors[viewMode] -> gst.getPixels().getColor(m.x, m.y);
+            
+            float bright = pixVal.getBrightness();
+            
+            ofDrawBitmapString(ofToString(bright), rawImagePos.x + m.x + 5, rawImagePos.y + m.y - 5);
+            
+        }
+        
+        
+        
+        
     } else {
         
         
@@ -296,7 +321,7 @@ void ofApp::draw(){
                 ofVec2f velocity = toOf(corridors[i] -> contours.getVelocity(j));
                 
                 //then send the blob
-                oscHandler.sendBlob(2, label, center, velocity);
+                sender.sendBlob(2, label, center, velocity);
                 
             
             }
@@ -344,13 +369,7 @@ void ofApp::keyPressed(int key){
         
     }
     
-//    if(key == 'c'){
-//        corridors[0] -> closeFeed();
-//    }
-//    
-//    if(key == 'o'){
-//        corridors[0] -> setupFeed();
-//    }
+
     
     
 }

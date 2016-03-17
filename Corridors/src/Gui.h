@@ -1,6 +1,4 @@
 
-#ifndef __gstream_01__gui__
-#define __gstream_01__gui__
 
 #include <stdio.h>
 #include "ofxGui.h"
@@ -44,4 +42,4 @@ public:
     ofxVec2Slider quadPt3;
     
 };
-#endif /* defined(__gstream_01__gui__) */
+
