@@ -50,7 +50,17 @@ void ofApp::update(){
         
         
         gst1.setPipeline("rtspsrc location=rtsp://admin:admin@" + addresses[0] + ":554/cam/realmonitor?channel=1&subtype=1 latency=0 ! queue2 max-size-buffers=2 ! decodebin ! videoconvert", OF_PIXELS_MONO, true, feedWidth, feedHeight);
+
+        cout << "\n\n\n\n\n" << endl;
+        cout << "Starting Feed 1 Pipeline" << endl;
+        cout << "\n\n\n\n\n" << endl;
+        
         gst1.startPipeline();
+        
+        cout << "\n\n\n\n\n" << endl;
+        cout << "Playing Feed 1" << endl;
+        cout << "\n\n\n\n\n" << endl;
+        
         gst1.play();
         
     }
@@ -65,7 +75,18 @@ void ofApp::update(){
         
         
         gst2.setPipeline("rtspsrc location=rtsp://admin:admin@" + addresses[1] + ":554/cam/realmonitor?channel=1&subtype=1 latency=0 ! queue2 max-size-buffers=2 ! decodebin ! videoconvert", OF_PIXELS_MONO, true, feedWidth, feedHeight);
+
+        cout << "\n\n\n\n\n" << endl;
+        cout << "Starting Feed 2 Pipeline" << endl;
+        cout << "\n\n\n\n\n" << endl;
+        
         gst2.startPipeline();
+        
+        
+        cout << "\n\n\n\n\n" << endl;
+        cout << "Playing Feed 2" << endl;
+        cout << "\n\n\n\n\n" << endl;
+        
         gst2.play();
         
     }
@@ -79,7 +100,17 @@ void ofApp::update(){
         cout << "\n\n\n\n\n" << endl;
         
         gst3.setPipeline("rtspsrc location=rtsp://admin:admin@" + addresses[2] + ":554/cam/realmonitor?channel=1&subtype=1 latency=0 ! queue2 max-size-buffers=2 ! decodebin ! videoconvert", OF_PIXELS_MONO, true, feedWidth, feedHeight);
+        
+        cout << "\n\n\n\n\n" << endl;
+        cout << "Starting Feed 3 Pipeline" << endl;
+        cout << "\n\n\n\n\n" << endl;
+        
         gst3.startPipeline();
+        
+        cout << "\n\n\n\n\n" << endl;
+        cout << "Playing Feed 3" << endl;
+        cout << "\n\n\n\n\n" << endl;
+        
         gst3.play();
         
     }
@@ -94,7 +125,17 @@ void ofApp::update(){
         
         
         gst4.setPipeline("rtspsrc location=rtsp://admin:admin@" + addresses[3] + ":554/cam/realmonitor?channel=1&subtype=1 latency=0 ! queue2 max-size-buffers=2 ! decodebin ! videoconvert", OF_PIXELS_MONO, true, feedWidth, feedHeight);
+        
+        cout << "\n\n\n\n\n" << endl;
+        cout << "Starting Feed 4 Pipeline" << endl;
+        cout << "\n\n\n\n\n" << endl;
+        
         gst4.startPipeline();
+        
+        cout << "\n\n\n\n\n" << endl;
+        cout << "Playing Feed 4" << endl;
+        cout << "\n\n\n\n\n" << endl;
+        
         gst4.play();
         
     }
@@ -109,7 +150,17 @@ void ofApp::update(){
         
         
         gst5.setPipeline("rtspsrc location=rtsp://admin:admin@" + addresses[4] + ":554/cam/realmonitor?channel=1&subtype=1 latency=0 ! queue2 max-size-buffers=2 ! decodebin ! videoconvert", OF_PIXELS_MONO, true, feedWidth, feedHeight);
+        
+        cout << "\n\n\n\n\n" << endl;
+        cout << "Starting Feed 5 Pipeline" << endl;
+        cout << "\n\n\n\n\n" << endl;
+        
         gst5.startPipeline();
+        
+        cout << "\n\n\n\n\n" << endl;
+        cout << "Playing Feed 5" << endl;
+        cout << "\n\n\n\n\n" << endl;
+        
         gst5.play();
         
     }
