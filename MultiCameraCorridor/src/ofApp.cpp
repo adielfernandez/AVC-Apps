@@ -238,9 +238,6 @@ void ofApp::draw(){
     
     ofSetWindowTitle("Main Lobby Aggregator");
     
-    //New Background
-    //ofBackgroundGradient(255, 200);
-    
     //draw the right corridor
     if(viewMode >= 0 && viewMode < numFeeds){
         
