@@ -52,9 +52,9 @@ public:
     void drawRaw(ofVec2f pos);
     void drawCV(ofVec2f pos, float scale);
     void drawGui(int x, int y);
-
+    void setMovieFile(string file);
     
-    
+    string fileName;
     
     //-----Corridor UI-----
     string name;

@@ -31,6 +31,12 @@ void Camera::setupFeed(){
     
 }
 
+void Camera::setMovieFile(string file){
+    
+    fileName = file;
+    
+}
+
 
 void Camera::closeFeed(){
 
@@ -59,7 +65,7 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
 
         
     } else {
-        movie.load("movies/flir_gray.mov");
+        movie.load(fileName);
         movie.setLoopState(OF_LOOP_NORMAL);
         movie.setPosition(ofRandom(movie.getTotalNumFrames())/movie.getTotalNumFrames());
         movie.play();

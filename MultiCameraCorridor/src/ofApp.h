@@ -17,6 +17,7 @@ class ofApp : public ofBaseApp{
 		void update();
 		void draw();
         void exit();
+    
 
 		void keyPressed(int key);
 		void keyReleased(int key);
@@ -42,7 +43,7 @@ class ofApp : public ofBaseApp{
     
     
     //-----CAMERAS-----
-    const int numFeeds = 0;
+    const int numFeeds = 6;
     vector<shared_ptr<Camera>> cameras;
     
     //-----AGGREGATOR-----
@@ -61,8 +62,6 @@ class ofApp : public ofBaseApp{
     
     //positions for aesthetics
     ofVec2f rawImagePos, cvImagePos;
-    
-    
     
     
     

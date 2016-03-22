@@ -101,12 +101,25 @@ void ofApp::setup(){
     vector<bool> useLiveorMovie;
     useLiveorMovie.resize(6);
     
-    useLiveorMovie[0] = true;
-    useLiveorMovie[1] = true;
-    useLiveorMovie[2] = true;
-    useLiveorMovie[3] = true;
-    useLiveorMovie[4] = true;
-    useLiveorMovie[5] = true;
+    useLiveorMovie[0] = false;
+    useLiveorMovie[1] = false;
+    useLiveorMovie[2] = false;
+    useLiveorMovie[3] = false;
+    useLiveorMovie[4] = false;
+    useLiveorMovie[5] = false;
+    
+    
+    //file names for test movies
+    vector<string> movieFiles;
+    movieFiles.resize(6);
+    
+    movieFiles[0] = "movies/2016-03-17-11-05-27_FLIR_1001.mov";
+    movieFiles[1] = "movies/2016-03-17-11-05-29_FLIR_1002.mov";
+    movieFiles[2] = "movies/2016-03-17-11-05-31_FLIR_1003.mov";
+    movieFiles[3] = "movies/2016-03-17-11-05-33_FLIR_1005.mov";
+    movieFiles[4] = "movies/2016-03-17-11-05-35_FLIR_1004.mov";
+    movieFiles[5] = "movies/flir_gray.mov";
+    
     
     
     //set up actual feeds
@@ -118,6 +131,7 @@ void ofApp::setup(){
         //create shared_ptr to a corridor
         auto cor = std::make_shared<Camera>();
         
+        cor -> setMovieFile(movieFiles[i]);
         cor -> setup(addresses[i], "Lobby 1 Cam " + ofToString(i + 1), bScaleDown, useLiveorMovie[i]);
         cor -> adjustedQuadOrigin = rawImagePos;
         cor -> backgroundIn.set(backgroundCols[i * 2]);
