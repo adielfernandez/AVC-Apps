@@ -24,7 +24,7 @@ void Camera::setupFeed(){
     cout << "\n\n\n\n\n" << endl;
     
     
-    gst.setPipeline("rtspsrc location=rtsp://admin:admin@" + IP + ":554/cam/realmonitor?channel=1&subtype=1 latency=100 ! queue2 max-size-buffers=2 ! decodebin ! videoconvert", OF_PIXELS_MONO, true, feedWidth, feedHeight);
+    gst.setPipeline("rtspsrc location=rtsp://admin:admin@" + IP + ":554/cam/realmonitor?channel=1&subtype=1 latency=0 ! rtpjpegdepay ! jpegdec !  queue ! decodebin ! videoconvert", OF_PIXELS_MONO, true, feedWidth, feedHeight);
     
     gst.startPipeline();
     gst.play();
