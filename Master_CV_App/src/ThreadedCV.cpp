@@ -9,10 +9,30 @@
 #include "ThreadedCV.hpp"
 
 
+using namespace ofxCv;
 
 
+ThreadedCV::ThreadedCV(){
+    
+}
 
-ThreadedCV::ThreadedCV(bool _scaleDown){
+
+ThreadedCV::~ThreadedCV(){
+    
+    //close thread channels
+    quadPixelsIn.close();
+    CVsettingsIn.close();
+    
+    threshPixOut.close();
+    contoursOut.close();
+    
+    
+    waitForThread(true);
+    
+}
+
+
+void ThreadedCV::setup(bool _scaleDown){
     
     bScaleDown = _scaleDown;
     
@@ -27,65 +47,25 @@ ThreadedCV::ThreadedCV(bool _scaleDown){
         scaledHeight = feedHeight;
     }
     
-    //allocate all the stuff we'll be using
-    //Textures
-    quadTex.allocate(scaledWidth, scaledHeight, GL_LUMINANCE);
-    
-    //FBO
-    fbo.allocate(scaledWidth, scaledHeight);
-    
-    //(also clear it out)
-    fbo.begin();
-    ofClear(0, 0, 0, 0);
-    fbo.end();
-    
-    //ofPixels
+
+        
+    //allocate all the ofPixels we'll be using
     grayPix.allocate(scaledWidth, scaledHeight, 1);
-    fboPix.allocate(scaledWidth, scaledHeight, 1);
     blurredPix.allocate(scaledWidth, scaledHeight, 1);
     threshPix.allocate(scaledWidth, scaledHeight, 1);
     
-    //ofImage
-    thresholdImg.allocate(scaledWidth, scaledHeight, OF_IMAGE_GRAYSCALE);
-    
-    //initialize imageQuad vector with 4 points
-    //this will be overwritten by xml settings later
-    imageQuad.resize(4);
-    imageQuad[0].set(0, 0);
-    imageQuad[1].set(0, 0);
-    imageQuad[2].set(0, 0);
-    imageQuad[3].set(0, 0);
-    
-    
     startThread();
     
-}
-
-ThreadedCV::~ThreadedCV(){
-    
-    //close thread channels
-    rawTexIn.close();
-    CVsettingsIn.close();
-    quadTexOut.close();
-    threshTexOut.close();
-    contoursOut.close();
-    
-    
-    waitForThread(true);
     
 }
 
-void ThreadedCV::analyze(ofTexture &t, const vector<float> &settings){
+
+void ThreadedCV::analyze(ofPixels &pix, const vector<int> &settings){
     
     //send texture and CV settings to the thread
-    rawTexIn.send(t);
+    quadPixelsIn.send(pix);
     CVsettingsIn.send(settings);
 
-    
-    
-    
-
-    
     
 }
 
@@ -93,22 +73,33 @@ void ThreadedCV::analyze(ofTexture &t, const vector<float> &settings){
 
 void ThreadedCV::update(){
     
+    //check if the thread is done with threshPix
+    //if so upload it to the texture
+    while(threshPixOut.tryReceive(threshPix)){
+        mainThreadThreshTex -> loadData(threshPix);
+    }
+    
+    //check if the thread is done finding contours
+    //then copy the threaded contours to a public version
+    while(contoursOut.tryReceive(contours)){
+        (*mainThreadContours) = std::move(contours);
+    }
     
     
 }
 
 void ThreadedCV::ThreadedFunction(){
     
-    
+        
     //the texture we'll get from the feed in the GL Thread
-    ofTexture rawTex;
+    ofPixels quadPix;
     
     //only do anything if we have a new frame
-    while(rawTexIn.receive(rawTex)){
+    while(quadPixelsIn.receive(quadPix)){
 
         
         //vector we're getting from the GL thread
-        vector<float> settings;
+        vector<int> settings;
         
         //Use that vector to populate these
         int threshold;
@@ -119,8 +110,7 @@ void ThreadedCV::ThreadedFunction(){
         int maxBlobArea;
         int persistence;
         int maxBlobDist;
-        vector<ofPoint> imageQuad;
-        imageQuad.resize(4);
+
     
         //wait until we have our settings loaded
         while(CVsettingsIn.receive(settings)){
@@ -135,20 +125,54 @@ void ThreadedCV::ThreadedFunction(){
             persistence = settings[6];
             maxBlobDist = settings[7];
             
-            //quad points
-            imageQuad[0].set(settings[8], settings[9]);
-            imageQuad[1].set(settings[10], settings[11]);
-            imageQuad[2].set(settings[12], settings[13]);
-            imageQuad[3].set(settings[14], settings[15]);
-            
         }
     
-        //we have our texture and our settings so get to work...
+        //we have our pixels and our settings so get to work...
         
         
+        //Convert to color
+        convertColor(quadPix, grayPix, CV_RGBA2GRAY);
+        
+        //blur it
+        ofxCv::GaussianBlur(grayPix, blurredPix, blurAmt);
+        
+        //threshold it
+        ofxCv::threshold(blurredPix, threshPix, threshold);
+        
+        //ERODE it
+        for(int e = 0; e < numErosions; e++){
+            erode(threshPix);
+        }
+        
+        //DILATE it
+        for(int d = 0; d < numDilations; d++){
+            dilate(threshPix);
+        }
+
+        
+        //-----Done with image altering-----
+        //------Now do contour finding------
         
         
+        //Define contour finder
+        contours.setMinArea(minBlobArea);
+        contours.setMaxArea(maxBlobArea);
+        contours.setThreshold(254);  //only detect white
         
+        // wait for half a frame before forgetting something
+        contours.getTracker().setPersistence(persistence);
+        
+        // an object can move up to ___ pixels per frame
+        contours.getTracker().setMaximumDistance(maxBlobDist);
+        
+        //find dem blobs
+        contours.findContours(threshPix);
+
+        
+        
+        //now pass all the data back to the GL thread
+        threshPixOut.send(std::move(threshPix));
+        contoursOut.send(std::move(contours));
         
         
     }

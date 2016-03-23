@@ -22,6 +22,7 @@
 #include "ofGstVideoPlayer.h"
 #include "ofxCv.h"
 #include "ofxOpencv.h"
+#include "ThreadedCV.hpp"
 
 #pragma once
 
@@ -62,24 +63,48 @@ public:
     ofColor circleCol, circleGrab;
     ofColor backgroundIn, backgroundOut;
     
+    
+    //-----CV && Image Processing-----
+    
+    /*
+     *  CV Workflow
+     *  -----------
+     *  -Get pixels from camera into texture
+     *  -remap the texture over the quad points onto a mesh
+     *  -Draw mesh in an FBO
+     *  -Get FBO pixels
+     *  -Convert to [true] grayscale
+     *  -Blur
+     *  -Threshold
+     *  -Erode
+     *  -Dilate
+     *  -Find Contours
+     *
+     */
+
+    
     //-----Camera Stream-----
+    int staggerTime;
+    bool started;
+    unsigned long long numFramesRec;
+
     int feedWidth, feedHeight;
     int scaledWidth, scaledHeight;
     
-
+    //bool to toggle scaling down 640x512
+    //down to 320x256 for faster processing
+    bool bScaleDown;
+    
     ofGstVideoUtils gst;
     ofVideoPlayer movie;
     bool useLiveFeed;
     
-    
-    int staggerTime;
-    bool started;
-    unsigned long long numFramesRec;    
+    //raw texture from feed
+    ofTexture rawTex;
     
     
-    //-----CV && Image Processing-----
-    //for remapping a subImage from the feed
-
+    
+    //for remapping a subImage from the feed:
     bool bEnableQuadMapping;
     
     vector<ofPoint> imageQuad;
@@ -87,23 +112,24 @@ public:
     ofVec2f adjustedQuadOrigin;
     ofVec2f adjustedMouse;
     float mapPtRad;
-    
-    ofTexture rawTex;
-    ofMesh quadMappedMesh;
-    ofTexture subTex;
-    ofFbo fbo;
 
-    ofxCv::ContourFinder contours;
-    ofPixels grayPix;
+    //Skewed/keystoned mesh
+    ofMesh quadMappedMesh;
+    ofTexture quadTex;
+    ofFbo fbo;
     ofPixels fboPix;
-    ofPixels blurredPix;
-    ofPixels threshPix;
-    ofImage thresholdImg;
     
+    //takes in the quad mapped pixels
+    //outputs threshold and contours
+    ThreadedCV imageProcessor;
     
-    //bool to toggle scaling down 640x512
-    //down to 320x256 for faster processing
-    bool bScaleDown;
+    //what we'll get from the
+    //image processing thread
+    ofTexture threshTex;
+    ofxCv::ContourFinder contours;
+
+    
+
     
     
     

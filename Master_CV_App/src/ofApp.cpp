@@ -189,22 +189,6 @@ void ofApp::update(){
     }
     
     
-    //put together a vector of pointers to the thresholded  objects
-    //ofPixel within the cameras vector. Then feed them into the aggregator
-    vector<shared_ptr<ofPixels>> camPixels;
-    vector<shared_ptr<ofTexture>> camTexs;
-    
-    for(int i = 0; i < numFeeds; i++){
-        
-        //This gets the thresholded ofPixels instance of each camera
-        auto thisCam = make_shared<ofPixels>(cameras[i] -> threshPix);
-        camPixels.push_back(thisCam);
-        
-        //This gets the texture of the raw image instance of each camera
-        auto thisTex = make_shared<ofTexture>(cameras[i] -> subTex);
-        camTexs.push_back(thisTex);
-        
-    }
 
     
 
@@ -216,7 +200,6 @@ void ofApp::update(){
 void ofApp::draw(){
 
     
-    ofSetWindowTitle("Main Lobby Aggregator");
     
     
     
@@ -267,31 +250,7 @@ void ofApp::draw(){
 
     
     
-    //OSC Data sending
-    //only send according to sendInterval (200 ms, i.e. 5X per second)
-    if(ofGetElapsedTimeMillis() - lastSendTime > (1000/dataPerSec)){
-        
-        
-        // go through each corridor
-        for(int i = 0; i < cameras.size(); i++){
-            
-            //the go through each blob
-            for(int j = 0; j < cameras[i] -> contours.size(); j++){
-                
-                //get relevant data
-                ofPoint center = toOf(cameras[i] -> contours.getCenter(j));
-                int label = cameras[i] -> contours.getLabel(j);
-                ofVec2f velocity = toOf(cameras[i] -> contours.getVelocity(j));
-                
-                //then send the blob
-                oscHandler.sendBlob(2, label, center, velocity);
-                
-                
-            }
-            
-        }
-        
-    }
+
     
 
     

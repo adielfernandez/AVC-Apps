@@ -38,17 +38,22 @@ class ThreadedCV: public ofThread{
     
 public:
     
-    ThreadedCV(bool _scaleDown);
+    ThreadedCV();
     ~ThreadedCV();
     
-    void analyze(ofTexture &t, const vector<float> &settings);
+    void setup(bool _scaleDown);
+    void analyze(ofPixels &pix, const vector<int> &settings);
     void update();
+    
+    ofPixels & getThreshPix();
+    ofxCv::ContourFinder & getContours();
+    
     
     bool bScaleDown;
     int feedWidth, feedHeight;
     int scaledWidth, scaledHeight;
     
-    
+
     
     
     
@@ -57,29 +62,24 @@ private:
     bool newFrame;
     
     //into thread
-    ofThreadChannel<ofTexture> rawTexIn;
-    ofThreadChannel<vector<float>> CVsettingsIn;
+    ofThreadChannel<ofPixels> quadPixelsIn;
+    ofThreadChannel<vector<int>> CVsettingsIn;
     
     //Thread output
-    ofThreadChannel<ofTexture> quadTexOut;
-    ofThreadChannel<ofTexture> threshTexOut;
+    ofThreadChannel<ofPixels> threshPixOut;
     ofThreadChannel<ofxCv::ContourFinder> contoursOut;
+    
     
     void ThreadedFunction();
     
-
-    ofMesh quadMappedMesh;
-    ofTexture quadTex;
-    
-    ofFbo fbo;
     
     ofxCv::ContourFinder contours;
     ofPixels grayPix;
-    ofPixels fboPix;
     ofPixels blurredPix;
     ofPixels threshPix;
-    ofImage thresholdImg;
     
+    ofTexture *mainThreadThreshTex;
+    ofxCv::ContourFinder *mainThreadContours;
 
 
     

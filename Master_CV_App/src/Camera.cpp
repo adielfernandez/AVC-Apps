@@ -134,7 +134,8 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     //allocate all the stuff we'll be using
     //Textures
     rawTex.allocate(feedWidth, feedHeight, GL_LUMINANCE);
-    subTex.allocate(scaledWidth, scaledHeight, GL_LUMINANCE);
+    quadTex.allocate(scaledWidth, scaledHeight, GL_LUMINANCE);
+    threshTex.allocate(scaledWidth, scaledHeight, GL_LUMINANCE);
     
     //FBO
     fbo.allocate(scaledWidth, scaledHeight);
@@ -143,20 +144,7 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     ofClear(255, 255, 255, 0);
     fbo.end();
     
-    //ofPixels
-    grayPix.allocate(scaledWidth, scaledHeight, 1);
     fboPix.allocate(scaledWidth, scaledHeight, 1);
-    blurredPix.allocate(scaledWidth, scaledHeight, 1);
-    threshPix.allocate(scaledWidth, scaledHeight, 1);
-    
-    //ofImage
-    thresholdImg.allocate(scaledWidth, scaledHeight, OF_IMAGE_GRAYSCALE);
-    
-
-
-    
-    
-
     
     //-----Gui-----
     cameraGui.setup(name);
@@ -166,19 +154,26 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     started = false;
     numFramesRec = 0;
     
+    
+    
+    
+    //start the image processing thread
+    imageProcessor.setup(bScaleDown);
+    
+    
+    
 }
 
 
 
 void Camera::update(){
     
-    
+    //update the quad points with changes from the GUI
     imageQuad[0].set(cameraGui.quadPt0 -> x, cameraGui.quadPt0 -> y);
     imageQuad[1].set(cameraGui.quadPt1 -> x, cameraGui.quadPt1 -> y);
     imageQuad[2].set(cameraGui.quadPt2 -> x, cameraGui.quadPt2 -> y);
     imageQuad[3].set(cameraGui.quadPt3 -> x, cameraGui.quadPt3 -> y);
     
-
     
     //handle mouse interaction with map pts
     adjustedMouse.set(ofGetMouseX() - adjustedQuadOrigin.x, ofGetMouseY() - adjustedQuadOrigin.y);
@@ -207,7 +202,6 @@ void Camera::update(){
     
     
     //update the feed/movie
-    
     if(useLiveFeed){
         
         if(started){
@@ -224,6 +218,13 @@ void Camera::update(){
     }
     
     
+    
+    //update the image processing thread
+    
+    
+    
+    
+    
     //get image from gst pipeline
     if(movie.isFrameNew() || gst.isFrameNew()){
         
@@ -232,21 +233,7 @@ void Camera::update(){
         cameraFPS = (int)(1/(ofGetElapsedTimef() - lastFrameTime));
         lastFrameTime = ofGetElapsedTimef();
         
-        /*
-         *  CV Workflow
-         *  -----------
-         *  -Get pixels from camera into texture
-         *  -remap the texture over the quad points onto a mesh
-         *  -Draw mesh in an FBO
-         *  -Get FBO pixels
-         *  -Convert to [true] grayscale
-         *  -Blur
-         *  -Threshold
-         *  -Erode
-         *  -Dilate
-         *  -Find Contours
-         *
-         */
+        
         
         
         
@@ -258,8 +245,6 @@ void Camera::update(){
             rawTex.loadData(movie.getPixels());  
         }
         
-        
-        
         //clear out the old mesh and remap the texture
         //to the control points we've set
         quadMappedMesh.clearTexCoords();
@@ -267,7 +252,7 @@ void Camera::update(){
         quadMappedMesh.addTexCoord(imageQuad[1]);
         quadMappedMesh.addTexCoord(imageQuad[2]);
         quadMappedMesh.addTexCoord(imageQuad[3]);
-    
+        
         //draw the mesh with the re-mapped texture to the FBO
         fbo.begin();
         rawTex.bind();
@@ -280,50 +265,20 @@ void Camera::update(){
         fbo.end();
         
         
-        //steal the new texture from the FBO
-        subTex = fbo.getTexture();
-        
-        
+        //steal the new texture from the FBO for displaying later
+        quadTex = fbo.getTexture();
+
         //get the pixels from the fbo
         fbo.readToPixels(fboPix);
         
-        //Convert to color
-        convertColor(fboPix, grayPix, CV_RGBA2GRAY);
-
-        //blur it
-        ofxCv::GaussianBlur(grayPix, blurredPix, cameraGui.blurAmountSlider);
+        //pass the fbo pixels to the processing thread
         
-        //threshold it
-        ofxCv::threshold(blurredPix, threshPix, cameraGui.thresholdSlider);
         
-        //ERODE it
-        for(int e = 0; e < cameraGui.numErosionsSlider; e++){
-            erode(threshPix);
-        }
+        //get the thresholded texture and contours from the thread
+//        threshTex = ;
+//        contours = ;
         
-        //DILATE it
-        for(int d = 0; d < cameraGui.numDilationsSlider; d++){
-            dilate(threshPix);
-        }
         
-        //Define contour finder
-        contours.setMinArea(cameraGui.minBlobAreaSlider);
-        contours.setMaxArea(cameraGui.maxBlobAreaSlider);
-        contours.setThreshold(254);  //only detect white
-        
-        // wait for half a frame before forgetting something
-        contours.getTracker().setPersistence(cameraGui.persistenceSlider);
-        
-        // an object can move up to ___ pixels per frame
-        contours.getTracker().setMaximumDistance(cameraGui.maxDistanceSlider);
-        
-        contours.findContours(threshPix);
-        
-        ContourFinder con;
-        
-        con = contours;
-        
-        cout << "Original contours size: " << contours.size() << ", Copied Size: " << con.size() << endl;
     }
     
     
@@ -343,10 +298,8 @@ void Camera::update(){
 
 
 void Camera::drawGui(int x, int y){
+
     cameraGui.draw(x, y);
-    
-
-
     
 }
 
@@ -416,17 +369,15 @@ void Camera::drawCV(ofVec2f pos, float scale){
     ofNoFill();
     ofSetLineWidth(1);
     
-    ofDrawRectangle(0, 0, subTex.getWidth(), subTex.getHeight());
+    ofDrawRectangle(0, 0, quadTex.getWidth(), quadTex.getHeight());
 
     
     ofSetColor(255);
-    subTex.draw(0, 0);
+    quadTex.draw(0, 0);
     
     if(cameraGui.drawThresholdToggle){
         
-        thresholdImg.setFromPixels(threshPix);
-        
-        thresholdImg.draw(0, 0);
+        threshTex.draw(0, 0);
         
     }
     
