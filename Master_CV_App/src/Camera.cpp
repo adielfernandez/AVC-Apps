@@ -17,13 +17,7 @@ Camera::Camera(){
 
 
 void Camera::setupFeed(){
-    
-    
-    cout << "\n\n\n\n\n" << endl;
-    cout << "Setting up: " + name << endl;
-    cout << "\n\n\n\n\n" << endl;
-    
-    
+
     gst.setPipeline("rtspsrc location=rtsp://admin:admin@" + IP + ":554/cam/realmonitor?channel=1&subtype=1 latency=0 ! rtpjpegdepay ! jpegdec !  queue ! decodebin ! videoconvert", OF_PIXELS_MONO, true, feedWidth, feedHeight);
     
     gst.startPipeline();
@@ -40,11 +34,6 @@ void Camera::setMovieFile(string file){
 
 void Camera::closeFeed(){
 
-    
-    cout << "\n\n\n\n\n" << endl;
-    cout << "Closing feed:  " + name << endl;
-    cout << "\n\n\n\n\n" << endl;
-    
     gst.close();
 }
 
@@ -82,8 +71,8 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
         
         movie.load(fileName);
         movie.setLoopState(OF_LOOP_NORMAL);
-        movie.setPosition(ofRandom(movie.getTotalNumFrames())/movie.getTotalNumFrames());
         movie.play();
+        //        movie.setPosition(ofRandom(movie.getTotalNumFrames())/movie.getTotalNumFrames());
         
     }
     
@@ -137,6 +126,11 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     quadTex.allocate(scaledWidth, scaledHeight, GL_LUMINANCE);
     threshTex.allocate(scaledWidth, scaledHeight, GL_LUMINANCE);
     
+    blurredPix.allocate(scaledWidth, scaledHeight, 1);
+    grayPix.allocate(scaledWidth, scaledHeight, 1);
+    threshPix.allocate(scaledWidth, scaledHeight, 1);
+    thresholdImg.allocate(scaledWidth, scaledHeight, OF_IMAGE_GRAYSCALE);
+    
     //FBO
     fbo.allocate(scaledWidth, scaledHeight);
     //(also clear it out)
@@ -158,9 +152,9 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     
     
     //start the image processing thread
-    imageProcessor.setup(bScaleDown);
+    imageProcessor.setup(&threshPix);
     
-    
+
     
 }
 
@@ -271,15 +265,75 @@ void Camera::update(){
         //get the pixels from the fbo
         fbo.readToPixels(fboPix);
         
+        
+        //construct a vector of ints with all the settings
+        vector<int> settings;
+        settings.resize(8);
+        
+        settings[0] = cameraGui.thresholdSlider;
+        settings[1] = cameraGui.blurAmountSlider;
+        settings[2] = cameraGui.numErosionsSlider;
+        settings[3] = cameraGui.numDilationsSlider;
+        settings[4] = cameraGui.minBlobAreaSlider;
+        settings[5] = cameraGui.maxBlobAreaSlider;
+        settings[6] = cameraGui.persistenceSlider;
+        settings[7] = cameraGui.maxDistanceSlider;
+
+        
         //pass the fbo pixels to the processing thread
+        fboPix.setImageType(OF_IMAGE_GRAYSCALE);
+//        threshTex.loadData(fboPix);
+
+        
+//        cout << "fboPix Address: " << &fboPix << endl;
+//        cout << "fboPix width: " << fboPix.getWidth() << endl;
+//        cout << "fboPix channels: " << fboPix.getNumChannels() << endl;
+//        cout << "fboPix format: " << fboPix.getPixelFormat() << endl;
+        
+        imageProcessor.analyze(fboPix, settings);
         
         
-        //get the thresholded texture and contours from the thread
-//        threshTex = ;
-//        contours = ;
+        
+//        //Convert to color
+//        convertColor(fboPix, grayPix, CV_RGBA2GRAY);
+//        
+//        //blur it
+//        ofxCv::GaussianBlur(grayPix, blurredPix, cameraGui.blurAmountSlider);
+//        
+//        //threshold it
+//        ofxCv::threshold(blurredPix, threshPix, cameraGui.thresholdSlider);
+//        
+//        //ERODE it
+//        for(int e = 0; e < cameraGui.numErosionsSlider; e++){
+//            erode(threshPix);
+//        }
+//        
+//        //DILAT it
+//        for(int d = 0; d < cameraGui.numDilationsSlider; d++){
+//            dilate(threshPix);
+//        }
+//        
+//        //Define contour finder
+//        contours.setMinArea(cameraGui.minBlobAreaSlider);
+//        contours.setMaxArea(cameraGui.maxBlobAreaSlider);
+//        contours.setThreshold(254);  //only detect white
+//        
+//        // wait for half a frame before forgetting something
+//        contours.getTracker().setPersistence(cameraGui.persistenceSlider);
+//        
+//        // an object can move up to ___ pixels per frame
+//        contours.getTracker().setMaximumDistance(cameraGui.maxDistanceSlider);
+//        
+//        contours.findContours(threshPix);
         
         
     }
+    
+    
+    //Update the image processing thread
+    //this will automatically fill threshTex and contours
+    //with new data as it works
+    imageProcessor.update();
     
     
     //for mouse interaction
@@ -373,11 +427,16 @@ void Camera::drawCV(ofVec2f pos, float scale){
 
     
     ofSetColor(255);
-    quadTex.draw(0, 0);
+//    quadTex.draw(0, 0);
     
     if(cameraGui.drawThresholdToggle){
         
-        threshTex.draw(0, 0);
+//        threshTex.draw(0, 0);
+        
+        thresholdImg.setFromPixels(threshPix);
+        thresholdImg.draw(0, 0);
+
+//        imageProcessor.draw(0, 0);
         
     }
     
@@ -414,8 +473,7 @@ void Camera::drawCV(ofVec2f pos, float scale){
 
 
 void Camera::mousePressed(ofMouseEventArgs &args){
-
-    cout << "Camera Mouse Pressed" << endl;
+    
     
     //handle mouse interaction with quadMap points
     for(int i = 0; i < imageQuad.size(); i++){

@@ -41,20 +41,9 @@ public:
     ThreadedCV();
     ~ThreadedCV();
     
-    void setup(bool _scaleDown);
-    void analyze(ofPixels &pix, const vector<int> &settings);
+    void setup(ofPixels *_mainThreadPix);
+    void analyze(ofPixels & pix, vector<int> & settings);
     void update();
-    
-    ofPixels & getThreshPix();
-    ofxCv::ContourFinder & getContours();
-    
-    
-    bool bScaleDown;
-    int feedWidth, feedHeight;
-    int scaledWidth, scaledHeight;
-    
-
-    
     
     
 private:
@@ -63,25 +52,18 @@ private:
     
     //into thread
     ofThreadChannel<ofPixels> quadPixelsIn;
-    ofThreadChannel<vector<int>> CVsettingsIn;
+    ofThreadChannel<vector<int>> settingsIn;
     
     //Thread output
     ofThreadChannel<ofPixels> threshPixOut;
-    ofThreadChannel<ofxCv::ContourFinder> contoursOut;
     
     
-    void ThreadedFunction();
-    
-    
-    ofxCv::ContourFinder contours;
-    ofPixels grayPix;
-    ofPixels blurredPix;
+    void threadedFunction();
+
     ofPixels threshPix;
     
-    ofTexture *mainThreadThreshTex;
-    ofxCv::ContourFinder *mainThreadContours;
-
-
+    vector<int> settings;
+    ofPixels *mainThreadPix;
     
 };
 

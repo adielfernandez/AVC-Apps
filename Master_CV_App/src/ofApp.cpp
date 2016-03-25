@@ -8,8 +8,6 @@ void ofApp::exit(){
     
     for(int i = 0; i < cameras.size(); i++){
         cameras[i] -> closeFeed();
-        
-        cout << "Closing Feed: " + ofToString(i) << endl;
     }
     
 }
@@ -53,17 +51,55 @@ void ofApp::setup(){
     //if we're using image scaling for faster processing
     bScaleDown = true;
     
-    //IP Addresses
-    //these will eventually be different
+    //address IPs
     vector<string> addresses;
-    addresses.resize(6);
+    addresses.resize(14);
     
-    addresses[0] = "192.168.187.39";
-    addresses[1] = "192.168.187.37";
-    addresses[2] = "192.168.187.39";
-    addresses[3] = "192.168.187.34";
-    addresses[4] = "192.168.187.39";
-    addresses[5] = "192.168.187.39";
+    //address IPs
+    vector<string> names;
+    names.resize(14);
+    
+    names[0] = "Cam01";
+    addresses[0] = "192.168.1.6";
+    
+    names[1] = "Cam02";
+    addresses[1] = "192.168.1.6";
+    
+    names[2] = "Cam03";
+    addresses[2] = "192.168.1.6";
+    
+    names[3] = "Cam04";
+    addresses[3] = "192.168.1.6";
+    
+    names[4] = "Cam05";
+    addresses[4] = "192.168.1.6";
+    
+    names[5] = "Cam06";
+    addresses[5] = "192.168.1.6";
+    
+    names[6] = "Cam07";
+    addresses[6] = "192.168.1.6";
+    
+    names[7] = "Cam08";
+    addresses[7] = "192.168.1.6";
+    
+    names[8] = "Cam09";
+    addresses[8] = "192.168.1.6";
+    
+    names[9] = "Cam10";
+    addresses[9] = "192.168.1.6";
+    
+    names[10] = "Cam11";
+    addresses[10] = "192.168.1.6";
+    
+    names[11] = "Cam12";
+    addresses[11] = "192.168.1.6";
+    
+    names[12] = "Cam13";
+    addresses[12] = "192.168.1.6";
+    
+    names[13] = "Cam14";
+    addresses[13] = "192.168.1.6";
     
     
     
@@ -121,7 +157,7 @@ void ofApp::setup(){
     
     
     //set up actual feeds
-    int stagger = 500;
+    int stagger = 100;
     
     //set up the cameras
     for(int i = 0; i < numFeeds; i++){
@@ -129,11 +165,11 @@ void ofApp::setup(){
         //create shared_ptr to a corridor
         auto cor = std::make_shared<Camera>();
         
-        cor -> setMovieFile(movieFiles[i]);
-        cor -> setup(addresses[i], "Lobby 1 Cam " + ofToString(i + 1), bScaleDown, useLiveorMovie[i]);
+//        cor -> setMovieFile(movieFiles[i]);
+        cor -> setup(addresses[i], names[i], bScaleDown, true);
         cor -> adjustedQuadOrigin = rawImagePos;
-        cor -> backgroundIn.set(backgroundCols[i * 2]);
-        cor -> backgroundOut.set(backgroundCols[i * 2 + 1]);
+        cor -> backgroundIn.set(backgroundCols[0]);
+        cor -> backgroundOut.set(backgroundCols[1]);
         cor -> staggerTime = stagger * i;
         
         cameras.push_back(cor);
@@ -239,7 +275,7 @@ void ofApp::draw(){
             msg = "CV NOT Scaled Down";
         }
         
-        msg += "\nCurrent CV resolution: " + ofToString(cameras[viewMode] -> threshPix.getWidth()) + " x " + ofToString(cameras[viewMode] -> threshPix.getHeight());
+
         
         ofDrawBitmapString(msg, 800, 30);
         
@@ -264,33 +300,33 @@ void ofApp::draw(){
 void ofApp::keyPressed(int key){
 
     
-    if(key == '1'){
-        viewMode = 0;
-    } else if(key == '2'){
-        viewMode = 1;
-    } else if(key == '3'){
-        viewMode = 2;
-    } else if(key == '4'){
-        viewMode = 3;
-    } else if(key == '5'){
-        viewMode = 4;
-    } else if(key == '6'){
-        viewMode = 5;
-    } else if(key == ' '){
-        viewMode = 6;
-    }
+//    if(key == '1'){
+//        viewMode = 0;
+//    } else if(key == '2'){
+//        viewMode = 1;
+//    } else if(key == '3'){
+//        viewMode = 2;
+//    } else if(key == '4'){
+//        viewMode = 3;
+//    } else if(key == '5'){
+//        viewMode = 4;
+//    } else if(key == '6'){
+//        viewMode = 5;
+//    } else if(key == ' '){
+//        viewMode = 6;
+//    }
     
     
     //cycle right
     if(key == OF_KEY_RIGHT){
         viewMode++;
-        if(viewMode > 4) viewMode = 0;
+        if(viewMode > numFeeds - 1) viewMode = 0;
     }
     
     //cycle left
     if(key == OF_KEY_LEFT){
         viewMode--;
-        if(viewMode < 0) viewMode = 4;
+        if(viewMode < 0) viewMode = numFeeds - 1;
     }
     
     //save all

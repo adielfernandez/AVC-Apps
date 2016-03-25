@@ -39,7 +39,7 @@ class ofApp : public ofBaseApp{
     
     
     //-----CAMERAS-----
-    const int numFeeds = 1;
+    const int numFeeds = 14;
     vector<shared_ptr<Camera>> cameras;
     
 

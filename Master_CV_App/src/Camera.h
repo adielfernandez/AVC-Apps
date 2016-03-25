@@ -119,6 +119,11 @@ public:
     ofFbo fbo;
     ofPixels fboPix;
     
+    ofPixels blurredPix;
+    ofPixels grayPix;
+    ofPixels threshPix;
+    ofImage thresholdImg;
+    
     //takes in the quad mapped pixels
     //outputs threshold and contours
     ThreadedCV imageProcessor;

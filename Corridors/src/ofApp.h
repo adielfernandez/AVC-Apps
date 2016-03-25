@@ -37,7 +37,7 @@ class ofApp : public ofBaseApp{
     
     
     //-----CORRIDORS-----
-    const int numFeeds = 4;
+    const int numFeeds = 14;
 
     vector<shared_ptr<Corridor>> corridors;
 
