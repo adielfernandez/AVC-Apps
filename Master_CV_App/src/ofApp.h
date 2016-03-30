@@ -4,6 +4,8 @@
 #include "Osc.h"
 #include "Camera.h"
 #include "ofxCv.h"
+#include "Button.hpp"
+#include "NavPanel.hpp"
 
 #pragma once
 
@@ -42,7 +44,7 @@ class ofApp : public ofBaseApp{
     const int numFeeds = 14;
     vector<shared_ptr<Camera>> cameras;
     
-
+    const int numScreens = 17;
     
     
     //-----UI-----
@@ -55,9 +57,10 @@ class ofApp : public ofBaseApp{
     int topMargin;
     int centerMargin;
     
+    NavPanel panel;
+    
     //positions for aesthetics
     ofVec2f rawImagePos, cvImagePos;
-    
     
     
     //-----Data-----

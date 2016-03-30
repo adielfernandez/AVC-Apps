@@ -21,18 +21,19 @@ ThreadedCV::~ThreadedCV(){
     
     //close thread channels
     quadPixelsIn.close();
+    settingsIn.close();
     threshPixOut.close();
-    
+    contoursOut.close();
     
     waitForThread(true);
     
 }
 
 
-void ThreadedCV::setup(ofPixels *_mainThreadPix){
+void ThreadedCV::setup(ofPixels *_mainThreadPix, ofxCv::ContourFinder *_mainThreadCons){
 
     mainThreadPix = _mainThreadPix;
-    
+    mainThreadContours = _mainThreadCons;
     
     startThread();
     
@@ -52,20 +53,15 @@ void ThreadedCV::analyze(ofPixels & p, vector<int> & settings){
 
 void ThreadedCV::update(){
     
-    newFrame = false;
-    while(threshPixOut.tryReceive(threshPix)){
-        newFrame = true;
+    ofPixels t;
+    if(threshPixOut.tryReceive(t)){
+        *mainThreadPix = t;
     }
     
-    
-    if(newFrame){
-
-        *mainThreadPix = threshPix;
-    
+    ofxCv::ContourFinder c;
+    if(contoursOut.tryReceive(c)){
+        *mainThreadContours = c;
     }
-    
-    
-
 }
 
 
@@ -75,25 +71,10 @@ void ThreadedCV::threadedFunction(){
     
     while(isThreadRunning()){
 
+//        float FR = 1000.0/((float)ofGetElapsedTimeMillis() - (float)lastFrameTime);
+//        cout << "[Thread] Framerate: " << FR << endl;
+//        lastFrameTime = ofGetElapsedTimeMillis();
         
-        //vector we're getting from the GL thread
-        vector<int> settings;
-
-        //Use that vector to populate these
-        int threshold;
-        int blurAmt;
-        int numErosions;
-        int numDilations;
-        int minBlobArea;
-        int maxBlobArea;
-        int persistence;
-        int maxBlobDist;
-
-        //the texture we'll get from the feed in the GL Thread
-        ofPixels threadPixels;
-        ofPixels blurredPix;
-        ofPixels thresholdedPix;
-
         //wait until we have our settings loaded and our pixels
         if(settingsIn.receive(settings) && quadPixelsIn.receive(threadPixels)){
 
@@ -107,22 +88,23 @@ void ThreadedCV::threadedFunction(){
             persistence = settings[6];
             maxBlobDist = settings[7];
 
-
+            //Make grayscale
+            threadPixels.setImageType(OF_IMAGE_GRAYSCALE);
 
             //blur it
             ofxCv::GaussianBlur(threadPixels, blurredPix, blurAmt);
 
             //threshold it
-            ofxCv::threshold(blurredPix, thresholdedPix, threshold);
+            ofxCv::threshold(blurredPix, threshPix, threshold);
 
             //ERODE it
             for(int e = 0; e < numErosions; e++){
-                erode(thresholdedPix);
+                erode(threshPix);
             }
 
             //DILATE it
             for(int d = 0; d < numDilations; d++){
-                dilate(thresholdedPix);
+                dilate(threshPix);
             }
 
 
@@ -131,23 +113,23 @@ void ThreadedCV::threadedFunction(){
 
 
             //Define contour finder
-//            contours.setMinArea(minBlobArea);
-//            contours.setMaxArea(maxBlobArea);
-//            contours.setThreshold(254);  //only detect white
-//
-//            // wait for half a frame before forgetting something
-//            contours.getTracker().setPersistence(persistence);
-//
-//            // an object can move up to ___ pixels per frame
-//            contours.getTracker().setMaximumDistance(maxBlobDist);
-//
-//            //find dem blobs
-//            contours.findContours(threshPix);
-            
-            
-            
-            threshPixOut.send(std::move(thresholdedPix));
+            contours.setMinArea(minBlobArea);
+            contours.setMaxArea(maxBlobArea);
+            contours.setThreshold(254);  //only detect white
 
+            // wait for half a frame before forgetting something
+            contours.getTracker().setPersistence(persistence);
+
+            // an object can move up to ___ pixels per frame
+            contours.getTracker().setMaximumDistance(maxBlobDist);
+
+            //find dem blobs
+            contours.findContours(threshPix);
+            
+            
+            
+            threshPixOut.send(std::move(threshPix));
+            contoursOut.send(std::move(contours));
         }
         
     

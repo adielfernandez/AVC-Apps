@@ -18,7 +18,7 @@ void ofApp::setup(){
     ofSetVerticalSync(false);
     ofSetFrameRate(200);
     
-    ofSetLogLevel(OF_LOG_VERBOSE);
+//    ofSetLogLevel(OF_LOG_VERBOSE);
     
     
     feedWidth = 640;
@@ -34,22 +34,29 @@ void ofApp::setup(){
     
     /*
      viewMode: What we're seeing
-     0 = View corridor 1
-     1 = View corridor 3
-     2 = View corridor 4
-     3 = View corridor 5
-     4 = View CV for all corridors
+     0 = View cam 1
+     1 = View cam 2
+     2 = View cam 3
+     3 = View cam 4
+     
+     etc...
+     
+     14 = Corridor 1 aggregation
+     15 = Corridor 6 aggregation
+     16 = OSC Page
+     
      */
     viewMode = 0;
     
     
     titleFont.load("fonts/Aller_Rg.ttf", 50, true);
+    
     smallerFont.load("fonts/Aller_Rg.ttf", 20, true);
     
     
     
     //if we're using image scaling for faster processing
-    bScaleDown = true;
+    bScaleDown = false;
     
     //address IPs
     vector<string> addresses;
@@ -59,46 +66,46 @@ void ofApp::setup(){
     vector<string> names;
     names.resize(14);
     
-    names[0] = "Cam01";
+    names[0] = "Cam-1";
     addresses[0] = "192.168.1.6";
     
-    names[1] = "Cam02";
+    names[1] = "Cam-2";
     addresses[1] = "192.168.1.6";
     
-    names[2] = "Cam03";
+    names[2] = "Cam-3";
     addresses[2] = "192.168.1.6";
     
-    names[3] = "Cam04";
+    names[3] = "Cam-4";
     addresses[3] = "192.168.1.6";
     
-    names[4] = "Cam05";
+    names[4] = "Cam-5";
     addresses[4] = "192.168.1.6";
     
-    names[5] = "Cam06";
+    names[5] = "Cam-6";
     addresses[5] = "192.168.1.6";
     
-    names[6] = "Cam07";
+    names[6] = "Cam-7";
     addresses[6] = "192.168.1.6";
     
-    names[7] = "Cam08";
+    names[7] = "Cam-8";
     addresses[7] = "192.168.1.6";
     
-    names[8] = "Cam09";
+    names[8] = "Cam-9";
     addresses[8] = "192.168.1.6";
     
-    names[9] = "Cam10";
+    names[9] = "Cam-10";
     addresses[9] = "192.168.1.6";
     
-    names[10] = "Cam11";
+    names[10] = "Cam-11";
     addresses[10] = "192.168.1.6";
     
-    names[11] = "Cam12";
+    names[11] = "Cam-12";
     addresses[11] = "192.168.1.6";
     
-    names[12] = "Cam13";
+    names[12] = "Cam-13";
     addresses[12] = "192.168.1.6";
     
-    names[13] = "Cam14";
+    names[13] = "Cam-14";
     addresses[13] = "192.168.1.6";
     
     
@@ -188,6 +195,11 @@ void ofApp::setup(){
     lastSendTime = 0;
     
     
+    
+    //-----create buttons for UI navigation-----
+    panel.setup(&viewMode);
+    
+    //buttons for the two aggregated scenes and the OSC screen
 
     
     
@@ -196,7 +208,7 @@ void ofApp::setup(){
 //--------------------------------------------------------------
 void ofApp::update(){
 
-    
+    panel.update();
     
     
     if(viewMode >= 0 && viewMode < numFeeds){
@@ -239,12 +251,14 @@ void ofApp::draw(){
     
     
     
-    //draw the right corridor
+    //draw the raw cameras
     if(viewMode >= 0 && viewMode < numFeeds){
         
-        ofBackgroundGradient(cameras[viewMode] -> backgroundIn, cameras[viewMode] -> backgroundOut);
+        ofBackgroundGradient(100, 0);
+//        ofBackgroundGradient(cameras[viewMode] -> backgroundIn, cameras[viewMode] -> backgroundOut);
         
         ofSetColor(255);
+        ofDrawBitmapString("Current Feed FPS: " + ofToString(cameras[viewMode] -> cameraFPS), 15, 45);
         titleFont.drawString(cameras[viewMode] -> name, rawImagePos.x, rawImagePos.y - 10);
         
         cameras[viewMode] -> drawRaw(rawImagePos);
@@ -254,8 +268,8 @@ void ofApp::draw(){
             scale = 1.0;
         } else {
             scale = 0.5;
-        }
         
+        }
         cameras[viewMode] -> drawCV(cvImagePos, scale);
         
         //draw num blobs under CV image
@@ -264,9 +278,7 @@ void ofApp::draw(){
         
         cameras[viewMode] -> drawGui(15, topMargin);
         
-        ofSetColor(255);
-        ofDrawBitmapString("Framerate: " + ofToString(ofGetFrameRate()), 15, 30);
-        ofDrawBitmapString("Current Feed FPS: " + ofToString(cameras[viewMode] -> cameraFPS), 15, 45);
+        
         
         string msg;
         if(bScaleDown){
@@ -281,13 +293,43 @@ void ofApp::draw(){
         
         
         
+    } else if(viewMode == 14){
+        
+        //CORRIDOR 1 AGGREGATION
+        ofBackgroundGradient(100, 0);
+        
+        ofSetColor(255);
+        titleFont.drawString("Corridor 1 Aggregate", rawImagePos.x, rawImagePos.y - 10);
+        
+        
+    } else if(viewMode == 15){
+        
+        //CORRIDOR 1 AGGREGATION
+        ofBackgroundGradient(100, 0);
+        
+        ofSetColor(255);
+        titleFont.drawString("Corridor 6 Aggregate", rawImagePos.x, rawImagePos.y - 10);
+        
+        
+        
+    } else if(viewMode == 16){
+        
+        //OSC VIEWER
+        ofBackgroundGradient(100, 0);
+        
+        ofSetColor(255);
+        titleFont.drawString("OSC Info", rawImagePos.x, rawImagePos.y - 10);
+        
     }
     
 
-    
+    ofSetColor(255);
+    ofDrawBitmapString("Framerate: " + ofToString(ofGetFrameRate()), 15, 30);
     
 
     
+    //UI panel for buttons to switch between views
+    panel.draw();
 
     
     
@@ -320,13 +362,13 @@ void ofApp::keyPressed(int key){
     //cycle right
     if(key == OF_KEY_RIGHT){
         viewMode++;
-        if(viewMode > numFeeds - 1) viewMode = 0;
+        if(viewMode > numScreens - 1) viewMode = 0;
     }
     
     //cycle left
     if(key == OF_KEY_LEFT){
         viewMode--;
-        if(viewMode < 0) viewMode = numFeeds - 1;
+        if(viewMode < 0) viewMode = numScreens - 1;
     }
     
     //save all
@@ -359,6 +401,13 @@ void ofApp::mouseDragged(int x, int y, int button){
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
 
+    //if we're in the navpanel...
+    if(y > panel.pos.y){
+        
+        panel.checkForClicks(x, y);
+
+    }
+    
 }
 
 //--------------------------------------------------------------

@@ -41,14 +41,13 @@ public:
     ThreadedCV();
     ~ThreadedCV();
     
-    void setup(ofPixels *_mainThreadPix);
+    void setup(ofPixels *_mainThreadPix, ofxCv::ContourFinder *_mainThreadCons);
     void analyze(ofPixels & pix, vector<int> & settings);
     void update();
     
     
 private:
     
-    bool newFrame;
     
     //into thread
     ofThreadChannel<ofPixels> quadPixelsIn;
@@ -56,15 +55,30 @@ private:
     
     //Thread output
     ofThreadChannel<ofPixels> threshPixOut;
+    ofThreadChannel<ofxCv::ContourFinder> contoursOut;
     
+    ofPixels *mainThreadPix;
+    ofxCv::ContourFinder *mainThreadContours;
     
     void threadedFunction();
 
     ofPixels threshPix;
+    ofxCv::ContourFinder contours;
     
     vector<int> settings;
-    ofPixels *mainThreadPix;
+    ofPixels threadPixels;
+    ofPixels blurredPix;
     
+    int threshold;
+    int blurAmt;
+    int numErosions;
+    int numDilations;
+    int minBlobArea;
+    int maxBlobArea;
+    int persistence;
+    int maxBlobDist;
+    
+    unsigned long lastFrameTime;
 };
 
 

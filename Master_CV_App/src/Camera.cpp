@@ -152,7 +152,7 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     
     
     //start the image processing thread
-    imageProcessor.setup(&threshPix);
+    imageProcessor.setup(&threshPix, &contours);
     
 
     
@@ -281,52 +281,8 @@ void Camera::update(){
 
         
         //pass the fbo pixels to the processing thread
-        fboPix.setImageType(OF_IMAGE_GRAYSCALE);
-//        threshTex.loadData(fboPix);
-
-        
-//        cout << "fboPix Address: " << &fboPix << endl;
-//        cout << "fboPix width: " << fboPix.getWidth() << endl;
-//        cout << "fboPix channels: " << fboPix.getNumChannels() << endl;
-//        cout << "fboPix format: " << fboPix.getPixelFormat() << endl;
-        
         imageProcessor.analyze(fboPix, settings);
-        
-        
-        
-//        //Convert to color
-//        convertColor(fboPix, grayPix, CV_RGBA2GRAY);
-//        
-//        //blur it
-//        ofxCv::GaussianBlur(grayPix, blurredPix, cameraGui.blurAmountSlider);
-//        
-//        //threshold it
-//        ofxCv::threshold(blurredPix, threshPix, cameraGui.thresholdSlider);
-//        
-//        //ERODE it
-//        for(int e = 0; e < cameraGui.numErosionsSlider; e++){
-//            erode(threshPix);
-//        }
-//        
-//        //DILAT it
-//        for(int d = 0; d < cameraGui.numDilationsSlider; d++){
-//            dilate(threshPix);
-//        }
-//        
-//        //Define contour finder
-//        contours.setMinArea(cameraGui.minBlobAreaSlider);
-//        contours.setMaxArea(cameraGui.maxBlobAreaSlider);
-//        contours.setThreshold(254);  //only detect white
-//        
-//        // wait for half a frame before forgetting something
-//        contours.getTracker().setPersistence(cameraGui.persistenceSlider);
-//        
-//        // an object can move up to ___ pixels per frame
-//        contours.getTracker().setMaximumDistance(cameraGui.maxDistanceSlider);
-//        
-//        contours.findContours(threshPix);
-        
-        
+                
     }
     
     
@@ -418,30 +374,21 @@ void Camera::drawCV(ofVec2f pos, float scale){
     
     ofTranslate(pos);
     ofScale(scale, scale);
-    
-    ofSetColor(255);
-    ofNoFill();
-    ofSetLineWidth(1);
-    
-    ofDrawRectangle(0, 0, quadTex.getWidth(), quadTex.getHeight());
 
     
     ofSetColor(255);
-//    quadTex.draw(0, 0);
+    quadTex.draw(0, 0);
     
     if(cameraGui.drawThresholdToggle){
-        
-//        threshTex.draw(0, 0);
         
         thresholdImg.setFromPixels(threshPix);
         thresholdImg.draw(0, 0);
 
-//        imageProcessor.draw(0, 0);
         
     }
     
     if(cameraGui.drawContoursToggle) {
-        RectTracker& tracker = contours.getTracker();
+//        RectTracker& tracker = contours.getTracker();
         
         ofSetColor(255, 0, 0);
         
@@ -464,7 +411,15 @@ void Camera::drawCV(ofVec2f pos, float scale){
             ofDrawBitmapString(msg, 0, 0);
         }
     }
+    
+    //draw border
+    ofSetColor(255);
+    ofNoFill();
+    ofSetLineWidth(1);
+    ofDrawRectangle(0, 0, quadTex.getWidth(), quadTex.getHeight());
 
+    ofFill();
+    
     ofPopMatrix();
     
     

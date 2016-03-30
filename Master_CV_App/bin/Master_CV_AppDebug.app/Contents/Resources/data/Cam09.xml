@@ -10,7 +10,7 @@
 	<Draw_threshold>1</Draw_threshold>
 	<Draw_Contours>1</Draw_Contours>
 	<Info>0</Info>
-	<Point_0>33, 25</Point_0>
+	<Point_0>15, 19</Point_0>
 	<Point_1>640, 0</Point_1>
 	<Point_2>640, 512</Point_2>
 	<Point_3>0, 512</Point_3>
