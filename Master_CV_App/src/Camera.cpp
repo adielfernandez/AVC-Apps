@@ -72,7 +72,7 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
         movie.load(fileName);
         movie.setLoopState(OF_LOOP_NORMAL);
         movie.play();
-        //        movie.setPosition(ofRandom(movie.getTotalNumFrames())/movie.getTotalNumFrames());
+        movie.setPosition(ofRandom(movie.getTotalNumFrames())/movie.getTotalNumFrames());
         
     }
     

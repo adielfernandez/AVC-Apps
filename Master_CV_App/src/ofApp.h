@@ -7,6 +7,8 @@
 #include "Button.hpp"
 #include "NavPanel.hpp"
 
+#include "PlaybackBar.hpp"
+
 #pragma once
 
 
@@ -34,17 +36,17 @@ class ofApp : public ofBaseApp{
 		
     
 
-    
+    PlaybackBar playback;
     
 
     bool bScaleDown;
-    
+    bool useLiveFeed;
     
     //-----CAMERAS-----
     const int numFeeds = 14;
     vector<shared_ptr<Camera>> cameras;
     
-    const int numScreens = 17;
+    const int numScreens = 18;
     
     
     //-----UI-----
@@ -62,11 +64,24 @@ class ofApp : public ofBaseApp{
     //positions for aesthetics
     ofVec2f rawImagePos, cvImagePos;
     
+    //positions for all cameras view
+    vector<ofVec2f> allCamsPos;
+    vector<ofVec2f> allLabelsPos;
+    int frameWidth, frameHeight;
     
-    //-----Data-----
+    
+    //-----OSC Data-----
     Osc oscHandler;
     int dataPerSec;
     unsigned long long lastSendTime;
+    float sendAlertTrans, sendTrans;
     
     
 };
+
+
+
+
+
+
+

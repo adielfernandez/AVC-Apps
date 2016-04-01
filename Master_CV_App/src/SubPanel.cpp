@@ -44,9 +44,9 @@ void SubPanel::update(){
 void SubPanel::draw(){
     
     if(isActive){
-        ofSetColor(20);
-    } else {
         ofSetColor(0);
+    } else {
+        ofSetColor(20);
     }
     ofDrawRectangle(pos, width, height);
     

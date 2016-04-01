@@ -1,9 +1,9 @@
 <Cam-7>
-	<Threshold>0</Threshold>
-	<Blur>1</Blur>
+	<Threshold>70</Threshold>
+	<Blur>21</Blur>
 	<Number_of_erosions>0</Number_of_erosions>
 	<Number_of_dilations>0</Number_of_dilations>
-	<Min_Blob_Area>0</Min_Blob_Area>
+	<Min_Blob_Area>95</Min_Blob_Area>
 	<Max_Blob_Area>50000</Max_Blob_Area>
 	<Persistence>15</Persistence>
 	<Max_Distance>32</Max_Distance>
@@ -14,4 +14,5 @@
 	<Point_1>640, 0</Point_1>
 	<Point_2>640, 512</Point_2>
 	<Point_3>0, 512</Point_3>
+<Cam-7/>
 </Cam-7>

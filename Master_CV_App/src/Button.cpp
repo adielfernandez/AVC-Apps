@@ -71,7 +71,15 @@ void Button::draw(){
     ofDrawRectangle(pos, width, height);
     
     ofSetColor(textCol);
-    font -> drawString(name, pos.x + (width - strW)/2, pos.y + height/2 + strH/2);
+    
+    //Because the g's make the text look off center
+    float fontDescenderHack;
+    if(name == "Aggregate"){
+        fontDescenderHack = 3;
+    } else {
+        fontDescenderHack = 0;
+    }
+    font -> drawString(name, pos.x + (width - strW)/2, pos.y + height/2 + strH/2 - fontDescenderHack);
     
 }
 

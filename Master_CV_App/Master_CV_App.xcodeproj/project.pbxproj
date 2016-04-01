@@ -32,6 +32,7 @@
 		837220E80EB56CD44AD27F2A /* ofxSlider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 15F2C6477A769C03A56D1401 /* ofxSlider.cpp */; };
 		856AA354D08AB4B323081444 /* ofxBaseGui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9604B925D32EE39065747725 /* ofxBaseGui.cpp */; };
 		879A251454401BC0B6E4F238 /* OscTypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9BFFBBF4CC43DEE890B3C3E /* OscTypes.cpp */; };
+		8912C3731CAE0511006D8BE4 /* Aggregator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8912C3711CAE0511006D8BE4 /* Aggregator.cpp */; };
 		8929C78A1CA1EA540024DA93 /* Camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8929C7821CA1EA540024DA93 /* Camera.cpp */; };
 		8929C78B1CA1EA540024DA93 /* CamGui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8929C7841CA1EA540024DA93 /* CamGui.cpp */; };
 		8929C78C1CA1EA540024DA93 /* Osc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8929C7861CA1EA540024DA93 /* Osc.cpp */; };
@@ -39,6 +40,7 @@
 		8929C79F1CA5AC570024DA93 /* Button.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8929C79D1CA5AC570024DA93 /* Button.cpp */; };
 		8929C7A21CA5C0CD0024DA93 /* NavPanel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8929C7A01CA5C0CD0024DA93 /* NavPanel.cpp */; };
 		8929C7A51CA5D7F40024DA93 /* SubPanel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8929C7A31CA5D7F40024DA93 /* SubPanel.cpp */; };
+		89E6E37E1CAC58F6005630C1 /* PlaybackBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 89E6E37C1CAC58F6005630C1 /* PlaybackBar.cpp */; };
 		8F5205AEF8861EF234F0651A /* ofxOscSender.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 81967292BFC87A0144BD32C6 /* ofxOscSender.cpp */; };
 		9D99424B122DE3C1D83A3670 /* ofGstVideoGrabber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F198996ED5C849097CC1ABB5 /* ofGstVideoGrabber.cpp */; };
 		A6668C5B1272D7FCD5B5A16F /* Utilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6CEC50DB3D06414010233963 /* Utilities.cpp */; };
@@ -217,6 +219,8 @@
 		8738DE90218B1E9054A88B54 /* Helpers.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = Helpers.h; path = ../../../addons/ofxCv/libs/ofxCv/include/ofxCv/Helpers.h; sourceTree = SOURCE_ROOT; };
 		87DBF560FF25F1CD2E737825 /* openfabmap.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = openfabmap.hpp; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/contrib/openfabmap.hpp; sourceTree = SOURCE_ROOT; };
 		87F26B4B24CBD428AD9EEBAA /* ofxBaseGui.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxBaseGui.h; path = ../../../addons/ofxGui/src/ofxBaseGui.h; sourceTree = SOURCE_ROOT; };
+		8912C3711CAE0511006D8BE4 /* Aggregator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Aggregator.cpp; sourceTree = "<group>"; };
+		8912C3721CAE0511006D8BE4 /* Aggregator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Aggregator.hpp; sourceTree = "<group>"; };
 		8929C7821CA1EA540024DA93 /* Camera.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Camera.cpp; sourceTree = "<group>"; };
 		8929C7831CA1EA540024DA93 /* Camera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Camera.h; sourceTree = "<group>"; };
 		8929C7841CA1EA540024DA93 /* CamGui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CamGui.cpp; sourceTree = "<group>"; };
@@ -232,6 +236,8 @@
 		8929C7A31CA5D7F40024DA93 /* SubPanel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SubPanel.cpp; sourceTree = "<group>"; };
 		8929C7A41CA5D7F40024DA93 /* SubPanel.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SubPanel.hpp; sourceTree = "<group>"; };
 		89449E3044D456F7DE7BEA14 /* ofxPanel.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxPanel.h; path = ../../../addons/ofxGui/src/ofxPanel.h; sourceTree = SOURCE_ROOT; };
+		89E6E37C1CAC58F6005630C1 /* PlaybackBar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlaybackBar.cpp; sourceTree = "<group>"; };
+		89E6E37D1CAC58F6005630C1 /* PlaybackBar.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PlaybackBar.hpp; sourceTree = "<group>"; };
 		8A4DD23693DFAB8EC05FAA5D /* ofxCvShortImage.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = ofxCvShortImage.cpp; path = ../../../addons/ofxOpenCv/src/ofxCvShortImage.cpp; sourceTree = SOURCE_ROOT; };
 		8B30E93FD3D3475EED522A0E /* ofxOscBundle.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxOscBundle.h; path = ../../../addons/ofxOsc/src/ofxOscBundle.h; sourceTree = SOURCE_ROOT; };
 		8C75AFC8774A62495DD53464 /* ofxOscReceiver.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxOscReceiver.h; path = ../../../addons/ofxOsc/src/ofxOscReceiver.h; sourceTree = SOURCE_ROOT; };
@@ -1041,6 +1047,8 @@
 				E4B69E1D0A3A1BDC003C02F2 /* main.cpp */,
 				E4B69E1F0A3A1BDC003C02F2 /* ofApp.h */,
 				E4B69E1E0A3A1BDC003C02F2 /* ofApp.cpp */,
+				8912C3721CAE0511006D8BE4 /* Aggregator.hpp */,
+				8912C3711CAE0511006D8BE4 /* Aggregator.cpp */,
 				8929C7831CA1EA540024DA93 /* Camera.h */,
 				8929C7821CA1EA540024DA93 /* Camera.cpp */,
 				8929C7911CA260070024DA93 /* ThreadedCV.hpp */,
@@ -1055,6 +1063,8 @@
 				8929C7A31CA5D7F40024DA93 /* SubPanel.cpp */,
 				8929C79E1CA5AC570024DA93 /* Button.hpp */,
 				8929C79D1CA5AC570024DA93 /* Button.cpp */,
+				89E6E37D1CAC58F6005630C1 /* PlaybackBar.hpp */,
+				89E6E37C1CAC58F6005630C1 /* PlaybackBar.cpp */,
 			);
 			path = src;
 			sourceTree = SOURCE_ROOT;
@@ -1247,6 +1257,7 @@
 				B266578FC55D23BFEBC042E7 /* ofxGuiGroup.cpp in Sources */,
 				483908258D00B98B4BE69F07 /* ofxLabel.cpp in Sources */,
 				F285EB3169F1566CA3D93C20 /* ofxPanel.cpp in Sources */,
+				8912C3731CAE0511006D8BE4 /* Aggregator.cpp in Sources */,
 				837220E80EB56CD44AD27F2A /* ofxSlider.cpp in Sources */,
 				8929C78B1CA1EA540024DA93 /* CamGui.cpp in Sources */,
 				B56FE57CC35806596D38118C /* ofxSliderGroup.cpp in Sources */,
@@ -1259,6 +1270,7 @@
 				8929C7A51CA5D7F40024DA93 /* SubPanel.cpp in Sources */,
 				8929C7921CA260070024DA93 /* ThreadedCV.cpp in Sources */,
 				FB09C6B2A1DA0EA217240CB8 /* ofxCvGrayscaleImage.cpp in Sources */,
+				89E6E37E1CAC58F6005630C1 /* PlaybackBar.cpp in Sources */,
 				E212C821D1064B92DD953A42 /* ofxCvHaarFinder.cpp in Sources */,
 				63020F16C7E8DED980111241 /* ofxCvImage.cpp in Sources */,
 				D3301F6A0B43BB293ED97C1D /* ofxCvShortImage.cpp in Sources */,

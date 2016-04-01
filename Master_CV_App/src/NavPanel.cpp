@@ -42,7 +42,7 @@ void NavPanel::setup(int *_viewModeVar){
     float buttonStartY = 35;
     
     //position of entire NavPanel
-    pos = ofVec2f(0, ofGetHeight() - (buttonHeight + margin) * 3 - buttonStartY - 10);
+    pos = ofVec2f(0, ofGetHeight() - (buttonHeight + margin) * 3 - buttonStartY);
     
     int leftSide = 0;
     
@@ -67,7 +67,7 @@ void NavPanel::setup(int *_viewModeVar){
         if(i < 6){
             s.title = "Corridor " + ofToString(i + 1);
         } else {
-            s.title = "OSC Info";
+            s.title = "Other";
         }
         
         
@@ -130,6 +130,10 @@ void NavPanel::setup(int *_viewModeVar){
         
         
     }
+    
+    //just manually turn on the first subpanel and button to active
+    subPanels[0].buttons[0].isActive = true;
+    subPanels[0].isActive = true;
     
     //one button in corridors 2, 3, 4, and 5
     //(i.e. subPanels 1, 2, 3, 4)
@@ -211,7 +215,7 @@ void NavPanel::setup(int *_viewModeVar){
     }
     
     //one button for the last panel to the OSC page
-    Button b;
+    Button osc;
     
 
     ofVec2f p;
@@ -221,22 +225,35 @@ void NavPanel::setup(int *_viewModeVar){
     x = p.x + margin;
     y = p.y + buttonStartY;
     
-    b.setup("OSC Info", 16, ofVec2f(x, y));
+    osc.setup("OSC Info", 16, ofVec2f(x, y));
     
-    b.width = buttonWidth;
-    b.height = buttonHeight;
+    osc.width = buttonWidth;
+    osc.height = buttonHeight;
     
     
-    b.setFont(&font);
+    osc.setFont(&font);
     
-    subPanels[6].buttons.push_back(b);
+    Button allCams;
+    
+    y += buttonHeight + margin;
+    
+    allCams.setup("All Cams", 17, ofVec2f(x, y));
+    
+    allCams.width = buttonWidth;
+    allCams.height = buttonHeight;
+    
+    
+    allCams.setFont(&font);
+    
+    subPanels[6].buttons.push_back(allCams);
+    subPanels[6].buttons.push_back(osc);
     
 
 }
 
 
 void NavPanel::update(){
-
+    
     for(int i = 0; i < subPanels.size(); i++){
         subPanels[i].update();
     }
