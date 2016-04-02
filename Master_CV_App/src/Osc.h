@@ -17,6 +17,11 @@ public:
     
     // Methods
     void setup(string _pgsIP, string _audioIP);
+    void setupAudio(string _IP, int _port);
+    void setupPGS(string _IP, int _port);
+    void setupHeartbeat(string _IP, int _port);
+    void setupGui();
+    
     void update();
     void drawGui(int x, int y);
 
@@ -24,12 +29,16 @@ public:
     void loadSettings();
     
     ofxOscSender pgsSender;
-    int pgsPort;
     string pgsIP;
+    int pgsPort;
     
     ofxOscSender audioSender;
-    int audioPort;
     string audioIP;
+    int audioPort;
+
+    ofxOscSender heartbeatSender;
+    string heartbeatIP;
+    int heartbeatPort;
     
     ofxPanel baseGui;
     

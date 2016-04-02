@@ -6,17 +6,32 @@ Osc::Osc(){
     
 }
 
-void Osc::setup(string _pgsIP, string _audioIP){
-
-    pgsPort = 12345;
-    audioPort = 12345;
+void Osc::setupPGS(string _IP, int _port){
     
-    pgsIP = _pgsIP;
-    audioIP = _audioIP;
-    
+    pgsIP = _IP;
+    pgsPort = _port;
     pgsSender.setup(pgsIP, pgsPort);
+    
+}
+
+void Osc::setupAudio(string _IP, int _port){
+
+    audioIP = _IP;
+    audioPort = _port;
     audioSender.setup(audioIP, audioPort);
     
+}
+
+void Osc::setupHeartbeat(string _IP, int _port){
+    
+    heartbeatIP = _IP;
+    heartbeatPort = _port;
+    heartbeatSender.setup(pgsIP, pgsPort);
+
+}
+
+
+void Osc::setupGui(){
     
     fileName = "oscSettings";
     
@@ -34,14 +49,6 @@ void Osc::setup(string _pgsIP, string _audioIP){
     baseGui.add(sendCorridor6.setup("Send Corridor 6 Data", true));
     
     baseGui.add(sendAudioOsc.setup("Send Audio Data", false));
-    
-
-    
-}
-
-void Osc::update(){
-    
-    
     
 }
 

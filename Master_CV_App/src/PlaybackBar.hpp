@@ -35,7 +35,7 @@ public:
     
     PlaybackBar();
     
-    void setup(ofVec2f _pos, vector<shared_ptr<Camera>> _cams, ofTrueTypeFont *_font);
+    void setup(ofVec2f _pos, const vector<shared_ptr<Camera>> _cams, ofTrueTypeFont *_font);
     void update();
     void draw();
     

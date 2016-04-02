@@ -15,26 +15,12 @@ Camera::Camera(){
         
 }
 
-
-void Camera::setupFeed(){
-
-    gst.setPipeline("rtspsrc location=rtsp://admin:admin@" + IP + ":554/cam/realmonitor?channel=1&subtype=1 latency=0 ! rtpjpegdepay ! jpegdec !  queue ! decodebin ! videoconvert", OF_PIXELS_MONO, true, feedWidth, feedHeight);
+void Camera::setupViewControl(int _thisView, int *_viewMode, ofVec2f _adjOrigin){
     
-    gst.startPipeline();
-    gst.play();
+    thisView = _thisView;
+    viewMode = _viewMode;
+    adjustedQuadOrigin = _adjOrigin;
     
-}
-
-void Camera::setMovieFile(string file){
-    
-    fileName = file;
-    
-}
-
-
-void Camera::closeFeed(){
-
-    gst.close();
 }
 
 void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed){
@@ -91,9 +77,6 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     
     
     //-----CV Objects && Image Processing-----
-
-    //enable/disable so we don't read mouse when we're on another screen
-    bEnableQuadMapping = false;
     
     //initialize imageQuad vector with 4 points
     //this will be overwritten by xml settings later
@@ -154,8 +137,28 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     //start the image processing thread
     imageProcessor.setup(&threshPix, &contours);
     
+}
 
+
+void Camera::setupFeed(){
     
+    gst.setPipeline("rtspsrc location=rtsp://admin:admin@" + IP + ":554/cam/realmonitor?channel=1&subtype=1 latency=0 ! rtpjpegdepay ! jpegdec !  queue ! decodebin ! videoconvert", OF_PIXELS_MONO, true, feedWidth, feedHeight);
+    
+    gst.startPipeline();
+    gst.play();
+    
+}
+
+void Camera::setMovieFile(string file){
+    
+    fileName = file;
+    
+}
+
+
+void Camera::closeFeed(){
+    
+    gst.close();
 }
 
 
@@ -287,17 +290,18 @@ void Camera::update(){
     
     
     //Update the image processing thread
-    //this will automatically fill threshTex and contours
+    //this will automatically fill threshPix and contours
     //with new data as it works
     imageProcessor.update();
     
     
-    //for mouse interaction
-    if(bEnableQuadMapping){
+    if((*viewMode) == thisView){
         ofRegisterMouseEvents(this);
     } else {
         ofUnregisterMouseEvents(this);
     }
+    
+
     
     
 
@@ -427,8 +431,16 @@ void Camera::drawCV(ofVec2f pos, float scale){
 }
 
 
+
+
+
+
+
+
+
 void Camera::mousePressed(ofMouseEventArgs &args){
     
+    cout << "Click from thisView = " << thisView << endl;
     
     //handle mouse interaction with quadMap points
     for(int i = 0; i < imageQuad.size(); i++){

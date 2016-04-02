@@ -1,2 +1,13 @@
+# Set the IP addresses to receive OSC Data. 
+# Line 8: PGS IP address
+# Line 9: PGS Recieve Port
+# Line 10: Audio System IP address
+# Line 11: Audio System Receive Port
+# Line 12: Heartbeat IP
+# Line 13: Heartbeat receive port
 localhost
+12345
 localhost
+12345
+localhost
+12345

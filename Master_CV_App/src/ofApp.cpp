@@ -18,7 +18,7 @@ void ofApp::setup(){
     ofSetVerticalSync(false);
     ofSetFrameRate(200);
     
-    ofSetLogLevel(OF_LOG_VERBOSE);
+//    ofSetLogLevel(OF_LOG_VERBOSE);
     
     ofSetWindowTitle("AV&C Terrell Place Sensor Processor");
     
@@ -30,8 +30,8 @@ void ofApp::setup(){
     topMargin = 70;
     centerMargin = 20;
     
-    rawImagePos.set(leftMargin, topMargin);
-    cvImagePos.set(leftMargin + feedWidth + centerMargin, topMargin);
+    mainContentPos.set(leftMargin, topMargin);
+    secondaryContentPos.set(leftMargin + feedWidth + centerMargin, topMargin);
     
     /*
      viewMode: What we're seeing
@@ -42,8 +42,8 @@ void ofApp::setup(){
      
      etc...
      
-     14 = Corridor 1 aggregation
-     15 = Corridor 6 aggregation
+     14 = Lobby 1 aggregation
+     15 = Lobby 2 aggregation
      16 = OSC Page
      17 = all cameras
      
@@ -112,54 +112,6 @@ void ofApp::setup(){
     
     
     
-    //Background Colors
-    //holds a dark then a light color for the gradient background
-    vector<ofColor> backgroundCols;
-    backgroundCols.resize(6 * 2);
-    
-    int high = 80;  //the high value of the primary colors
-    int low = 30;   //the low value
-    
-    //first corridor is red
-    backgroundCols[0].set(high, 0, 0);
-    backgroundCols[1].set(low, 0, 0);
-    //then yellow
-    backgroundCols[2].set(high, high, 0);
-    backgroundCols[3].set(low, low, 0);
-    //then green
-    backgroundCols[4].set(0, high, 0);
-    backgroundCols[5].set(0, low, 0);
-    //then cyan
-    backgroundCols[6].set(0, high + low, high + low);
-    backgroundCols[7].set(0, low + low, low + low);
-    //then blue
-    backgroundCols[8].set(0, 0, high);
-    backgroundCols[9].set(0, 0, low);
-    //then magenta
-    backgroundCols[10].set(high, 0, high);
-    backgroundCols[11].set(low, 0, low);
-    
-    
-    //Which cameras will be live or with a video for debugging
-//    vector<bool> useLive;
-//    useLive.resize(14);
-//    
-//    useLive[0] = false;
-//    useLive[1] = true;
-//    useLive[2] = true;
-//    useLive[3] = true;
-//    useLive[4] = true;
-//    useLive[5] = true;
-//    useLive[6] = true;
-//    useLive[7] = true;
-//    useLive[8] = true;
-//    useLive[9] = true;
-//    useLive[10] = true;
-//    useLive[11] = true;
-//    useLive[12] = true;
-//    useLive[13] = true;
-//    useLive[14] = true;
-    
     
     //file names for test movies
     vector<string> movieFiles;
@@ -174,7 +126,7 @@ void ofApp::setup(){
     
     
     //master control of live vs video
-    useLiveFeed = false;
+    useLiveFeed = true;
     
     //set up actual feeds
     int stagger = 250;
@@ -186,10 +138,9 @@ void ofApp::setup(){
         auto cor = std::make_shared<Camera>();
         
         cor -> setMovieFile(movieFiles[0]);
+        cor -> setupViewControl(i, &viewMode, mainContentPos);
         cor -> setup(addresses[i], names[i], bScaleDown, useLiveFeed);
-        cor -> adjustedQuadOrigin = rawImagePos;
-        cor -> backgroundIn.set(backgroundCols[0]);
-        cor -> backgroundOut.set(backgroundCols[1]);
+        
         cor -> staggerTime = stagger * i;
         
         cameras.push_back(cor);
@@ -198,10 +149,11 @@ void ofApp::setup(){
     }
     
     
-
-    
-    
-    
+    //----------AGGREGATORS----------
+    Lobby1Aggregate.setup("Lobby1Aggregate", 6, cameras, bScaleDown);
+    Lobby1Aggregate.setupViewControl(14, &viewMode, mainContentPos);
+    Lobby2Aggregate.setup("Lobby2Aggregate", 4, cameras, bScaleDown);
+    Lobby2Aggregate.setupViewControl(15, &viewMode, mainContentPos);
     
     
     //-----Data-----
@@ -209,7 +161,10 @@ void ofApp::setup(){
     //get the IP from file
     ofBuffer buffer = ofBufferFromFile("ip.txt");
     
-    string pgsIP, audioIP;
+    string pgsIP, audioIP, heartbeatIP;
+    int pgsPort, audioPort, heartbeatPort;
+
+    cout << "Getting OSC Configuration from File" << endl;
     
     if(buffer.size()) {
         
@@ -219,37 +174,46 @@ void ofApp::setup(){
             
             string line = *it;
             
-            if(lineNum == 0){
-                
+            if(lineNum == 7){
                 pgsIP = line;
-                lineNum++;
-                
-                cout << "PGS IP from file: " << pgsIP << endl;
-                
-            } else if(lineNum == 1){
+            } else if(lineNum == 8){
+                pgsPort = ofToInt(line);
+            } else if(lineNum == 9){
                 audioIP = line;
-                
-                cout << "Audio IP from file: " << audioIP << endl;
+            } else if(lineNum == 10){
+                audioPort = ofToInt(line);
+            } else if(lineNum == 11){
+                heartbeatIP = line;
+            } else if(lineNum == 12){
+                heartbeatPort = ofToInt(line);
             }
             
-            
+            lineNum++;
         }
         
-        
-    } else {
-        pgsIP = "localhost";
-        audioIP = "localhost";
     }
     
-    oscHandler.setup(pgsIP, audioIP);
+    cout << "PGS IP: " << pgsIP << endl;
+    cout << "PGS Port: " << pgsPort << endl;
+    cout << "Audio IP: " << audioIP << endl;
+    cout << "Audio Port: " << audioPort << endl;
+    cout << "Heartbeat IP: " << heartbeatIP << endl;
+    cout << "Heartbeat Port: " << heartbeatPort << endl;
+    
+    
+    
+    oscHandler.setupPGS(pgsIP, pgsPort);
+    oscHandler.setupAudio(audioIP, audioPort);
+    oscHandler.setupHeartbeat(heartbeatIP, heartbeatPort);
+    
+    oscHandler.setupGui();
+    
     oscHandler.loadSettings();
 
-    
+    //for visualizing message sending
     lastSendTime = 0;
-    
     sendAlertTrans = 0;
     sendTrans = 0;
-    
     
     
     
@@ -268,6 +232,8 @@ void ofApp::setup(){
         ofVec2f p;
         p.set(panel.pos.x + 10, panel.pos.y - playback.bgHeight - 10);
         
+        cout << "[ofApp] cam vector address: " << &cameras << endl;
+        cout << "[ofApp] cam vector first cam address: " << cameras[0] << endl;
         playback.setup(p, cameras, &smallerFont);
         
     }
@@ -324,38 +290,40 @@ void ofApp::setup(){
     
 }
 
-//--------------------------------------------------------------
+//===============================================================//
+//---------------------------------------------------------------//
+//                _  _ ___  ___  ____ ___ ____                   //
+//                |  | |__] |  \ |__|  |  |___                   //
+//                |__| |    |__/ |  |  |  |___                   //
+//                                                               //
+//---------------------------------------------------------------//
+//===============================================================//
+
+
 void ofApp::update(){
 
+    //button panel
     panel.update();
     
+    
+    //update the playback bar if we're not live
     if(!useLiveFeed) playback.update();
     
-    if(viewMode >= 0 && viewMode < numFeeds){
-        
-        
-        //only enable quad mapping if we're the one on screen
-        for(int i = 0; i < cameras.size(); i++){
-            
-            if(viewMode == i){
-                cameras[i] -> bEnableQuadMapping = true;
-            } else {
-                cameras[i] -> bEnableQuadMapping = false;
-            }
-            
-        }
-        
-    }
     
     
-    
-    //update everything regardless of other functionalities
+    //Cameras
     for(int i = 0; i < cameras.size(); i++){
-        
         cameras[i] -> update();
-        
     }
     
+    //Lobby 1
+    Lobby1Aggregate.update();
+    
+
+    //Lobby 2
+    Lobby2Aggregate.update();
+    
+
     
     //OSC
 
@@ -374,7 +342,16 @@ void ofApp::update(){
     
 }
 
-//--------------------------------------------------------------
+
+//===============================================================//
+//---------------------------------------------------------------//
+//                    ___  ____ ____ _ _ _                       //
+//                    |  \ |__/ |__| | | |                       //
+//                    |__/ |  \ |  | |_|_|                       //
+//                                                               //
+//---------------------------------------------------------------//
+//===============================================================//
+
 void ofApp::draw(){
 
     
@@ -389,9 +366,9 @@ void ofApp::draw(){
         
         ofSetColor(255);
         ofDrawBitmapString("Current Feed FPS: " + ofToString(cameras[viewMode] -> cameraFPS), 15, 45);
-        titleFont.drawString(cameras[viewMode] -> name, rawImagePos.x, rawImagePos.y - 10);
+        titleFont.drawString(cameras[viewMode] -> name, mainContentPos.x, mainContentPos.y - 10);
         
-        cameras[viewMode] -> drawRaw(rawImagePos);
+        cameras[viewMode] -> drawRaw(mainContentPos);
         
         float scale;
         if(bScaleDown){
@@ -400,11 +377,11 @@ void ofApp::draw(){
             scale = 0.5;
         
         }
-        cameras[viewMode] -> drawCV(cvImagePos, scale);
+        cameras[viewMode] -> drawCV(secondaryContentPos, scale);
         
         //draw num blobs under CV image
         ofSetColor(255);
-        ofDrawBitmapString("Num Blobs: " + ofToString(cameras[viewMode] -> contours.size()), cvImagePos.x, cvImagePos.y + feedHeight/2 + 20);
+        ofDrawBitmapString("Num Blobs: " + ofToString(cameras[viewMode] -> contours.size()), secondaryContentPos.x, secondaryContentPos.y + feedHeight/2 + 20);
         
         cameras[viewMode] -> drawGui(15, topMargin);
         
@@ -429,7 +406,18 @@ void ofApp::draw(){
 
         
         ofSetColor(255);
-        titleFont.drawString("Corridor 1 Aggregate", rawImagePos.x, rawImagePos.y - 10);
+        titleFont.drawString("Corridor 1 Aggregate", mainContentPos.x, mainContentPos.y - 10);
+        
+        Lobby1Aggregate.drawRaw(mainContentPos.x, mainContentPos.y);
+        Lobby1Aggregate.drawCV(mainContentPos.x, mainContentPos.y);
+        
+        Lobby1Aggregate.drawGui(15, topMargin);
+        
+        
+        
+        
+        
+        
         
         
     } else if(viewMode == 15){
@@ -437,7 +425,17 @@ void ofApp::draw(){
         //CORRIDOR 1 AGGREGATION
         
         ofSetColor(255);
-        titleFont.drawString("Corridor 6 Aggregate", rawImagePos.x, rawImagePos.y - 10);
+        titleFont.drawString("Corridor 6 Aggregate", mainContentPos.x, mainContentPos.y - 10);
+        
+        Lobby2Aggregate.drawRaw(mainContentPos.x, mainContentPos.y);
+        Lobby2Aggregate.drawCV(mainContentPos.x, mainContentPos.y);
+        
+        Lobby2Aggregate.drawGui(15, topMargin);
+        
+        
+        
+        
+        
         
         
         
@@ -446,7 +444,7 @@ void ofApp::draw(){
         //OSC VIEWER
         
         ofSetColor(255);
-        titleFont.drawString("OSC Info", rawImagePos.x, rawImagePos.y - 10);
+        titleFont.drawString("OSC Info", mainContentPos.x, mainContentPos.y - 10);
         
         oscHandler.drawGui(15, topMargin);
         
@@ -582,7 +580,7 @@ void ofApp::draw(){
         //All cameras
         
         ofSetColor(255);
-        titleFont.drawString("All Cameras", rawImagePos.x, rawImagePos.y - 10);
+        titleFont.drawString("All Cameras", mainContentPos.x, mainContentPos.y - 10);
         
         for(int i = 0; i < numFeeds; i++){
             
@@ -823,23 +821,6 @@ void ofApp::draw(){
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-
-    
-//    if(key == '1'){
-//        viewMode = 0;
-//    } else if(key == '2'){
-//        viewMode = 1;
-//    } else if(key == '3'){
-//        viewMode = 2;
-//    } else if(key == '4'){
-//        viewMode = 3;
-//    } else if(key == '5'){
-//        viewMode = 4;
-//    } else if(key == '6'){
-//        viewMode = 5;
-//    } else if(key == ' '){
-//        viewMode = 6;
-//    }
     
     
     //cycle right

@@ -3,8 +3,8 @@
 	<Max_Blob_Area>50000</Max_Blob_Area>
 	<Persistence>15</Persistence>
 	<Max_Distance>32</Max_Distance>
-	<Draw_threshold>0</Draw_threshold>
-	<Draw_Contours>1</Draw_Contours>
+	<Draw_threshold>1</Draw_threshold>
+	<Draw_Contours>0</Draw_Contours>
 	<Info>0</Info>
 	<Cam1_Pos>0, 0</Cam1_Pos>
 	<Cam2_Pos>305, 0</Cam2_Pos>

@@ -45,6 +45,7 @@ public:
     
     Camera();
     void setup(string _IP, string _corridorName, bool _scaleDown, bool _useLiveFeed);
+    void setupViewControl(int _thisView, int *_viewMode, ofVec2f _adjOrigin);
     
     void setupFeed();
     void closeFeed();
@@ -62,6 +63,12 @@ public:
     string IP;
     ofColor circleCol, circleGrab;
     ofColor backgroundIn, backgroundOut;
+    
+    //pointer to the current view in the ofApp
+    //need to keep track of when we're active
+    //so we only listen to the mouse when needed
+    int *viewMode;
+    int thisView;
     
     
     //-----CV && Image Processing-----
@@ -105,11 +112,17 @@ public:
     
     
     //for remapping a subImage from the feed:
-    bool bEnableQuadMapping;
     
     vector<ofPoint> imageQuad;
     vector<bool> quadPtMouseLock;
+    
+    //This holds the upper left corner
+    //of the content area where the camera/quad
+    //is drawn on screen.
     ofVec2f adjustedQuadOrigin;
+    
+    //This holds the adjusted mouse so clicks
+    //still make sense in the quad's reference frame
     ofVec2f adjustedMouse;
     float mapPtRad;
 

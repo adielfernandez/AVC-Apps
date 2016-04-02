@@ -6,6 +6,7 @@
 #include "ofxCv.h"
 #include "Button.hpp"
 #include "NavPanel.hpp"
+#include "Aggregator.hpp"
 
 #include "PlaybackBar.hpp"
 
@@ -49,6 +50,12 @@ class ofApp : public ofBaseApp{
     const int numScreens = 18;
     
     
+    //Aggregates
+    Aggregator Lobby1Aggregate;
+    Aggregator Lobby2Aggregate;
+    
+    
+    
     //-----UI-----
     int viewMode;
     ofTrueTypeFont titleFont;
@@ -62,7 +69,7 @@ class ofApp : public ofBaseApp{
     NavPanel panel;
     
     //positions for aesthetics
-    ofVec2f rawImagePos, cvImagePos;
+    ofVec2f mainContentPos, secondaryContentPos;
     
     //positions for all cameras view
     vector<ofVec2f> allCamsPos;
