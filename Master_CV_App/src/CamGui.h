@@ -18,7 +18,8 @@ public:
     // Methods
     void setup(string name, bool solo);
     void draw(int x, int y);
-    void load();
+    void loadSettings();
+    void saveSettings();
     
     string guiName;
     

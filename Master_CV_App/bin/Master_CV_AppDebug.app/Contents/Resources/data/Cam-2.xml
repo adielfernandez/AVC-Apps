@@ -8,7 +8,7 @@
 	<Point_1>640, 0</Point_1>
 	<Point_2>640, 512</Point_2>
 	<Point_3>0, 512</Point_3>
-	<Crop_Start__norm_>0.103125, 0.0703125</Crop_Start__norm_>
-	<Crop_End__norm_>0.271875, 0.246094</Crop_End__norm_>
+	<Crop_Start__norm_>0, 0</Crop_Start__norm_>
+	<Crop_End__norm_>1, 1</Crop_End__norm_>
 <Cam-2/>
 </Cam-2>

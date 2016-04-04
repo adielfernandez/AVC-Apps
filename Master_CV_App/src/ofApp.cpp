@@ -60,6 +60,16 @@ void ofApp::setup(){
     //if we're using image scaling for faster processing
     bScaleDown = true;
     
+    if(bScaleDown){
+        scaledWidth = feedWidth/2;
+        scaledHeight = feedHeight/2;
+    } else {
+        scaledWidth = feedWidth;
+        scaledHeight = feedHeight;
+    }
+    
+    
+    
     //address IPs
     vector<string> addresses;
     addresses.resize(14);
@@ -395,7 +405,8 @@ void ofApp::draw(){
     } else if(viewMode == 14){
         
         //CORRIDOR 1 AGGREGATION
-
+        ofBackgroundGradient(80, 0);
+        
         currentViewTitle = "Lobby 1 Aggregate";
         
         Lobby1Aggregate.drawRaw(mainContentPos.x, mainContentPos.y);
@@ -413,7 +424,7 @@ void ofApp::draw(){
     } else if(viewMode == 15){
         
         //CORRIDOR 1 AGGREGATION
-        
+        ofBackgroundGradient(80, 0);
 
         currentViewTitle = "Lobby 2 Aggregate";
         
@@ -605,22 +616,43 @@ void ofApp::draw(){
             //==============================
             
             
-//            ofxOscBundle bundle;
-//            
-//            int numCorridors = 6;
-//            
-//            for(int i = 0; i < numCorridors; i++){
-//                
-//                ofxOscMessage m;
-//                m.setAddress("/Corridor " + ofToString(i + 1));
-//                m.addFloatArg(blobs.size());
-//                m.addFloatArg(avgSpeed);
-//                
-//                bundle.addMessage(m);
-//                
-//            }
-//            
-//            sender.sendBundle(bundle);
+            if(oscHandler.sendAudioOsc){
+                
+                ofxOscBundle audioBundle;
+                
+                int numCorridors = 6;
+                
+                for(int i = 0; i < numCorridors; i++){
+                    
+                    ofxOscMessage m;
+                    m.setAddress("/Corridor " + ofToString(i + 1));
+                    
+                    //Lobby 1
+                    if(i == 0){
+                        
+                        m.addFloatArg(Lobby1Aggregate.contours.size());
+                        m.addFloatArg(Lobby1Aggregate.avgSpeed);
+                        
+                    } else if(i >= 1 && i <= 4){
+                        
+                        //corridors 2, 3, 4, 5 are:
+                        //cameras 6, 7, 8, 9 (zero-indexed)
+                        m.addFloatArg(cameras[i + 5] -> contours.size());
+                        m.addFloatArg(cameras[i + 5] -> avgSpeed);
+                        
+                    } else {
+                        m.addFloatArg(Lobby2Aggregate.contours.size());
+                        m.addFloatArg(Lobby2Aggregate.avgSpeed);
+                    }
+                    
+                    audioBundle.addMessage(m);
+                    
+                }
+                
+                oscHandler.audioSender.sendBundle(audioBundle);
+
+            }
+            
             
             
             //=====================
@@ -633,142 +665,62 @@ void ofApp::draw(){
             
             
             //ONE Total system bundle
-//            ofxOscBundle allSystemData;
-//            //ONE message for system-wide data
-//            ofxOscMessage systemMessage;
-//            //SIX bundles, one for each corridor
-//            vector<ofxOscBundle> corridorBundles;
-//            //SIX messages, one for each corridor
-//            vector<ofxOscMessage> corridorMessages;
-//
-//            //SIX bundles for each vector of blobs
-//            vector<ofxOscBundle> blobBundles;
-//
-//
-//
-//            //averaged data
-//            int totalNumBlobs = 0;
-//
-//
-//            //pretend we have more corridors to send more "complete" data mock up
-//            int numCorridors = 6;
-//
-//            //go through all corridors
-//            for(int i = 0; i < numCorridors; i++){
-//
-//                //get data for this corridor
-//                string corridorAddress = "/corridor_" + ofToString(i + 1) + "_stats";
-//
-//
-//                //reset stats to get averages
-//                int numBlobs;
-//                float avgSpeed;
-//                ofVec2f avgPos;
-//                ofVec2f avgDir;
-//                ofVec2f avgVel;
-//
-//                numBlobs = blobs.size();
-//                avgSpeed = 0;
-//                avgPos.set(0);
-//                avgVel.set(0);
-//                avgDir.set(0);
-//
-//                totalNumBlobs += numBlobs;
-//
-//                //go through all blobs within corridor
-//                //corridor Index will change when more cameras are actually used
-//
-//                ofxOscBundle thisBlobBundle;
-//                blobBundles.push_back(thisBlobBundle);
-//
-//                vector<ofxOscMessage> thisCorridorBlobs;
-//
-//                for(int j = 0; j < blobs.size(); j++){
-//
-//                    int blobID = blobs[j].ID;
-//                    ofPoint center = blobs[j].pos;
-//                    ofVec2f velocity = blobs[j].vel;
-//
-//
-//                    //assemble the message for this blob
-//                    ofxOscMessage thisBlob;
-//                    thisBlob.setAddress("/corridor_" + ofToString(i + 1) + "/blob_data");
-//                    thisBlob.addIntArg(blobID + 10000 * i);
-//                    thisBlob.addFloatArg(center.x/corridorDim.x);   //divide by cam dimensions
-//                    thisBlob.addFloatArg(center.y/corridorDim.y);  //to normalize
-//                    thisBlob.addFloatArg(velocity.x);
-//                    thisBlob.addFloatArg(velocity.y);
-//
-//                    //add it to the right blob bundle
-//                    blobBundles[i].addMessage(thisBlob);
-//
-//
-//
-//                    //add to the averages
-//                    avgSpeed += velocity.length();
-//                    avgVel += velocity;
-//                    avgPos += center;
-//                }
-//
-//
-//
-//
-//                //average out all the data for this corridor
-//                avgSpeed = avgSpeed/float(numBlobs);
-//                avgVel = avgVel/float(numBlobs);
-//                avgDir = avgVel.getNormalized();
-//                avgPos = avgPos/float(numBlobs);
-//
-//
-//                ofxOscMessage thisCorridorData;
-//                thisCorridorData.setAddress(corridorAddress);
-//                thisCorridorData.addIntArg(numBlobs);
-//                thisCorridorData.addFloatArg(avgPos.x);
-//                thisCorridorData.addFloatArg(avgPos.y);
-//                thisCorridorData.addFloatArg(avgDir.x);
-//                thisCorridorData.addFloatArg(avgDir.y);
-//                thisCorridorData.addFloatArg(avgSpeed);
-//
-//                //store this corridor's stats
-//                corridorMessages.push_back(thisCorridorData);
-//
-//                //add a wrapper for this bundle
-//                ofxOscBundle thisCorridorBundle;
-//                corridorBundles.push_back(thisCorridorBundle);
-//
-//
-//
-//
-//            }
-//
-//
-//            //start assembling messages and bundles
-//            systemMessage.setAddress("/system_stats");
-//            systemMessage.addIntArg(totalNumBlobs);
-//
-//            // all system data message
-//            allSystemData.addMessage(systemMessage);
-//
-//            //now corridor data
-//            //loop through 6 corridors and assemble
-//            //all the data into bundles
-//            for(int i = 0; i < numCorridors; i++){
-//
-//                //corridor wrapper gets a corridor message...
-//                corridorBundles[i].addMessage(corridorMessages[i]);
-//
-//                //and a blob bundle (this was pre-populated with messages
-//                //above when we went through the
-//                corridorBundles[i].addBundle(blobBundles[i]);
-//
-//                allSystemData.addBundle(corridorBundles[i]);
-//            }
-//
-//
-//
-//            //Now send it all at once
-//            sender.sendBundle(allSystemData);
+            ofxOscBundle allSystemData;
+            //ONE message for system-wide data
+            ofxOscMessage systemMessage;
+            //SIX bundles, one for each corridor
+            vector<ofxOscBundle> corridorBundles;
+            //SIX messages, one for each corridor
+            vector<ofxOscMessage> corridorMessages;
+
+            //SIX bundles for each vector of blobs
+            vector<ofxOscBundle> blobBundles;
+
+
+
+            //averaged data
+            int totalNumBlobs;
             
+            totalNumBlobs += Lobby1Aggregate.contours.size();
+            totalNumBlobs += cameras[6] -> contours.size();
+            totalNumBlobs += cameras[7] -> contours.size();
+            totalNumBlobs += cameras[8] -> contours.size();
+            totalNumBlobs += cameras[9] -> contours.size();
+            totalNumBlobs += Lobby2Aggregate.contours.size();
+            
+//            cout << "\n\nNumber of blobs per corridor\n\n" << endl;
+//            cout << Lobby1Aggregate.contours.size() << endl;
+//            cout << cameras[6] -> contours.size() << endl;
+//            cout << cameras[7] -> contours.size() << endl;
+//            cout << cameras[8] -> contours.size() << endl;
+//            cout << cameras[9] -> contours.size() << endl;
+//            cout << Lobby2Aggregate.contours.size() << endl;
+//            cout << "totalNumBlobs: " << totalNumBlobs << endl;
+            
+            
+            allSystemData.clear();
+            systemMessage.clear();
+            
+            //start assembling messages and bundles
+            systemMessage.setAddress("/system_stats");
+            systemMessage.addIntArg(totalNumBlobs);
+            
+            // all system data message
+            allSystemData.addMessage(systemMessage);
+            
+            
+            //now go through all the corridors and add the
+            //corridor bundles to the system bundle
+            if(oscHandler.sendCorridor1) allSystemData.addBundle(Lobby1Aggregate.corridorBundle);
+            if(oscHandler.sendCorridor2) allSystemData.addBundle(cameras[6] -> corridorBundle);
+            if(oscHandler.sendCorridor3) allSystemData.addBundle(cameras[7] -> corridorBundle);
+            if(oscHandler.sendCorridor4) allSystemData.addBundle(cameras[8] -> corridorBundle);
+            if(oscHandler.sendCorridor5) allSystemData.addBundle(cameras[9] -> corridorBundle);
+            if(oscHandler.sendCorridor6) allSystemData.addBundle(Lobby2Aggregate.corridorBundle);
+
+            
+            //Now send it all at once
+            oscHandler.pgsSender.sendBundle(allSystemData);
             
             
             lastSendTime = ofGetElapsedTimeMillis();
@@ -836,13 +788,15 @@ void ofApp::keyPressed(int key){
     if(key == 's'){
         
         for(int i = 0; i < cameras.size(); i++){
-            cameras[i] -> cameraGui.gui.saveToFile(cameras[i] -> name + ".xml");
+            cameras[i] -> cameraGui.saveSettings();
         }
         
         oscHandler.saveSettings();
+        Lobby1Aggregate.saveSettings();
+        Lobby2Aggregate.saveSettings();
         
         
-        cout << "Cameras and OSC settings saved" << endl;
+        cout << "Cameras, Aggregates and OSC settings saved" << endl;
     }
     
     

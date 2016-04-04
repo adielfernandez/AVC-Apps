@@ -147,9 +147,14 @@ void ThreadedCV::threadedFunction(){
             contours.findContours(threshPix);
             
             
-            threshPixOut.send(std::move(threshPix));
-            contoursOut.send(std::move(contours));
+//            if(soloCam){
+                threshPixOut.send(std::move(threshPix));
+//            } else {
+//                threshPixOut.send(std::move(threadPixels));
+//            }
             
+            
+            contoursOut.send(std::move(contours));
             
         }
         

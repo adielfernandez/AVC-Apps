@@ -312,6 +312,7 @@ void NavPanel::draw(){
     
     int lineGap = 15;
     ofSetLineWidth(2);
+    ofFill();
     
     for(int i = 0; i < subPanels.size(); i++){
         subPanels[i].draw();

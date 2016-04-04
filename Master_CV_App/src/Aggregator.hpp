@@ -17,6 +17,7 @@
 #include "ofMain.h"
 #include "ofxCv.h"
 #include "Camera.h"
+#include "ofxOsc.h"
 
 #pragma once
 
@@ -59,6 +60,9 @@ public:
     //master ofPixels object for aggregate
     ofPixels masterPix;
     ofPixels blurredMaster;
+    ofPixels threshMaster;
+    
+    ofxCv::ContourFinder contours;
     
     
     ofImage masterImg;
@@ -87,7 +91,16 @@ public:
     ofColor handleCol, grabbedCol;
     
     
+    //Blob Stats
+    ofVec2f avgDir;
+    ofVec2f avgPos;
+    ofVec2f avgVel;
+    float avgSpeed;
     
+    //osc bundles to prepare
+    ofxOscMessage corridorStats;
+    ofxOscBundle corridorBundle;
+    ofxOscBundle blobsBundle;
     
     //Gui
     void drawGui(int x, int y);
@@ -98,7 +111,10 @@ public:
     
     ofxPanel gui;
     
+    ofxIntSlider thresholdSlider;
     ofxIntSlider blurAmountSlider;
+    ofxIntSlider numErosionsSlider;
+    ofxIntSlider numDilationsSlider;
     ofxIntSlider minBlobAreaSlider;
     ofxIntSlider maxBlobAreaSlider;
     ofxIntSlider persistenceSlider;

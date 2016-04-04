@@ -62,6 +62,7 @@ class ofApp : public ofBaseApp{
     ofTrueTypeFont smallerFont;
     
     int feedWidth, feedHeight;
+    int scaledWidth, scaledHeight;
     int leftMargin;
     int topMargin;
     int centerMargin;

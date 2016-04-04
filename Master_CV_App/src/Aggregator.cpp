@@ -8,6 +8,7 @@
 
 #include "Aggregator.hpp"
 
+using namespace ofxCv;
 
 Aggregator::Aggregator(){
     
@@ -94,8 +95,8 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
     }
     
     
-    handleCol.set(255);
-    grabbedCol.set(0, 255, 0);
+    handleCol.set(0, 255, 0);
+    grabbedCol.set(0, 150, 255);
     
     
     
@@ -105,8 +106,11 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
     //param 1 = gui title, param 2 = filename, then 3&4 = startposition
     gui.setup(guiName, guiName + ".xml", 0, 0);
     
-    gui.add(blurAmountSlider.setup("Blur", 1, 0, 30));
-    gui.add(minBlobAreaSlider.setup("Min Blob Area", 0, 0, 1000));
+    gui.add(thresholdSlider.setup("Threshold", 0, 0, 255));
+    gui.add(blurAmountSlider.setup("Blur", 1, 0, 50));
+    gui.add(numErosionsSlider.setup("Number of erosions", 0, 0, 10));
+    gui.add(numDilationsSlider.setup("Number of dilations", 0, 0, 10));
+    gui.add(minBlobAreaSlider.setup("Min Blob Area", 0, 0, 500));
     gui.add(maxBlobAreaSlider.setup("Max Blob Area", 50000, 0, 100000));
     gui.add(persistenceSlider.setup("Persistence", 15, 0, 100));
     gui.add(maxDistanceSlider.setup("Max Distance", 32, 0, 100));
@@ -217,9 +221,46 @@ void Aggregator::update(){
         
     }
     
+    
     //now take the masterPix object and do some CV on it
     
+    //blur it
+    GaussianBlur(masterPix, blurredMaster, blurAmountSlider);
     
+    //threshold it
+    threshold(blurredMaster, threshMaster, thresholdSlider);
+    
+    //ERODE it
+    for(int e = 0; e < numErosionsSlider; e++){
+        erode(threshMaster);
+    }
+    
+    //DILATE it
+    for(int d = 0; d < numDilationsSlider; d++){
+        dilate(threshMaster);
+    }
+    
+    
+    
+    
+    
+    //-----Done with image altering-----
+    //------Now do contour finding------
+    
+    
+    //Define contour finder
+    contours.setMinArea(minBlobAreaSlider);
+    contours.setMaxArea(maxBlobAreaSlider);
+    contours.setThreshold(254);  //only detect white
+    
+    // wait for half a frame before forgetting something
+    contours.getTracker().setPersistence(persistenceSlider);
+    
+    // an object can move up to ___ pixels per frame
+    contours.getTracker().setMaximumDistance(maxDistanceSlider);
+    
+    //find dem blobs
+    contours.findContours(threshMaster);
     
 
     
@@ -237,6 +278,81 @@ void Aggregator::update(){
         ofUnregisterMouseEvents(this);
     }
     
+    
+    
+    
+    //get together all the average blob data for this corridor
+    avgDir.set(0);
+    avgVel.set(0);
+    avgPos.set(0);
+    avgSpeed = 0;
+    
+    corridorBundle.clear();
+    corridorStats.clear();
+    blobsBundle.clear();
+    
+    
+    //which Corridor is it
+    int oneOrSix;
+    
+    if(numCams == 6){
+        oneOrSix = 1;
+    } else {
+        oneOrSix = 6;
+    }
+    
+    
+    
+    //go through the blobs and start collecting data
+    for(int i = 0; i < contours.size(); i++){
+        
+        //get data from contour
+        int label = contours.getLabel(i);
+        ofPoint center = toOf(contours.getCenter(i));
+        ofPoint centerNormalized = center/ofVec2f(scaledWidth, scaledHeight);
+        ofVec2f velocity = toOf(contours.getVelocity(i));
+        
+        //add it to our averages
+        avgVel += velocity;
+        avgSpeed += velocity.length();
+        avgPos += centerNormalized;
+        
+        //prepare a message for this blob then
+        //push it into the blobMessages vector
+        ofxOscMessage m;
+        
+        m.setAddress("/corridor_" + ofToString(oneOrSix) + "/blob_data");
+        m.addIntArg(label);
+        m.addFloatArg(centerNormalized.x);
+        m.addFloatArg(centerNormalized.y);
+        m.addFloatArg(velocity.x);
+        m.addFloatArg(velocity.x);
+        
+        blobsBundle.addMessage(m);
+        
+    }
+    
+    //average out all the data for this corridor
+    avgSpeed = avgSpeed/float(contours.size());
+    avgVel = avgVel/float(contours.size());
+    avgDir = avgVel.getNormalized();
+    avgPos = avgPos/float(contours.size());
+    
+
+    
+    //prepare the corridor stats message
+    corridorStats.setAddress("/corridor_" + ofToString(oneOrSix) + "_stats");
+    corridorStats.addIntArg(contours.size());
+    corridorStats.addFloatArg(avgPos.x);
+    corridorStats.addFloatArg(avgPos.y);
+    corridorStats.addFloatArg(avgDir.x);
+    corridorStats.addFloatArg(avgDir.y);
+    corridorStats.addFloatArg(avgSpeed);
+    
+    //now assemble the corridor bundle from the stats message and all the blobs
+    corridorBundle.addMessage(corridorStats);
+    corridorBundle.addBundle(blobsBundle);
+    
 
 }
 
@@ -247,7 +363,7 @@ void Aggregator::drawRaw(int x, int y){
     
     for(int i = 0; i < numCams; i++){
         
-        ofSetColor(255, 200);
+        ofSetColor(255, 120);
         cams[indices[i]] -> drawCroppedTex(positions[i]);
         
         ofSetColor(255);
@@ -283,9 +399,41 @@ void Aggregator::drawCV(int x, int y){
     }
     
     
+    if(drawContoursToggle){
+        
+        ofSetColor(255, 0, 0);
+        ofPushMatrix();
+        ofSetLineWidth(1);
+        
+        contours.draw();
+        
+        for(int i = 0; i < contours.size(); i++) {
+            ofPoint center = toOf(contours.getCenter(i));
+            ofPushMatrix();
+            ofTranslate(center.x, center.y);
+            int label = contours.getLabel(i);
+            ofVec2f velocity = toOf(contours.getVelocity(i));
+            
+            string msg = ofToString(label);
+            
+            if(showInfoToggle){
+               
+//                msg = ofToString(label) + " : " + ofToString(center.x) + "," + ofToString(center.y) + " : " + ofToString(velocity.x) + "," + ofToString(velocity.y);
+
+                ofSetColor(0, 100, 255);
+                ofDrawBitmapString(msg, 0, 0);
+            }
+            
+        }
+        ofPopMatrix();
+        
+    }
+    
+    
+    
     ofNoFill();
     
-    ofSetLineWidth(0.5);
+    
     
     //draw mouse handles
     for(int i = 0; i < positions.size(); i++){
@@ -294,8 +442,10 @@ void Aggregator::drawCV(int x, int y){
         
         if(posMouseLock[i]){
             c = grabbedCol;
+            ofSetLineWidth(2);
         } else {
             c = handleCol;
+            ofSetLineWidth(0.5);
         }
         
         ofSetColor(c);
@@ -330,7 +480,11 @@ void Aggregator::loadSettings(){
     
 }
 
-
+void Aggregator::saveSettings(){
+    
+    gui.loadFromFile(guiName + ".xml");
+    
+}
 
 void Aggregator::mousePressed(ofMouseEventArgs &args){
     

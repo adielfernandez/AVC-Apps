@@ -182,8 +182,16 @@ public:
     ofxCv::ContourFinder contours;
 
     
-
+    //Blob Stats
+    ofVec2f avgDir;
+    ofVec2f avgPos;
+    ofVec2f avgVel;
+    float avgSpeed;
     
+    //osc bundles to prepare
+    ofxOscMessage corridorStats;
+    ofxOscBundle corridorBundle;
+    ofxOscBundle blobsBundle;
     
     
     //-----Gui-----

@@ -11,4 +11,8 @@
 	<Cam3_Pos>640, 0</Cam3_Pos>
 	<Cam4_Pos>0, 256</Cam4_Pos>
 <Lobby2Aggregate/>
+<Threshold>0</Threshold>
+	<Blur>1</Blur>
+	<Number_of_erosions>0</Number_of_erosions>
+	<Number_of_dilations>0</Number_of_dilations>
 </Lobby2Aggregate>

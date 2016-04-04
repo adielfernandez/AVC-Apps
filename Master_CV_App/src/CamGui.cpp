@@ -42,9 +42,15 @@ void CamGui::setup(string name, bool solo){
     }
 }
 
-void CamGui::load(){
+void CamGui::loadSettings(){
     
     gui.loadFromFile(guiName + ".xml");
+    
+}
+
+void CamGui::saveSettings(){
+    
+    gui.saveToFile(guiName + ".xml");
     
 }
 
