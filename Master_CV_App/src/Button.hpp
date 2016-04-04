@@ -28,8 +28,7 @@ public:
     
     Button();
     
-    void setup(string _name, int _dest, ofVec2f _pos);
-    void setFont(ofTrueTypeFont *_font);
+    void setup(string _name, int _dest, ofVec2f _pos, ofTrueTypeFont *_font);
     void update();
     void draw();
     
@@ -38,9 +37,9 @@ public:
     int clickDest;
     int viewMode;
     int width, height;
-    int strW, strH;
     
     ofVec2f pos;
+    ofVec2f textPos;
     
     ofTrueTypeFont *font;
     

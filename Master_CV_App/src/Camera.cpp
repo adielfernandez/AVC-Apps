@@ -15,15 +15,63 @@ Camera::Camera(){
         
 }
 
+void Camera::setFont(ofTrueTypeFont *_font){
+    
+    font = _font;
+    
+}
+
+
 void Camera::setupViewControl(int _thisView, int *_viewMode, ofVec2f _adjOrigin){
     
     thisView = _thisView;
     viewMode = _viewMode;
-    adjustedQuadOrigin = _adjOrigin;
+    adjustedOrigin = _adjOrigin;
     
 }
 
+void Camera::setupFeed(){
+    
+    gst.setPipeline("rtspsrc location=rtsp://admin:admin@" + IP + ":554/cam/realmonitor?channel=1&subtype=1 latency=0 ! rtpjpegdepay ! jpegdec !  queue ! decodebin ! videoconvert", OF_PIXELS_MONO, true, feedWidth, feedHeight);
+    
+    gst.startPipeline();
+    gst.play();
+    
+}
+
+void Camera::setMovieFile(string file){
+    
+    fileName = file;
+    
+}
+
+
+void Camera::closeFeed(){
+    
+    gst.close();
+}
+
 void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed){
+    
+    
+    
+    //-----Corridor UI-----
+    name = _name;
+    IP = _IP;
+    
+    
+    //which camera setting we're tweaking
+    manipulationMode = 0;
+    
+    quadMapCol.set(255, 0, 255);
+    croppingCol.set(0, 255, 255);
+    circleCol.set(quadMapCol);
+    circleGrab.set(255, 0, 0);
+    
+    
+    //size of quad handles
+    mapPtRad = 10;
+    titleSpace = 20;
     
     //-----Camera Stream-----
     feedWidth = 640;
@@ -44,16 +92,9 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     
     
     
-    //video or feed?
-    if(useLiveFeed){
-    
-        //Dont start feed yet, we'll start them later
-        //but staggered
-        
-//        setupFeed();
-
-        
-    } else {
+    //load video data if we're not using the live feed
+    //the feed will be started later
+    if(!useLiveFeed){
         
         movie.load(fileName);
         movie.setLoopState(OF_LOOP_NORMAL);
@@ -63,16 +104,7 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     }
     
     
-    
-    //-----Corridor UI-----
-    name = _name;
-    IP = _IP;
-    
-    circleCol.set(255, 0, 255);
-    circleGrab.set(0, 255, 0);
-    
-    //size of quad handles
-    mapPtRad = 10;
+
     
     
     
@@ -103,28 +135,36 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     quadMappedMesh.setMode(OF_PRIMITIVE_TRIANGLE_FAN);
 
     
+    
+    //Cropping setup
+    cropStart.set(0, 0);
+    cropEnd.set(scaledWidth, scaledHeight);
+    
+    //bools that control if the points are attached to the mouse
+    cropStartLock = false;
+    cropEndLock = false;
+    
+    
     //allocate all the stuff we'll be using
     //Textures
     rawTex.allocate(feedWidth, feedHeight, GL_LUMINANCE);
     quadTex.allocate(scaledWidth, scaledHeight, GL_LUMINANCE);
-    threshTex.allocate(scaledWidth, scaledHeight, GL_LUMINANCE);
     
-    blurredPix.allocate(scaledWidth, scaledHeight, 1);
-    grayPix.allocate(scaledWidth, scaledHeight, 1);
-    threshPix.allocate(scaledWidth, scaledHeight, 1);
-    thresholdImg.allocate(scaledWidth, scaledHeight, OF_IMAGE_GRAYSCALE);
+    
+    threadOutput.allocate(scaledWidth, scaledHeight, 1);
+    threadOutputImg.allocate(scaledWidth, scaledHeight, OF_IMAGE_GRAYSCALE);
     
     //FBO
     fbo.allocate(scaledWidth, scaledHeight);
-    //(also clear it out)
     fbo.begin();
     ofClear(255, 255, 255, 0);
     fbo.end();
     
     fboPix.allocate(scaledWidth, scaledHeight, 1);
     
+    
     //-----Gui-----
-    cameraGui.setup(name);
+    cameraGui.setup(name, soloCam);
     cameraGui.load();
     
     
@@ -135,31 +175,12 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     
     
     //start the image processing thread
-    imageProcessor.setup(&threshPix, &contours);
+    imageProcessor.setup(&threadOutput, &contours, soloCam);
     
 }
 
 
-void Camera::setupFeed(){
-    
-    gst.setPipeline("rtspsrc location=rtsp://admin:admin@" + IP + ":554/cam/realmonitor?channel=1&subtype=1 latency=0 ! rtpjpegdepay ! jpegdec !  queue ! decodebin ! videoconvert", OF_PIXELS_MONO, true, feedWidth, feedHeight);
-    
-    gst.startPipeline();
-    gst.play();
-    
-}
 
-void Camera::setMovieFile(string file){
-    
-    fileName = file;
-    
-}
-
-
-void Camera::closeFeed(){
-    
-    gst.close();
-}
 
 
 
@@ -171,30 +192,71 @@ void Camera::update(){
     imageQuad[2].set(cameraGui.quadPt2 -> x, cameraGui.quadPt2 -> y);
     imageQuad[3].set(cameraGui.quadPt3 -> x, cameraGui.quadPt3 -> y);
     
+
+    //update the crop points with changes from the GUI
+    //but gui vals are normalized so scale them back up
+    cropStart.set(scaledWidth * cameraGui.cropStart -> x, scaledHeight * cameraGui.cropStart -> y);
+    cropEnd.set(scaledWidth * cameraGui.cropEnd -> x, scaledHeight * cameraGui.cropEnd -> y);
+
     
     //handle mouse interaction with map pts
-    adjustedMouse.set(ofGetMouseX() - adjustedQuadOrigin.x, ofGetMouseY() - adjustedQuadOrigin.y);
+    adjustedMouse.set(ofGetMouseX() - adjustedOrigin.x, ofGetMouseY() - adjustedOrigin.y - titleSpace);
     
-    for(int i = 0; i < quadPtMouseLock.size(); i++){
+    //Image manipulation:
+    //0 = quad mapping
+    //1 = cropping
+    if(manipulationMode == 0){
+    
+        circleCol = quadMapCol;
         
-        if(quadPtMouseLock[i]){
-            imageQuad[i].x = ofClamp(adjustedMouse.x, 0, feedWidth);
-            imageQuad[i].y = ofClamp(adjustedMouse.y, 0, feedHeight);
+        
+        for(int i = 0; i < quadPtMouseLock.size(); i++){
             
-            //Update the gui so the values are stored when we save
-            if(i == 0){
-                cameraGui.quadPt0 = imageQuad[i];
-            } else if(i == 1){
-                cameraGui.quadPt1 = imageQuad[i];
-            } else if(i == 2){
-                cameraGui.quadPt2 = imageQuad[i];
-            } else {
-                cameraGui.quadPt3 = imageQuad[i];
+            if(quadPtMouseLock[i]){
+                imageQuad[i].x = ofClamp(adjustedMouse.x, 0, feedWidth);
+                imageQuad[i].y = ofClamp(adjustedMouse.y, 0, feedHeight);
+                
+                //Update the gui so the values are stored when we save
+                if(i == 0){
+                    cameraGui.quadPt0 = imageQuad[i];
+                } else if(i == 1){
+                    cameraGui.quadPt1 = imageQuad[i];
+                } else if(i == 2){
+                    cameraGui.quadPt2 = imageQuad[i];
+                } else {
+                    cameraGui.quadPt3 = imageQuad[i];
+                }
+                
             }
             
         }
+
+    } else {
+    
+        circleCol = quadMapCol;
+        
+        //go through the two cropping points
+        //upper left and lower right
+        if(cropStartLock){
+            cropStart.x = ofClamp(adjustedMouse.x, 0, scaledWidth);
+            cropStart.y = ofClamp(adjustedMouse.y, 0, scaledHeight);
+            
+            //save a normalized version to the gui
+            cameraGui.cropStart = cropStart/ofVec2f(scaledWidth, scaledHeight);
+            
+        }
+        
+        if(cropEndLock){
+            cropEnd.x = ofClamp(adjustedMouse.x, 0, scaledWidth);
+            cropEnd.y = ofClamp(adjustedMouse.y, 0, scaledHeight);
+            
+            //save a normalized version to the gui
+            cameraGui.cropEnd = cropEnd/ofVec2f(scaledWidth, scaledHeight);
+        }
+        
         
     }
+    
     
     
     
@@ -229,10 +291,6 @@ void Camera::update(){
         
         cameraFPS = (int)(1/(ofGetElapsedTimef() - lastFrameTime));
         lastFrameTime = ofGetElapsedTimef();
-        
-        
-        
-        
         
         
         //get texture from feed
@@ -271,7 +329,7 @@ void Camera::update(){
         
         //construct a vector of ints with all the settings
         vector<int> settings;
-        settings.resize(8);
+        settings.resize(12);
         
         settings[0] = cameraGui.thresholdSlider;
         settings[1] = cameraGui.blurAmountSlider;
@@ -281,6 +339,10 @@ void Camera::update(){
         settings[5] = cameraGui.maxBlobAreaSlider;
         settings[6] = cameraGui.persistenceSlider;
         settings[7] = cameraGui.maxDistanceSlider;
+        settings[8] = (int)(cameraGui.cropStart -> x * scaledWidth);
+        settings[9] = (int)(cameraGui.cropStart -> y * scaledHeight);
+        settings[10] = (int)(cameraGui.cropEnd -> x * scaledWidth);
+        settings[11] = (int)(cameraGui.cropEnd -> y * scaledHeight);
 
         
         //pass the fbo pixels to the processing thread
@@ -290,7 +352,7 @@ void Camera::update(){
     
     
     //Update the image processing thread
-    //this will automatically fill threshPix and contours
+    //this will automatically fill threadOutput (and contours if soloCam = true)
     //with new data as it works
     imageProcessor.update();
     
@@ -318,19 +380,104 @@ void Camera::drawGui(int x, int y){
 }
 
 
-void Camera::drawRaw(ofVec2f pos){
+void Camera::drawMain(){
+    
+    
+    ofSetColor(255);
+    ofDrawBitmapString( ofToString(name) + " Feed FPS: " + ofToString(cameraFPS), 15, 60);
+    
+
+    
+    ofVec2f secondSpot;
+    
+    if(manipulationMode == 0){
+        
+        string title = "Raw Feed (640x512) -> Quad Mapping";
+        ofDrawBitmapString(title, adjustedOrigin.x, adjustedOrigin.y + 10);
+        
+        drawRaw(adjustedOrigin.x, adjustedOrigin.y + titleSpace);
+        
+        
+        secondSpot.set(adjustedOrigin.x + feedWidth + 20, adjustedOrigin.y);
+        
+
+        
+    } else {
+        
+        //this part wont happen even if manipulationMode is 1, unless soloCam is false
+        //since there's no way to set the mode with the buttons gone
+        
+        string title = "Mapped & scaled to: " + ofToString(scaledWidth) + "x" + ofToString(scaledHeight) + ")";
+        ofSetColor(255);
+        ofDrawBitmapString(title, adjustedOrigin.x, adjustedOrigin.y + 10);
+        drawQuad(adjustedOrigin.x, adjustedOrigin.y + titleSpace, 1.0f);
+        
+        secondSpot.set(adjustedOrigin.x + scaledWidth + 20, adjustedOrigin.y);
+        
+   
+    }
+    
+    int w = cropEnd.x - cropStart.x;
+    int h = cropEnd.y - cropStart.y;
+    
+    string title;
+    if(soloCam){
+        title = "Threshold + Contours (Scaled to: " + ofToString(w) + "x" + ofToString(h) + ")";
+    } else {
+        title = "Threshold + Contours (Cropped to: " + ofToString(w) + "x" + ofToString(h) + ")";
+    }
+    ofSetColor(255);
+    ofDrawBitmapString(title, secondSpot.x, secondSpot.y + 10);
+    
+    
+    //shrink down images just for display purposes
+    float scale;
+    if(bScaleDown){
+        scale = 1.0;
+    } else {
+        scale = 0.5;
+    }
+    
+    drawCV(secondSpot.x, secondSpot.y + titleSpace, scale);
+    
+    if(soloCam){
+        //draw num blobs under CV image
+        ofSetColor(255);
+        ofDrawBitmapString("Num Blobs: " + ofToString(contours.size()), secondSpot.x, secondSpot.y + scaledHeight + titleSpace + 20);
+    }
+    
+    drawGui(15, adjustedOrigin.y);
+    
+    
+    
+
+    
+    
+    
+    
+}
+
+
+
+
+void Camera::drawRaw(int x, int y){
     
     //WARNING: certain things can be drawn with matrix translations
     // but others need to be drawn raw since they depend on mouse interaction
     
     
     ofPushMatrix();
-    ofTranslate(pos);
     
     
     ofSetColor(255);
+    ofTranslate(x, y);
+
+    
+    //raw camera feed
+    ofSetColor(255);
     rawTex.draw(0, 0);
     
+    //border
     ofNoFill();
     ofSetLineWidth(2);
     ofDrawRectangle(0, 0, feedWidth, feedHeight);
@@ -341,7 +488,7 @@ void Camera::drawRaw(ofVec2f pos){
     
     ofSetLineWidth(1);
     
-    ofSetColor(circleCol);
+    ofSetColor(quadMapCol);
     quadMap.draw();
     
     //draw mapping points
@@ -353,7 +500,7 @@ void Camera::drawRaw(ofVec2f pos){
         if(quadPtMouseLock[i]){
             c = circleGrab;
         } else {
-            c = circleCol;
+            c = quadMapCol;
         }
         
         ofNoFill();
@@ -364,6 +511,8 @@ void Camera::drawRaw(ofVec2f pos){
         
     }
     
+    
+    
     ofPopStyle();
 
     
@@ -372,29 +521,122 @@ void Camera::drawRaw(ofVec2f pos){
     
 }
 
-void Camera::drawCV(ofVec2f pos, float scale){
+void Camera::drawQuad(int x, int y, float scale){
+    
+    //WARNING: certain things can be drawn with matrix translations
+    // but others need to be drawn raw since they depend on mouse interaction
+    
     
     ofPushMatrix();
     
-    ofTranslate(pos);
-    ofScale(scale, scale);
+    ofTranslate(x, y);
 
     
+    //raw camera feed
     ofSetColor(255);
     quadTex.draw(0, 0);
     
+    //border
+    ofNoFill();
+    ofSetLineWidth(2);
+    ofDrawRectangle(0, 0, scaledWidth, scaledHeight);
+    
+    //draw lines between points
+    ofPolyline cropSquare;
+    cropSquare.addVertex(cropStart);
+    cropSquare.addVertex(cropEnd.x, cropStart.y);
+    cropSquare.addVertex(cropEnd);
+    cropSquare.addVertex(cropStart.x, cropEnd.y);
+    cropSquare.close();
+    
+    ofSetLineWidth(1);
+    
+    ofSetColor(croppingCol);
+    cropSquare.draw();
+    
+    //draw mapping points
+    ofPushStyle();
+    ofNoFill();
+    
+    ofColor handleCol;
+    
+    if(cropStartLock){
+        handleCol = circleGrab;
+    } else {
+        handleCol = croppingCol;
+    }
+    
+    ofSetColor(handleCol);
+    ofDrawCircle(cropStart, mapPtRad);
+    
+    if(cropEndLock){
+        handleCol = circleGrab;
+    } else {
+        handleCol = croppingCol;
+    }
+    
+    ofSetColor(handleCol);
+    ofDrawCircle(cropEnd, mapPtRad);
+    
+    ofSetColor(255);
+    ofDrawBitmapString("Crop Start", cropStart.x + mapPtRad, cropStart.y + mapPtRad);
+    ofDrawBitmapString("Crop End", cropEnd.x - mapPtRad - 70, cropEnd.y - mapPtRad);
+
+    
+    
+    
+    ofPopStyle();
+    
+    
+    ofPopMatrix();
+    
+}
+
+
+void Camera::drawCV(int x, int y, float scale){
+    
+    ofPushMatrix();
+    
+    ofTranslate(x, y);
+    
+    ofScale(scale, scale);
+
+    
+    //draw texture translucent and reddish
+    ofSetColor(255, 100);
+    quadTex.draw(0, 0);
+    
+
+//    if(!soloCam){
+    
+        //draw light red tint over the quadTex then the crop on top
+        ofSetColor(255, 200, 200, 100);
+        ofDrawRectangle(0, 0, quadTex.getWidth(), quadTex.getHeight());
+        
+        
+        ofSetColor(255);
+        drawCroppedTex(cropStart);
+//    }
+
+    
     if(cameraGui.drawThresholdToggle){
         
-        thresholdImg.setFromPixels(threshPix);
-        thresholdImg.draw(0, 0);
-
+        threadOutputImg.setFromPixels(threadOutput);
+        threadOutputImg.draw(cropStart);
         
     }
     
-    if(cameraGui.drawContoursToggle) {
-//        RectTracker& tracker = contours.getTracker();
+    ofNoFill();
+    ofSetLineWidth(0.5);
+    ofSetColor(255);
+    ofDrawRectangle(cropStart, threadOutputImg.getWidth(), threadOutputImg.getHeight());
+
+    
+    if(cameraGui.drawContoursToggle){
         
         ofSetColor(255, 0, 0);
+        ofPushMatrix();
+        ofTranslate(cropStart.x, cropStart.y);
         
         contours.draw();
         
@@ -414,6 +656,8 @@ void Camera::drawCV(ofVec2f pos, float scale){
             ofSetColor(0, 100, 255);
             ofDrawBitmapString(msg, 0, 0);
         }
+        ofPopMatrix();
+        
     }
     
     //draw border
@@ -432,7 +676,16 @@ void Camera::drawCV(ofVec2f pos, float scale){
 
 
 
-
+void Camera::drawCroppedTex(ofVec2f pos){
+    
+    //then draw the texture
+    int w = cropEnd.x - cropStart.x;
+    int h = cropEnd.y - cropStart.y;
+    
+    ofSetColor(255);
+    quadTex.drawSubsection(pos.x, pos.y, w, h, cropStart.x, cropStart.y, w, h);
+    
+}
 
 
 
@@ -440,21 +693,51 @@ void Camera::drawCV(ofVec2f pos, float scale){
 
 void Camera::mousePressed(ofMouseEventArgs &args){
     
-    cout << "Click from thisView = " << thisView << endl;
-    
-    //handle mouse interaction with quadMap points
-    for(int i = 0; i < imageQuad.size(); i++){
+    if(manipulationMode == 0){
         
-        //need to adjust mouse position since we're
-        //translating the raw camera view from the origin with pushmatrix
-        float dist = ofDist(adjustedMouse.x, adjustedMouse.y, imageQuad[i].x, imageQuad[i].y);
-        
-        if(dist < mapPtRad){
-            quadPtMouseLock[i] = true;
-        } else {
-            quadPtMouseLock[i] = false;
+        //handle mouse interaction with quadMap points
+        for(int i = 0; i < imageQuad.size(); i++){
+            
+            //need to adjust mouse position since we're
+            //translating the raw camera view from the origin with pushmatrix
+            float dist = ofDist(adjustedMouse.x, adjustedMouse.y, imageQuad[i].x, imageQuad[i].y);
+            
+            if(dist < mapPtRad){
+                quadPtMouseLock[i] = true;
+                
+                //exit the for loop, prevents us from
+                //grabbing multiple handles at once
+                break;
+            } else {
+                quadPtMouseLock[i] = false;
+            }
+            
+            
         }
         
+    } else {
+        
+        //check for start point first then end point later
+        //so we don't grab two points at once
+        float dist = ofDist(adjustedMouse.x, adjustedMouse.y, cropStart.x, cropStart.y);
+        
+        if(dist < mapPtRad){
+            cropStartLock = true;
+            
+        } else {
+            cropStartLock = false;
+            
+            //if we're not in cropStart, check for cropEnd
+            
+            dist = ofDist(adjustedMouse.x, adjustedMouse.y, cropEnd.x, cropEnd.y);
+            
+            if(dist < mapPtRad){
+                cropEndLock = true;
+            } else {
+                cropEndLock = false;
+            }
+            
+        }
         
     }
     
@@ -465,6 +748,10 @@ void Camera::mouseReleased(ofMouseEventArgs &args){
     for(int i = 0; i < quadPtMouseLock.size(); i++){
         quadPtMouseLock[i] = false;
     }
+    
+    
+    cropStartLock = false;
+    cropEndLock = false;
     
 }
 

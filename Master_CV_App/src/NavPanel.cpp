@@ -15,10 +15,12 @@ NavPanel::NavPanel(){
 
 
 
-void NavPanel::setup(int *_viewModeVar){
+void NavPanel::setup(int *_viewMode, vector<shared_ptr<Camera>> _cams){
 
-    viewChanger = _viewModeVar;
-        
+    viewMode = _viewMode;
+    cams = _cams;
+    
+    
     font.load("fonts/Aller_Rg.ttf", 12);
     
     
@@ -101,10 +103,10 @@ void NavPanel::setup(int *_viewModeVar){
             _name = "Aggregate";
             _destination = 14;
             
-            b.setup(_name, _destination, ofVec2f(p.x + margin, p.y + buttonStartY));
-            //first aggregate button is extra wide
             b.width = buttonWidth * 3 + margin * 2;
             b.height = buttonHeight;
+            b.setup(_name, _destination, ofVec2f(p.x + margin, p.y + buttonStartY), &font);
+            //first aggregate button is extra wide
             
         } else {
             
@@ -118,13 +120,12 @@ void NavPanel::setup(int *_viewModeVar){
             y = p.y + buttonStartY + ( i < 3 ? 1 : 2 ) * (buttonHeight + margin);
             
             
-            b.setup(_name, _destination, ofVec2f(x, y));
-            
             b.width = buttonWidth;
             b.height = buttonHeight;
+            b.setup(_name, _destination, ofVec2f(x, y), &font);
+            
             
         }
-        b.setFont(&font);
         
         subPanels[0].buttons.push_back(b);
         
@@ -155,13 +156,11 @@ void NavPanel::setup(int *_viewModeVar){
         x = p.x + margin;
         y = p.y + buttonStartY;
         
-        b.setup(_name, _destination, ofVec2f(x, y));
-        
         b.width = buttonWidth;
         b.height = buttonHeight;
+        b.setup(_name, _destination, ofVec2f(x, y), &font);
         
-    
-        b.setFont(&font);
+        
         
         subPanels[i].buttons.push_back(b);
     
@@ -184,10 +183,10 @@ void NavPanel::setup(int *_viewModeVar){
             _name = "Aggregate";
             _destination = 15;
             
-            b.setup(_name, _destination, ofVec2f(p.x + margin, p.y + buttonStartY));
-            //first aggregate button is extra wide
             b.width = buttonWidth * 3 + margin * 2;
             b.height = buttonHeight;
+            b.setup(_name, _destination, ofVec2f(p.x + margin, p.y + buttonStartY), &font);
+            //first aggregate button is extra wide
             
         } else {
             
@@ -201,19 +200,19 @@ void NavPanel::setup(int *_viewModeVar){
             y = p.y + buttonStartY + ( i < 3 ? 1 : 2 ) * (buttonHeight + margin);
             
             
-            b.setup(_name, _destination, ofVec2f(x, y));
-            
             b.width = buttonWidth;
             b.height = buttonHeight;
+            b.setup(_name, _destination, ofVec2f(x, y), &font);
+            
             
         }
-        b.setFont(&font);
         
         subPanels[5].buttons.push_back(b);
         
         
     }
     
+
     //one button for the last panel to the OSC page
     Button osc;
     
@@ -225,29 +224,54 @@ void NavPanel::setup(int *_viewModeVar){
     x = p.x + margin;
     y = p.y + buttonStartY;
     
-    osc.setup("OSC Info", 16, ofVec2f(x, y));
-    
     osc.width = buttonWidth;
     osc.height = buttonHeight;
+    osc.setup("OSC Info", 16, ofVec2f(x, y), &font);
     
-    
-    osc.setFont(&font);
     
     Button allCams;
     
     y += buttonHeight + margin;
     
-    allCams.setup("All Cams", 17, ofVec2f(x, y));
-    
     allCams.width = buttonWidth;
     allCams.height = buttonHeight;
+    allCams.setup("All Cams", 17, ofVec2f(x, y), &font);
     
-    
-    allCams.setFont(&font);
     
     subPanels[6].buttons.push_back(allCams);
     subPanels[6].buttons.push_back(osc);
     
+    
+    
+    //subpanel for each camera's manipulationMode
+    manipulationPanel.setup(ofVec2f(0));
+    
+    manipulationPanel.margin = margin;
+    manipulationPanel.buttonWidth = buttonWidth;
+    manipulationPanel.buttonHeight = buttonHeight;
+    manipulationPanel.width = buttonWidth * 2 + margin * 3;
+    manipulationPanel.title = "Image Manipulation";
+    manipulationPanel.height = buttonStartY + buttonHeight + margin;
+    manipulationPanel.pos.set(ofGetWidth() - manipulationPanel.width - margin, pos.y - manipulationPanel.height - margin );
+    manipulationPanel.setFont(&font);
+    
+    //add two buttons
+    Button quadMap;
+    Button cropping;
+    
+    //Quad Mapping: Camera manipulationMode = 0
+    quadMap.width = buttonWidth;
+    quadMap.height = buttonHeight;
+    quadMap.setup("Quad Map", 0, manipulationPanel.pos + ofVec2f(margin, buttonStartY), &font);
+    
+    //Cropping: Camera manipulationMode = 1
+    cropping.width = buttonWidth;
+    cropping.height = buttonHeight;
+    cropping.setup("Cropping", 1, manipulationPanel.pos + ofVec2f(margin * 2 + buttonWidth, buttonStartY), &font);
+    
+    manipulationPanel.buttons.push_back(quadMap);
+    manipulationPanel.buttons.push_back(cropping);
+    manipulationPanel.isActive = true;
 
 }
 
@@ -257,6 +281,29 @@ void NavPanel::update(){
     for(int i = 0; i < subPanels.size(); i++){
         subPanels[i].update();
     }
+    
+    
+    //check the manipulationMode variable in the current camera
+    //and modify the button visuals accordingly
+    if((*viewMode) >= 0 && (*viewMode) <= 13){
+        
+        if(cams[(*viewMode)] -> manipulationMode == 0){
+            manipulationPanel.buttons[0].isActive = true;
+            manipulationPanel.buttons[1].isActive = false;
+        } else {
+            manipulationPanel.buttons[0].isActive = false;
+            manipulationPanel.buttons[1].isActive = true;
+        }
+        
+        if(cams[*viewMode] -> soloCam == false){
+            manipulationPanel.update();
+        }
+    }
+    
+    
+    
+    
+    
     
     
 }
@@ -277,7 +324,12 @@ void NavPanel::draw(){
     }
     
     
-
+    if((*viewMode) >= 0 && (*viewMode) <= 13){
+        
+        if(cams[*viewMode] -> soloCam == false){
+            manipulationPanel.draw();
+        }
+    }
 }
 
 
@@ -300,7 +352,7 @@ void NavPanel::checkForClicks(int x, int y){
                     
                     
                     //and change the current view
-                    *viewChanger = subPanels[i].buttons[j].clickDest;
+                    *viewMode = subPanels[i].buttons[j].clickDest;
                     
                     
                     //set all panels/buttons to inactive
@@ -310,17 +362,33 @@ void NavPanel::checkForClicks(int x, int y){
                     subPanels[i].isActive = true;
                     subPanels[i].buttons[j].isActive = true;
                     
-                    
-                    
-                } else {
-                    
+                    //no need to check other buttons
+                    break;
+
                 }
-                
             }
             
+            //no need to check other subpanels
+            break;
         }
-        
     }
+    
+    //only check the manipulationMode buttons if we're in a camera view
+    if((*viewMode) >= 0 && (*viewMode) <= 13){
+    
+        if(cams[*viewMode] -> soloCam == false){
+            //check for clicks in the manipulationMode panel too
+            if(manipulationPanel.buttons[0].isInside(x, y)){
+                cams[*viewMode] -> manipulationMode = 0;
+            }
+
+            if(manipulationPanel.buttons[1].isInside(x, y)){
+                cams[*viewMode] -> manipulationMode = 1;
+            }
+        }
+    }
+    
+    
     
     
 }

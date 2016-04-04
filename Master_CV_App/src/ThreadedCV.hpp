@@ -23,14 +23,14 @@
 /*
  *ThreadedCV:
  *  INPUT:
- *      -Raw texture
+ *      -Raw texture (post quad mapping)
  *      -CV variables:
  *          -Blur amt, threshold, etc.
  *
  *  OUTPUT:
- *      -Quad mapped tex
- *      -Thresholded tex
- *      -Contours
+ *      -if soloCam: Thresholded ofPixels
+ *      -            & Contours
+ *      -if !soloCam: Cropped pixels (no threshold)
  */
 
 
@@ -41,7 +41,7 @@ public:
     ThreadedCV();
     ~ThreadedCV();
     
-    void setup(ofPixels *_mainThreadPix, ofxCv::ContourFinder *_mainThreadCons);
+    void setup(ofPixels *_mainThreadPix, ofxCv::ContourFinder *_mainThreadCons, bool solo);
     void analyze(ofPixels & pix, vector<int> & settings);
     void update();
     
@@ -77,6 +77,12 @@ private:
     int maxBlobArea;
     int persistence;
     int maxBlobDist;
+    int cropStartX;
+    int cropStartY;
+    int cropEndX;
+    int cropEndY;
+    
+    bool soloCam;
     
     unsigned long lastFrameTime;
 };

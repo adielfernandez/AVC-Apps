@@ -51,9 +51,9 @@ void ofApp::setup(){
     viewMode = 0;
     
     
-    titleFont.load("fonts/Aller_Rg.ttf", 45, true);
+    titleFont.load("fonts/Aller_Rg.ttf", 40, true);
     
-    smallerFont.load("fonts/Aller_Rg.ttf", 16, true);
+    smallerFont.load("fonts/Aller_Rg.ttf", 14, true);
     
     
     
@@ -137,11 +137,30 @@ void ofApp::setup(){
         //create shared_ptr to a corridor
         auto cor = std::make_shared<Camera>();
         
+        //do these first
         cor -> setMovieFile(movieFiles[0]);
-        cor -> setupViewControl(i, &viewMode, mainContentPos);
-        cor -> setup(addresses[i], names[i], bScaleDown, useLiveFeed);
+        cor -> setFont(&smallerFont);
         
+        //params: the view of this camera, the view control variable,
+        //the position of the main content area
+        cor -> setupViewControl(i, &viewMode, mainContentPos);
+        
+        //if it's a soloCam (corridors 2-5 i.e. cameras 6-9),
+        //no need for cropping. if not, no need for contours
+        bool solo;
+        if(i >= 6 && i <= 9){
+            solo = true;
+        } else {
+            solo = false;
+        }
+        
+        cor -> soloCam = solo;
+        
+        //and stagger
         cor -> staggerTime = stagger * i;
+
+        //then set up everything else
+        cor -> setup(addresses[i], names[i], bScaleDown, useLiveFeed);
         
         cameras.push_back(cor);
         
@@ -224,7 +243,7 @@ void ofApp::setup(){
     
     
     //-----create buttons for UI navigation-----
-    panel.setup(&viewMode);
+    panel.setup(&viewMode, cameras);
     
     //video playback
     if(!useLiveFeed){
@@ -359,44 +378,17 @@ void ofApp::draw(){
     
     ofBackgroundGradient(200, 0);
     
+    string currentViewTitle = "";
+    
     //draw the raw cameras
     if(viewMode >= 0 && viewMode < numFeeds){
         
-//        ofBackgroundGradient(cameras[viewMode] -> backgroundIn, cameras[viewMode] -> backgroundOut);
-        
         ofSetColor(255);
-        ofDrawBitmapString("Current Feed FPS: " + ofToString(cameras[viewMode] -> cameraFPS), 15, 45);
-        titleFont.drawString(cameras[viewMode] -> name, mainContentPos.x, mainContentPos.y - 10);
         
-        cameras[viewMode] -> drawRaw(mainContentPos);
-        
-        float scale;
-        if(bScaleDown){
-            scale = 1.0;
-        } else {
-            scale = 0.5;
-        
-        }
-        cameras[viewMode] -> drawCV(secondaryContentPos, scale);
-        
-        //draw num blobs under CV image
-        ofSetColor(255);
-        ofDrawBitmapString("Num Blobs: " + ofToString(cameras[viewMode] -> contours.size()), secondaryContentPos.x, secondaryContentPos.y + feedHeight/2 + 20);
-        
-        cameras[viewMode] -> drawGui(15, topMargin);
+        currentViewTitle = cameras[viewMode] ->  name;
         
         
-        
-        string msg;
-        if(bScaleDown){
-            msg = "CV Scaled Down";
-        } else {
-            msg = "CV NOT Scaled Down";
-        }
-        
-
-        
-        ofDrawBitmapString(msg, 800, 30);
+        cameras[viewMode] -> drawMain();
         
         
         
@@ -404,9 +396,7 @@ void ofApp::draw(){
         
         //CORRIDOR 1 AGGREGATION
 
-        
-        ofSetColor(255);
-        titleFont.drawString("Corridor 1 Aggregate", mainContentPos.x, mainContentPos.y - 10);
+        currentViewTitle = "Lobby 1 Aggregate";
         
         Lobby1Aggregate.drawRaw(mainContentPos.x, mainContentPos.y);
         Lobby1Aggregate.drawCV(mainContentPos.x, mainContentPos.y);
@@ -424,8 +414,8 @@ void ofApp::draw(){
         
         //CORRIDOR 1 AGGREGATION
         
-        ofSetColor(255);
-        titleFont.drawString("Corridor 6 Aggregate", mainContentPos.x, mainContentPos.y - 10);
+
+        currentViewTitle = "Lobby 2 Aggregate";
         
         Lobby2Aggregate.drawRaw(mainContentPos.x, mainContentPos.y);
         Lobby2Aggregate.drawCV(mainContentPos.x, mainContentPos.y);
@@ -442,9 +432,7 @@ void ofApp::draw(){
     } else if(viewMode == 16){
         
         //OSC VIEWER
-        
-        ofSetColor(255);
-        titleFont.drawString("OSC Info", mainContentPos.x, mainContentPos.y - 10);
+        currentViewTitle = "OSC Info";
         
         oscHandler.drawGui(15, topMargin);
         
@@ -579,14 +567,13 @@ void ofApp::draw(){
         
         //All cameras
         
-        ofSetColor(255);
-        titleFont.drawString("All Cameras", mainContentPos.x, mainContentPos.y - 10);
+        currentViewTitle = "All Cameras";
         
         for(int i = 0; i < numFeeds; i++){
             
             float scale = frameWidth/(float)cameras[i] -> scaledWidth;
             
-            cameras[i] -> drawCV(allCamsPos[i], scale);
+            cameras[i] -> drawCV(allCamsPos[i].x, allCamsPos[i].y, scale);
             
             //draw camera label
             ofSetColor(180);
@@ -807,7 +794,17 @@ void ofApp::draw(){
     ofSetColor(255);
     ofDrawBitmapString("Framerate: " + ofToString(ofGetFrameRate()), 15, 30);
     
-
+    titleFont.drawString(currentViewTitle, mainContentPos.x, mainContentPos.y - 20);
+    
+    string msg;
+    if(bScaleDown){
+        msg = "CV Scaled Down";
+    } else {
+        msg = "CV NOT Scaled Down";
+    }
+    
+    ofDrawBitmapString(msg, 15, 45);
+    
     
     //UI panel for buttons to switch between views
     panel.draw();
@@ -844,6 +841,8 @@ void ofApp::keyPressed(int key){
         
         oscHandler.saveSettings();
         
+        
+        cout << "Cameras and OSC settings saved" << endl;
     }
     
     
@@ -868,11 +867,8 @@ void ofApp::mouseDragged(int x, int y, int button){
 void ofApp::mousePressed(int x, int y, int button){
 
     //if we're in the navpanel...
-    if(y > panel.pos.y){
-        
-        panel.checkForClicks(x, y);
+    panel.checkForClicks(x, y);
 
-    }
     
 }
 

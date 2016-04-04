@@ -16,6 +16,7 @@
 #include "Button.hpp"
 #include "SubPanel.hpp"
 #include "ofMain.h"
+#include "Camera.h"
 
 #pragma once
 
@@ -26,7 +27,7 @@ public:
     
     NavPanel();
     
-    void setup(int *_viewModeVar);
+    void setup(int *_viewMode, vector<shared_ptr<Camera>> _cams);
     void update();
     void draw();
     
@@ -35,7 +36,9 @@ public:
     
     //pointer to the viewMode variable
     //in ofApp that cycles the views
-    int *viewChanger;
+    int *viewMode;
+    vector<shared_ptr<Camera>> cams;
+    
     
     ofTrueTypeFont font;
     
@@ -47,6 +50,6 @@ public:
     
     int numSubPanels;
     vector<SubPanel> subPanels;
-    
+    SubPanel manipulationPanel;    
     
 };

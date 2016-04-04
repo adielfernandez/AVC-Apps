@@ -30,10 +30,12 @@ ThreadedCV::~ThreadedCV(){
 }
 
 
-void ThreadedCV::setup(ofPixels *_mainThreadPix, ofxCv::ContourFinder *_mainThreadCons){
+void ThreadedCV::setup(ofPixels *_mainThreadPix, ofxCv::ContourFinder *_mainThreadCons, bool solo){
 
     mainThreadPix = _mainThreadPix;
     mainThreadContours = _mainThreadCons;
+    soloCam = solo;
+    
     
     startThread();
     
@@ -87,49 +89,68 @@ void ThreadedCV::threadedFunction(){
             maxBlobArea = settings[5];
             persistence = settings[6];
             maxBlobDist = settings[7];
+            cropStartX = settings[8];
+            cropStartY = settings[9];
+            cropEndX = settings[10];
+            cropEndY = settings[11];
 
             //Make grayscale
             threadPixels.setImageType(OF_IMAGE_GRAYSCALE);
-
+            
+            if(!soloCam){
+                int w = cropEndX - cropStartX;
+                int h = cropEndY - cropStartY;
+                
+                threadPixels.crop(cropStartX, cropStartY, w, h);
+            }
+        
+        
+            
+            
             //blur it
             ofxCv::GaussianBlur(threadPixels, blurredPix, blurAmt);
-
+            
+            //only threshold it if we're a soloCam
             //threshold it
             ofxCv::threshold(blurredPix, threshPix, threshold);
-
+            
             //ERODE it
             for(int e = 0; e < numErosions; e++){
                 erode(threshPix);
             }
-
+            
             //DILATE it
             for(int d = 0; d < numDilations; d++){
                 dilate(threshPix);
             }
-
-
+            
+            
+            
+            
+            
             //-----Done with image altering-----
             //------Now do contour finding------
-
-
+            
+            
             //Define contour finder
             contours.setMinArea(minBlobArea);
             contours.setMaxArea(maxBlobArea);
             contours.setThreshold(254);  //only detect white
-
+            
             // wait for half a frame before forgetting something
             contours.getTracker().setPersistence(persistence);
-
+            
             // an object can move up to ___ pixels per frame
             contours.getTracker().setMaximumDistance(maxBlobDist);
-
+            
             //find dem blobs
             contours.findContours(threshPix);
             
             
-            
             threshPixOut.send(std::move(threshPix));
             contoursOut.send(std::move(contours));
+            
+            
         }
         
     

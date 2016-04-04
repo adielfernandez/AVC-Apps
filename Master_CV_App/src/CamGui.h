@@ -16,7 +16,7 @@ public:
     CamGui();
     
     // Methods
-    void setup(string name);
+    void setup(string name, bool solo);
     void draw(int x, int y);
     void load();
     
@@ -27,17 +27,22 @@ public:
     ofxIntSlider blurAmountSlider;
     ofxIntSlider numErosionsSlider;
     ofxIntSlider numDilationsSlider;
+    ofxToggle drawThresholdToggle;
+    
     ofxIntSlider minBlobAreaSlider;
     ofxIntSlider maxBlobAreaSlider;
     ofxIntSlider persistenceSlider;
     ofxIntSlider maxDistanceSlider;
-    ofxToggle drawThresholdToggle;
     ofxToggle drawContoursToggle;
     ofxToggle showInfoToggle;
+    
     ofxVec2Slider quadPt0;
     ofxVec2Slider quadPt1;
     ofxVec2Slider quadPt2;
     ofxVec2Slider quadPt3;
+
+    ofxVec2Slider cropStart;
+    ofxVec2Slider cropEnd;
     
 };
 

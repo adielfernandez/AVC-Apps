@@ -17,15 +17,13 @@ Button::Button(){
     
 }
 
-void Button::setup(string _name, int _dest, ofVec2f _pos){
+void Button::setup(string _name, int _dest, ofVec2f _pos, ofTrueTypeFont *_font){
     
     name = _name;
     clickDest = _dest;
     pos = _pos;
+    font = _font;
     
-
-    
-
     //width and height set by NavPanel
 //    width = 90;
 //    height = 30;
@@ -40,17 +38,31 @@ void Button::setup(string _name, int _dest, ofVec2f _pos){
     
     isActive = false;
     
+    
+    //calculate the string width and height for later
+    int strW = font -> stringWidth(name);
+    int strH = font -> stringHeight(name);
+    
+    textPos.set(pos.x + (width - strW)/2, pos.y + height/2 + strH/2);
+    
+    //tweak to raise the text position if the string contains
+    //any letters with descenders
+    std::size_t found = name.find_first_of("gjpqy");
+    
+    
+    //if we find any descenders, add a little to the textPos
+    if(found != std::string::npos){
+        
+        textPos.y -= 3;
+        
+    }
+    
+    
+    
+    
 }
 
-void Button::setFont(ofTrueTypeFont *_font){
-    font = _font;
-    
-    //now that we have a font, calculate the string
-    //width and height for later
-    strW = font -> stringWidth(name);
-    strH = font -> stringHeight(name);
-    
-}
+
 
 void Button::update(){
     
@@ -72,14 +84,7 @@ void Button::draw(){
     
     ofSetColor(textCol);
     
-    //Because the g's make the text look off center
-    float fontDescenderHack;
-    if(name == "Aggregate"){
-        fontDescenderHack = 3;
-    } else {
-        fontDescenderHack = 0;
-    }
-    font -> drawString(name, pos.x + (width - strW)/2, pos.y + height/2 + strH/2 - fontDescenderHack);
+    font -> drawString(name, textPos.x, textPos.y);
     
 }
 
