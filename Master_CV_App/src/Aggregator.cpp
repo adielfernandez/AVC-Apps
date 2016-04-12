@@ -111,7 +111,7 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
     gui.add(numErosionsSlider.setup("Number of erosions", 0, 0, 10));
     gui.add(numDilationsSlider.setup("Number of dilations", 0, 0, 10));
     gui.add(minBlobAreaSlider.setup("Min Blob Area", 0, 0, 500));
-    gui.add(maxBlobAreaSlider.setup("Max Blob Area", 50000, 0, 100000));
+    gui.add(maxBlobAreaSlider.setup("Max Blob Area", 25000, 0, 50000));
     gui.add(persistenceSlider.setup("Persistence", 15, 0, 100));
     gui.add(maxDistanceSlider.setup("Max Distance", 32, 0, 100));
     gui.add(drawThresholdToggle.setup("Draw threshold", false));
@@ -217,7 +217,21 @@ void Aggregator::update(){
     //paste the other ofPixels into masterPix
     for(int i = 0; i < numCams; i++){
         
-        cams[indices[i]] -> threadOutput.blendInto(masterPix, positions[i].x, positions[i].y);
+        //if we're the second camera of the 4 camera lobby (lobby 2)
+        //rotate the ofPixels to paste it in correctly
+        if(numCams == 4 && i == 1){
+            
+            ofPixels rotated;
+            cams[indices[i]] -> threadOutput.rotate90To(rotated, 1);
+            
+            rotated.blendInto(masterPix, positions[i].x, positions[i].y);
+            
+        } else {
+            
+            //all other cameras get pasted in normally
+            cams[indices[i]] -> threadOutput.blendInto(masterPix, positions[i].x, positions[i].y);
+            
+        }
         
     }
     
@@ -363,8 +377,25 @@ void Aggregator::drawRaw(int x, int y){
     
     for(int i = 0; i < numCams; i++){
         
-        ofSetColor(255, 120);
-        cams[indices[i]] -> drawCroppedTex(positions[i]);
+        ofSetColor(255, 200);
+        
+        if(numCams == 4 && i == 1){
+
+            //draw rotated 90 degrees clockwise
+            ofPushMatrix();
+            ofTranslate(positions[i].x, positions[i].y);
+            ofRotate(90);
+            ofTranslate(0, -cams[indices[i]] -> croppedHeight);
+            
+            
+            cams[indices[i]] -> drawCroppedTex(ofVec2f(0, 0));
+            
+            ofPopMatrix();
+            
+        } else {
+            //draw normally
+            cams[indices[i]] -> drawCroppedTex(positions[i]);
+        }
         
         ofSetColor(255);
         ofDrawBitmapString("Cam " + ofToString(indices[i] + 1), positions[i].x + 5, positions[i].y + 12);
@@ -453,7 +484,17 @@ void Aggregator::drawCV(int x, int y){
         
         //draw camera frames to show overlap regions
         ofSetColor(c, 100);
-        ofDrawRectangle(positions[i], cams[indices[i]] -> threadOutput.getWidth(), cams[indices[i]] -> threadOutput.getHeight());
+        //if we're camera 2 in corridor 6 draw it rotated
+        if(numCams == 4 && i == 1){
+            
+            //draw with width/height switched
+            ofDrawRectangle(positions[i], cams[indices[i]] -> threadOutput.getHeight(), cams[indices[i]] -> threadOutput.getWidth());
+            
+        } else {
+            
+            //draw normally
+            ofDrawRectangle(positions[i], cams[indices[i]] -> threadOutput.getWidth(), cams[indices[i]] -> threadOutput.getHeight());
+        }
         
     }
     
@@ -482,7 +523,7 @@ void Aggregator::loadSettings(){
 
 void Aggregator::saveSettings(){
     
-    gui.loadFromFile(guiName + ".xml");
+    gui.saveToFile(guiName + ".xml");
     
 }
 

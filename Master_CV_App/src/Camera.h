@@ -62,7 +62,7 @@ public:
     void drawRaw(int x, int y);
     
     //quad mapped image (with cropping pts)
-    void drawQuad(int x, int y, float scale);
+    void drawMap(int x, int y, float scale);
     
     void drawCroppedTex(ofVec2f pos);
     
@@ -78,7 +78,7 @@ public:
     string name;
     string IP;
     ofColor circleCol, circleGrab;
-    ofColor quadMapCol, croppingCol;
+    ofColor mappingCol, croppingCol;
     ofColor backgroundIn, backgroundOut;
     ofTrueTypeFont *font;
     
@@ -123,6 +123,7 @@ public:
 
     int feedWidth, feedHeight;
     int scaledWidth, scaledHeight;
+    int croppedWidth, croppedHeight;
     
     //bool to toggle scaling down 640x512
     //down to 320x256 for faster processing
@@ -143,8 +144,9 @@ public:
     
     
     //for remapping a subImage from the feed:
-    vector<ofPoint> imageQuad;
-    vector<bool> quadPtMouseLock;
+    int numMapPts;
+    vector<ofPoint> imageMapPts;
+    vector<bool> mapPtMouseLock;
     
     //for cropping a portion of the image
     //just two points: upper left and lower right
@@ -164,8 +166,8 @@ public:
     float mapPtRad;
 
     //Skewed/keystoned mesh
-    ofMesh quadMappedMesh;
-    ofTexture quadTex;
+    ofMesh mappedMesh;
+    ofTexture mappedTex;
     ofFbo fbo;
     ofPixels fboPix;
     

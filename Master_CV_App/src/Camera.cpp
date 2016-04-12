@@ -63,13 +63,13 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     //which camera setting we're tweaking
     manipulationMode = 0;
     
-    quadMapCol.set(255, 0, 255);
+    mappingCol.set(255, 0, 255);
     croppingCol.set(0, 255, 255);
-    circleCol.set(quadMapCol);
+    circleCol.set(mappingCol);
     circleGrab.set(255, 0, 0);
     
     
-    //size of quad handles
+    //size of map handles
     mapPtRad = 10;
     titleSpace = 20;
     
@@ -110,29 +110,64 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     
     //-----CV Objects && Image Processing-----
     
-    //initialize imageQuad vector with 4 points
+    //initialize imageMapPts vector with 4 points
     //this will be overwritten by xml settings later
-    imageQuad.resize(4);
-    imageQuad[0].set(0, 0);
-    imageQuad[1].set(feedWidth, 0);
-    imageQuad[2].set(feedWidth, feedHeight);
-    imageQuad[3].set(0, feedHeight);
+//    numMapPts = 4;
+//    imageMapPts.resize(numMapPts);
+//    imageMapPts[0].set(0, 0);
+//    imageMapPts[1].set(feedWidth, 0);
+//    imageMapPts[2].set(feedWidth, feedHeight);
+//    imageMapPts[3].set(0, feedHeight);
+
+    //map quad to 9 points in a rectangular 3x3 grid
+    //these will be overwritten by settings loaded later
+    numMapPts = 9;
+    imageMapPts.resize(numMapPts);
+    for(int i = 0; i < imageMapPts.size(); i++){
+        
+        int x = (i % 3) * feedWidth/2;
+        int y = (i - i % 3)/3 * feedHeight/2;
+        
+        imageMapPts[i].set( x, y );
+        
+    }
     
     
     //bools we need to check if we're grabbing the
-    //imageQuad points for texture mapping
-    quadPtMouseLock.resize(4);
-    for(int i = 0; i < quadPtMouseLock.size(); i++){
-        quadPtMouseLock[i] = false;
+    //imageMapPts points for texture mapping
+    mapPtMouseLock.resize(numMapPts);
+    for(int i = 0; i < mapPtMouseLock.size(); i++){
+        mapPtMouseLock[i] = false;
     }
     
     //Make the mesh the same size as the normal feed frame
-    //Re-use the imageQuad points since they are still rectangular at this point
-    quadMappedMesh.addVertex(imageQuad[0]);
-    quadMappedMesh.addVertex(imageQuad[1]);
-    quadMappedMesh.addVertex(imageQuad[2]);
-    quadMappedMesh.addVertex(imageQuad[3]);
-    quadMappedMesh.setMode(OF_PRIMITIVE_TRIANGLE_FAN);
+    //Re-use the imageMapPts points since they are still rectangular at this point
+    
+    //BUT... add them using triangle fan with fan center at central point == imageMapPts[4]
+    //then go clockwise around center from top left
+    /*
+     *     0 ___1___ 2
+     *      |\  |  /|
+     *      | \ | / |
+     *     3|__\|/__|5  (4 at center)
+     *      |  /|\  |
+     *      | / | \ |
+     *      |/__|__\|
+     *     6    7    8
+     *
+     */
+    mappedMesh.addVertex(imageMapPts[4]);
+    mappedMesh.addVertex(imageMapPts[0]);
+    mappedMesh.addVertex(imageMapPts[1]);
+    mappedMesh.addVertex(imageMapPts[2]);
+    mappedMesh.addVertex(imageMapPts[5]);
+    mappedMesh.addVertex(imageMapPts[8]);
+    mappedMesh.addVertex(imageMapPts[7]);
+    mappedMesh.addVertex(imageMapPts[6]);
+    mappedMesh.addVertex(imageMapPts[3]);
+    mappedMesh.addVertex(imageMapPts[0]);  //and wrap back around so the fan closes
+    
+    mappedMesh.setMode(OF_PRIMITIVE_TRIANGLE_FAN);
 
     
     
@@ -148,7 +183,7 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     //allocate all the stuff we'll be using
     //Textures
     rawTex.allocate(feedWidth, feedHeight, GL_LUMINANCE);
-    quadTex.allocate(scaledWidth, scaledHeight, GL_LUMINANCE);
+    mappedTex.allocate(scaledWidth, scaledHeight, GL_LUMINANCE);
     
     
     threadOutput.allocate(scaledWidth, scaledHeight, 1);
@@ -193,12 +228,16 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
 
 void Camera::update(){
     
-    //update the quad points with changes from the GUI
-    imageQuad[0].set(cameraGui.quadPt0 -> x, cameraGui.quadPt0 -> y);
-    imageQuad[1].set(cameraGui.quadPt1 -> x, cameraGui.quadPt1 -> y);
-    imageQuad[2].set(cameraGui.quadPt2 -> x, cameraGui.quadPt2 -> y);
-    imageQuad[3].set(cameraGui.quadPt3 -> x, cameraGui.quadPt3 -> y);
-    
+    //update the mapping points with changes from the GUI
+    imageMapPts[0].set(cameraGui.mapPt0 -> x, cameraGui.mapPt0 -> y);
+    imageMapPts[1].set(cameraGui.mapPt1 -> x, cameraGui.mapPt1 -> y);
+    imageMapPts[2].set(cameraGui.mapPt2 -> x, cameraGui.mapPt2 -> y);
+    imageMapPts[3].set(cameraGui.mapPt3 -> x, cameraGui.mapPt3 -> y);
+    imageMapPts[4].set(cameraGui.mapPt4 -> x, cameraGui.mapPt4 -> y);
+    imageMapPts[5].set(cameraGui.mapPt5 -> x, cameraGui.mapPt5 -> y);
+    imageMapPts[6].set(cameraGui.mapPt6 -> x, cameraGui.mapPt6 -> y);
+    imageMapPts[7].set(cameraGui.mapPt7 -> x, cameraGui.mapPt7 -> y);
+    imageMapPts[8].set(cameraGui.mapPt8 -> x, cameraGui.mapPt8 -> y);
 
     //update the crop points with changes from the GUI
     //but gui vals are normalized so scale them back up
@@ -210,28 +249,38 @@ void Camera::update(){
     adjustedMouse.set(ofGetMouseX() - adjustedOrigin.x, ofGetMouseY() - adjustedOrigin.y - titleSpace);
     
     //Image manipulation:
-    //0 = quad mapping
+    //0 = mapping
     //1 = cropping
     if(manipulationMode == 0){
     
-        circleCol = quadMapCol;
+        circleCol = mappingCol;
         
         
-        for(int i = 0; i < quadPtMouseLock.size(); i++){
+        for(int i = 0; i < mapPtMouseLock.size(); i++){
             
-            if(quadPtMouseLock[i]){
-                imageQuad[i].x = ofClamp(adjustedMouse.x, 0, feedWidth);
-                imageQuad[i].y = ofClamp(adjustedMouse.y, 0, feedHeight);
+            if(mapPtMouseLock[i]){
+                imageMapPts[i].x = ofClamp(adjustedMouse.x, 0, feedWidth);
+                imageMapPts[i].y = ofClamp(adjustedMouse.y, 0, feedHeight);
                 
                 //Update the gui so the values are stored when we save
                 if(i == 0){
-                    cameraGui.quadPt0 = imageQuad[i];
+                    cameraGui.mapPt0 = imageMapPts[i];
                 } else if(i == 1){
-                    cameraGui.quadPt1 = imageQuad[i];
+                    cameraGui.mapPt1 = imageMapPts[i];
                 } else if(i == 2){
-                    cameraGui.quadPt2 = imageQuad[i];
+                    cameraGui.mapPt2 = imageMapPts[i];
+                } else if(i == 3){
+                    cameraGui.mapPt3 = imageMapPts[i];
+                } else if(i == 4){
+                    cameraGui.mapPt4 = imageMapPts[i];
+                } else if(i == 5){
+                    cameraGui.mapPt5 = imageMapPts[i];
+                } else if(i == 6){
+                    cameraGui.mapPt6 = imageMapPts[i];
+                } else if(i == 7){
+                    cameraGui.mapPt7 = imageMapPts[i];
                 } else {
-                    cameraGui.quadPt3 = imageQuad[i];
+                    cameraGui.mapPt8 = imageMapPts[i];
                 }
                 
             }
@@ -240,7 +289,7 @@ void Camera::update(){
 
     } else {
     
-        circleCol = quadMapCol;
+        circleCol = mappingCol;
         
         //go through the two cropping points
         //upper left and lower right
@@ -309,11 +358,22 @@ void Camera::update(){
         
         //clear out the old mesh and remap the texture
         //to the control points we've set
-        quadMappedMesh.clearTexCoords();
-        quadMappedMesh.addTexCoord(imageQuad[0]);
-        quadMappedMesh.addTexCoord(imageQuad[1]);
-        quadMappedMesh.addTexCoord(imageQuad[2]);
-        quadMappedMesh.addTexCoord(imageQuad[3]);
+        mappedMesh.clearTexCoords();
+        mappedMesh.addTexCoord(imageMapPts[4]);
+        mappedMesh.addTexCoord(imageMapPts[0]);
+        mappedMesh.addTexCoord(imageMapPts[1]);
+        mappedMesh.addTexCoord(imageMapPts[2]);
+        mappedMesh.addTexCoord(imageMapPts[5]);
+        mappedMesh.addTexCoord(imageMapPts[8]);
+        mappedMesh.addTexCoord(imageMapPts[7]);
+        mappedMesh.addTexCoord(imageMapPts[6]);
+        mappedMesh.addTexCoord(imageMapPts[3]);
+        mappedMesh.addTexCoord(imageMapPts[0]);  //and wrap back around so the fan closes
+        
+//        mappedMesh.addTexCoord(imageMapPts[0]);
+//        mappedMesh.addTexCoord(imageMapPts[1]);
+//        mappedMesh.addTexCoord(imageMapPts[2]);
+//        mappedMesh.addTexCoord(imageMapPts[3]);
         
         //draw the mesh with the re-mapped texture to the FBO
         fbo.begin();
@@ -322,13 +382,13 @@ void Camera::update(){
         
         if(bScaleDown) ofScale(0.5, 0.5);
         
-        quadMappedMesh.draw();
+        mappedMesh.draw();
         rawTex.unbind();
         fbo.end();
         
         
         //steal the new texture from the FBO for displaying later
-        quadTex = fbo.getTexture();
+        mappedTex = fbo.getTexture();
 
         //get the pixels from the fbo
         fbo.readToPixels(fboPix);
@@ -447,8 +507,9 @@ void Camera::update(){
         corridorBundle.addBundle(blobsBundle);
     }
     
-
-    
+    //convenience variables to hold the cropped area dimensions
+    croppedWidth = cropEnd.x - cropStart.x;
+    croppedHeight = cropEnd.y - cropStart.y;
     
 }
 
@@ -483,7 +544,7 @@ void Camera::drawMain(){
     
     if(manipulationMode == 0){
         
-        string title = "Raw Feed (640x512) -> Quad Mapping";
+        string title = "Raw Feed (640x512) -> Mapping";
         ofDrawBitmapString(title, adjustedOrigin.x, adjustedOrigin.y + 10);
         
         drawRaw(adjustedOrigin.x, adjustedOrigin.y + titleSpace);
@@ -501,21 +562,21 @@ void Camera::drawMain(){
         string title = "Mapped & scaled to: " + ofToString(scaledWidth) + "x" + ofToString(scaledHeight) + ")";
         ofSetColor(255);
         ofDrawBitmapString(title, adjustedOrigin.x, adjustedOrigin.y + 10);
-        drawQuad(adjustedOrigin.x, adjustedOrigin.y + titleSpace, 1.0f);
+        drawMap(adjustedOrigin.x, adjustedOrigin.y + titleSpace, 1.0f);
         
         secondSpot.set(adjustedOrigin.x + scaledWidth + 20, adjustedOrigin.y);
         
    
     }
     
-    int w = cropEnd.x - cropStart.x;
-    int h = cropEnd.y - cropStart.y;
     
     string title;
     if(soloCam){
-        title = "Threshold + Contours (Scaled to: " + ofToString(w) + "x" + ofToString(h) + ")";
+        title = "Threshold + Contours (Scaled to: " + ofToString(scaledWidth) + "x" + ofToString(scaledHeight) + ")";
     } else {
-        title = "Threshold + Contours (Cropped to: " + ofToString(w) + "x" + ofToString(h) + ")";
+        
+
+        title = "Threshold + Contours (Cropped to: " + ofToString(croppedWidth) + "x" + ofToString(croppedHeight) + ")";
     }
     ofSetColor(255);
     ofDrawBitmapString(title, secondSpot.x, secondSpot.y + 10);
@@ -574,31 +635,36 @@ void Camera::drawRaw(int x, int y){
     ofDrawRectangle(0, 0, feedWidth, feedHeight);
     
     //draw lines between points
-    ofPolyline quadMap(imageQuad);
-    quadMap.close();
+    ofSetColor(mappingCol);
+    ofSetLineWidth(0.5);
+    ofMesh mapLines;
     
-    ofSetLineWidth(1);
+    //we're actually manipulating texcoords so those
+    //are the ones we need to draw
+    for(int i = 0; i < mappedMesh.getNumTexCoords(); i++){
+        mapLines.addVertex(mappedMesh.getTexCoord(i));
+    }
+    mapLines.setMode(OF_PRIMITIVE_TRIANGLE_FAN);
     
-    ofSetColor(quadMapCol);
-    quadMap.draw();
+    mapLines.drawWireframe();
     
     //draw mapping points
     ofPushStyle();
-    for(int i = 0; i < imageQuad.size(); i++){
+    for(int i = 0; i < imageMapPts.size(); i++){
         
         ofColor c;
         
-        if(quadPtMouseLock[i]){
+        if(mapPtMouseLock[i]){
             c = circleGrab;
         } else {
-            c = quadMapCol;
+            c = mappingCol;
         }
         
         ofNoFill();
         ofSetColor(c);
-        ofDrawCircle(imageQuad[i], mapPtRad);
+        ofDrawCircle(imageMapPts[i], mapPtRad);
         ofSetColor(255);
-        ofDrawBitmapString(ofToString(i), imageQuad[i].x + mapPtRad, imageQuad[i].y - mapPtRad);
+        ofDrawBitmapString(ofToString(i), imageMapPts[i].x + mapPtRad, imageMapPts[i].y - mapPtRad);
         
     }
     
@@ -612,7 +678,7 @@ void Camera::drawRaw(int x, int y){
     
 }
 
-void Camera::drawQuad(int x, int y, float scale){
+void Camera::drawMap(int x, int y, float scale){
     
     //WARNING: certain things can be drawn with matrix translations
     // but others need to be drawn raw since they depend on mouse interaction
@@ -625,12 +691,12 @@ void Camera::drawQuad(int x, int y, float scale){
     
     //raw camera feed
     ofSetColor(255);
-    quadTex.draw(0, 0);
+    mappedTex.draw(0, 0);
     
     //border
     ofNoFill();
     ofSetLineWidth(1);
-    ofSetColor(quadMapCol);
+    ofSetColor(mappingCol);
     ofDrawRectangle(0, 0, scaledWidth, scaledHeight);
     ofFill();
     
@@ -697,16 +763,16 @@ void Camera::drawCV(int x, int y, float scale){
     
     //draw texture translucent and reddish
     ofSetColor(255, 100);
-    quadTex.draw(0, 0);
+    mappedTex.draw(0, 0);
     
 
     
-    //draw light red tint over the quadTex then the crop on top
+    //draw light red tint over the mappedTex then the crop on top
     
     ofNoFill();
     ofSetLineWidth(1);
-    ofSetColor(quadMapCol);
-    ofDrawRectangle(0, 0, quadTex.getWidth(), quadTex.getHeight());
+    ofSetColor(mappingCol);
+    ofDrawRectangle(0, 0, mappedTex.getWidth(), mappedTex.getHeight());
     ofFill();
     
     ofSetColor(255);
@@ -770,11 +836,10 @@ void Camera::drawCV(int x, int y, float scale){
 void Camera::drawCroppedTex(ofVec2f pos){
     
     //then draw the texture
-    int w = cropEnd.x - cropStart.x;
-    int h = cropEnd.y - cropStart.y;
+    int w = croppedWidth;
+    int h = croppedHeight;
     
-    ofSetColor(255);
-    quadTex.drawSubsection(pos.x, pos.y, w, h, cropStart.x, cropStart.y, w, h);
+    mappedTex.drawSubsection(pos.x, pos.y, w, h, cropStart.x, cropStart.y, w, h);
     
 }
 
@@ -786,21 +851,22 @@ void Camera::mousePressed(ofMouseEventArgs &args){
     
     if(manipulationMode == 0){
         
-        //handle mouse interaction with quadMap points
-        for(int i = 0; i < imageQuad.size(); i++){
+        //handle mouse interaction with Map points
+        for(int i = 0; i < imageMapPts.size(); i++){
             
             //need to adjust mouse position since we're
             //translating the raw camera view from the origin with pushmatrix
-            float dist = ofDist(adjustedMouse.x, adjustedMouse.y, imageQuad[i].x, imageQuad[i].y);
+            float dist = ofDist(adjustedMouse.x, adjustedMouse.y, imageMapPts[i].x, imageMapPts[i].y);
             
             if(dist < mapPtRad){
-                quadPtMouseLock[i] = true;
+                mapPtMouseLock[i] = true;
                 
                 //exit the for loop, prevents us from
                 //grabbing multiple handles at once
                 break;
+                
             } else {
-                quadPtMouseLock[i] = false;
+                mapPtMouseLock[i] = false;
             }
             
             
@@ -836,8 +902,8 @@ void Camera::mousePressed(ofMouseEventArgs &args){
 
 void Camera::mouseReleased(ofMouseEventArgs &args){
     
-    for(int i = 0; i < quadPtMouseLock.size(); i++){
-        quadPtMouseLock[i] = false;
+    for(int i = 0; i < mapPtMouseLock.size(); i++){
+        mapPtMouseLock[i] = false;
     }
     
     

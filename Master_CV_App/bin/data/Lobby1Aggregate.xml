@@ -7,11 +7,11 @@
 	<Draw_Contours>1</Draw_Contours>
 	<Info>0</Info>
 	<Cam1_Pos>0, 0</Cam1_Pos>
-	<Cam2_Pos>294, 0</Cam2_Pos>
-	<Cam3_Pos>587, 0</Cam3_Pos>
-	<Cam4_Pos>0, 231</Cam4_Pos>
-	<Cam5_Pos>296, 223</Cam5_Pos>
-	<Cam6_Pos>586, 235</Cam6_Pos>
+	<Cam2_Pos>236, 0</Cam2_Pos>
+	<Cam3_Pos>512, 0</Cam3_Pos>
+	<Cam4_Pos>0, 254</Cam4_Pos>
+	<Cam5_Pos>250, 252</Cam5_Pos>
+	<Cam6_Pos>555, 230</Cam6_Pos>
 <Lobby1Aggregate/>
 <Threshold>0</Threshold>
 	<Blur>1</Blur>

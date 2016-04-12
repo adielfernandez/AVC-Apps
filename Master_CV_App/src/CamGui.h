@@ -37,11 +37,16 @@ public:
     ofxToggle drawContoursToggle;
     ofxToggle showInfoToggle;
     
-    ofxVec2Slider quadPt0;
-    ofxVec2Slider quadPt1;
-    ofxVec2Slider quadPt2;
-    ofxVec2Slider quadPt3;
-
+    ofxVec2Slider mapPt0;
+    ofxVec2Slider mapPt1;
+    ofxVec2Slider mapPt2;
+    ofxVec2Slider mapPt3;
+    ofxVec2Slider mapPt4;
+    ofxVec2Slider mapPt5;
+    ofxVec2Slider mapPt6;
+    ofxVec2Slider mapPt7;
+    ofxVec2Slider mapPt8;
+    
     ofxVec2Slider cropStart;
     ofxVec2Slider cropEnd;
     

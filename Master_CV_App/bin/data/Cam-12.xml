@@ -1,14 +1,19 @@
 <Cam-12>
-	<Threshold>65</Threshold>
-	<Blur>17</Blur>
+	<Threshold>67</Threshold>
+	<Blur>7</Blur>
 	<Number_of_erosions>0</Number_of_erosions>
 	<Number_of_dilations>0</Number_of_dilations>
-	<Draw_threshold>1</Draw_threshold>
+	<Draw_threshold>0</Draw_threshold>
 	<Point_0>0, 0</Point_0>
-	<Point_1>640, 0</Point_1>
-	<Point_2>640, 512</Point_2>
-	<Point_3>0, 512</Point_3>
+	<Point_1>320, 0</Point_1>
+	<Point_2>640, 0</Point_2>
+	<Point_3>0, 256</Point_3>
 	<Crop_Start__norm_>0, 0</Crop_Start__norm_>
 	<Crop_End__norm_>1, 1</Crop_End__norm_>
 <Cam-12/>
+<Point_4>320, 256</Point_4>
+	<Point_5>640, 256</Point_5>
+	<Point_6>0, 512</Point_6>
+	<Point_7>320, 512</Point_7>
+	<Point_8>640, 512</Point_8>
 </Cam-12>

@@ -78,6 +78,7 @@ void ofApp::setup(){
     vector<string> names;
     names.resize(14);
     
+    //All cameras set to single feed
     names[0] = "Cam-1";
     addresses[0] = "192.168.1.6";
     
@@ -119,6 +120,49 @@ void ofApp::setup(){
     
     names[13] = "Cam-14";
     addresses[13] = "192.168.1.6";
+    
+    //AVC Test Setup
+//    names[0] = "Cam-1";
+//    addresses[0] = "192.168.187.39";
+//    
+//    names[1] = "Cam-2";
+//    addresses[1] = "192.168.187.45";
+//    
+//    names[2] = "Cam-3";
+//    addresses[2] = "192.168.187.37";
+//    
+//    names[3] = "Cam-4";
+//    addresses[3] = "192.168.187.35";
+//    
+//    names[4] = "Cam-5";
+//    addresses[4] = "192.168.187.44";
+//    
+//    names[5] = "Cam-6";
+//    addresses[5] = "192.168.187.38";
+//    
+//    names[6] = "Cam-7";
+//    addresses[6] = "192.168.187.34";
+//    
+//    names[7] = "Cam-8";
+//    addresses[7] = "192.168.187.36";
+//    
+//    names[8] = "Cam-9";
+//    addresses[8] = "192.168.187.47";
+//    
+//    names[9] = "Cam-10";
+//    addresses[9] = "192.168.187.46";
+//    
+//    names[10] = "Cam-11";
+//    addresses[10] = "192.168.187.39";
+//    
+//    names[11] = "Cam-12";
+//    addresses[11] = "192.168.187.45";
+//    
+//    names[12] = "Cam-13";
+//    addresses[12] = "192.168.187.37";
+//    
+//    names[13] = "Cam-14";
+//    addresses[13] = "192.168.187.35";
     
     
     
