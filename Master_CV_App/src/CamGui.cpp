@@ -16,19 +16,20 @@ void CamGui::setup(string name, bool solo){
     //param 1 = gui title, param 2 = filename, then 3&4 = startposition
     gui.setup(guiName, guiName + ".xml", 0, 0);
     
-    gui.add(thresholdSlider.setup("Threshold", 0, 0, 255));
-    gui.add(blurAmountSlider.setup("Blur", 1, 0, 50));
-    gui.add(numErosionsSlider.setup("Number of erosions", 0, 0, 10));
-    gui.add(numDilationsSlider.setup("Number of dilations", 0, 0, 10));
-    gui.add(drawThresholdToggle.setup("Draw threshold", false));
-    
     if(solo){
+        gui.add(thresholdSlider.setup("Threshold", 0, 0, 255));
+        gui.add(blurAmountSlider.setup("Blur", 1, 0, 50));
+        gui.add(numErosionsSlider.setup("Number of erosions", 0, 0, 10));
+        gui.add(numDilationsSlider.setup("Number of dilations", 0, 0, 10));
+        gui.add(drawThresholdToggle.setup("Draw threshold", false));
+    
         gui.add(minBlobAreaSlider.setup("Min Blob Area", 0, 0, 1000));
         gui.add(maxBlobAreaSlider.setup("Max Blob Area", 50000, 0, 100000));
         gui.add(persistenceSlider.setup("Persistence", 15, 0, 100));
         gui.add(maxDistanceSlider.setup("Max Distance", 32, 0, 100));
         gui.add(drawContoursToggle.setup("Draw Contours", true));
         gui.add(showInfoToggle.setup("Info", false));
+        
     } else {
         gui.add(cropStart.setup("Crop Start (norm)", ofVec2f(0, 0), ofVec2f(0, 0), ofVec2f(1.0, 1.0)));
         gui.add(cropEnd.setup("Crop End (norm)", ofVec2f(1.0, 1.0), ofVec2f(0, 0), ofVec2f(1.0, 1.0)));
@@ -47,6 +48,8 @@ void CamGui::setup(string name, bool solo){
     gui.add(mapPt6.setup("Point 6", ofVec2f(0, feedHeight), ofVec2f(0, 0), feedDim));
     gui.add(mapPt7.setup("Point 7", ofVec2f(feedWidth/2, feedHeight), ofVec2f(0, 0), feedDim));
     gui.add(mapPt8.setup("Point 8", ofVec2f(feedWidth, feedHeight), ofVec2f(0, 0), feedDim));
+    
+    
     
 }
 

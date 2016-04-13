@@ -65,7 +65,7 @@ public:
     ofxCv::ContourFinder contours;
     
     
-    ofImage masterImg;
+    ofImage blurredMasterImg, threshMasterImg;
     int overallWidth;
     int overallHeight;
     
@@ -119,6 +119,7 @@ public:
     ofxIntSlider maxBlobAreaSlider;
     ofxIntSlider persistenceSlider;
     ofxIntSlider maxDistanceSlider;
+    ofxToggle drawBlurredToggle;
     ofxToggle drawThresholdToggle;
     ofxToggle drawContoursToggle;
     ofxToggle showInfoToggle;

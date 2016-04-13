@@ -203,14 +203,18 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     cameraGui.loadSettings();
     
     
+    //camera starting/restarting
     started = false;
+    connectionStale = false;
     numFramesRec = 0;
-    
+    lastFrameTime = 0;
+    connectionTime = 0;
+    timeBeforeReset = 5000;
     
     
     
     //start the image processing thread
-    imageProcessor.setup(&threadOutput, &contours, soloCam);
+    if(soloCam) imageProcessor.setup(&threadOutput, &contours, soloCam);
     
 }
 
@@ -313,7 +317,9 @@ void Camera::update(){
         
     }
     
-    
+    //convenience variables to hold the cropped area dimensions
+    croppedWidth = cropEnd.x - cropStart.x;
+    croppedHeight = cropEnd.y - cropStart.y;
     
     
     //update the feed/movie
@@ -323,18 +329,29 @@ void Camera::update(){
             gst.update();
         }
         
-        if(!started && ofGetElapsedTimeMillis() > staggerTime){
+        if(!started && !connectionStale && ofGetElapsedTimeMillis() > staggerTime){
             started = true;
             setupFeed();
         }
         
+        //if we've started but havent received a new
+        //frame in a while, shut down the feed
+//        if(started && ofGetElapsedTimeMillis() - lastFrameTime > timeBeforeReset){
+//            
+//            cout << "\n\n" << name << ": Gone stale, closing\n\n" << endl;
+//            closeFeed();
+//            connectionStale = true;
+//            started = false;
+//            
+//        }
+
+        
+        
+
+        
     } else {
         movie.update();
     }
-    
-    
-    
-    //update the image processing thread
     
     
     
@@ -345,8 +362,8 @@ void Camera::update(){
         
         numFramesRec++;
         
-        cameraFPS = (int)(1/(ofGetElapsedTimef() - lastFrameTime));
-        lastFrameTime = ofGetElapsedTimef();
+        cameraFPS = (int)(1/(ofGetElapsedTimef() - (float)lastFrameTime/1000.0f));
+        lastFrameTime = ofGetElapsedTimeMillis();
         
         
         //get texture from feed
@@ -394,35 +411,46 @@ void Camera::update(){
         fbo.readToPixels(fboPix);
         
         
-        //construct a vector of ints with all the settings
-        vector<int> settings;
-        settings.resize(12);
+        //if we're a solo camera use the thread to do CV stuff
+        //other wise, just crop the pixels to be sent to the aggregate
+        if(soloCam){
         
-        settings[0] = cameraGui.thresholdSlider;
-        settings[1] = cameraGui.blurAmountSlider;
-        settings[2] = cameraGui.numErosionsSlider;
-        settings[3] = cameraGui.numDilationsSlider;
-        settings[4] = cameraGui.minBlobAreaSlider;
-        settings[5] = cameraGui.maxBlobAreaSlider;
-        settings[6] = cameraGui.persistenceSlider;
-        settings[7] = cameraGui.maxDistanceSlider;
-        settings[8] = (int)(cameraGui.cropStart -> x * scaledWidth);
-        settings[9] = (int)(cameraGui.cropStart -> y * scaledHeight);
-        settings[10] = (int)(cameraGui.cropEnd -> x * scaledWidth);
-        settings[11] = (int)(cameraGui.cropEnd -> y * scaledHeight);
+            //construct a vector of ints with all the settings
+            vector<int> settings;
+            settings.resize(12);
+            
+            settings[0] = (soloCam == true ? cameraGui.thresholdSlider : 0);
+            settings[1] = cameraGui.blurAmountSlider;
+            settings[2] = cameraGui.numErosionsSlider;
+            settings[3] = cameraGui.numDilationsSlider;
+            settings[4] = cameraGui.minBlobAreaSlider;
+            settings[5] = cameraGui.maxBlobAreaSlider;
+            settings[6] = cameraGui.persistenceSlider;
+            settings[7] = cameraGui.maxDistanceSlider;
+            settings[8] = (int)(cameraGui.cropStart -> x * scaledWidth);
+            settings[9] = (int)(cameraGui.cropStart -> y * scaledHeight);
+            settings[10] = (int)(cameraGui.cropEnd -> x * scaledWidth);
+            settings[11] = (int)(cameraGui.cropEnd -> y * scaledHeight);
 
-        
-        //pass the fbo pixels to the processing thread
-        imageProcessor.analyze(fboPix, settings);
-                
+            //pass the fbo pixels to the processing thread
+            imageProcessor.analyze(fboPix, settings);
+            
+        } else {
+            
+            //just manually fill the threadOutput pixels
+            //with the crop from the fboPix
+            fboPix.cropTo(threadOutput, cropStart.x, cropStart.y, croppedWidth, croppedHeight);
+            
+        }
     }
     
     
     //Update the image processing thread
     //this will automatically fill threadOutput (and contours if soloCam = true)
     //with new data as it works
-    imageProcessor.update();
+    if(soloCam) imageProcessor.update();
     
+
     
     if((*viewMode) == thisView){
         ofRegisterMouseEvents(this);
@@ -507,9 +535,7 @@ void Camera::update(){
         corridorBundle.addBundle(blobsBundle);
     }
     
-    //convenience variables to hold the cropped area dimensions
-    croppedWidth = cropEnd.x - cropStart.x;
-    croppedHeight = cropEnd.y - cropStart.y;
+
     
 }
 
@@ -570,17 +596,7 @@ void Camera::drawMain(){
     }
     
     
-    string title;
-    if(soloCam){
-        title = "Threshold + Contours (Scaled to: " + ofToString(scaledWidth) + "x" + ofToString(scaledHeight) + ")";
-    } else {
-        
 
-        title = "Threshold + Contours (Cropped to: " + ofToString(croppedWidth) + "x" + ofToString(croppedHeight) + ")";
-    }
-    ofSetColor(255);
-    ofDrawBitmapString(title, secondSpot.x, secondSpot.y + 10);
-    
     
     //shrink down images just for display purposes
     float scale;
@@ -592,13 +608,39 @@ void Camera::drawMain(){
     
     drawCV(secondSpot.x, secondSpot.y + titleSpace, scale);
     
-    if(soloCam){
-        //draw num blobs under CV image
-        ofSetColor(255);
-        ofDrawBitmapString("Num Blobs: " + ofToString(contours.size()), secondSpot.x, secondSpot.y + scaledHeight + titleSpace + 20);
-    }
     
     drawGui(15, adjustedOrigin.y);
+    
+    
+    
+    
+    //debug info:
+    
+    string title;
+    if(soloCam){
+        title = "Threshold + Contours (Scaled to: " + ofToString(scaledWidth) + "x" + ofToString(scaledHeight) + ")";
+        
+        // anddraw num blobs under CV image
+        ofSetColor(255);
+        ofDrawBitmapString("Num Blobs: " + ofToString(contours.size()), secondSpot.x, secondSpot.y + scaledHeight + titleSpace + 20);
+        
+    } else {
+        
+        
+        title = "Threshold + Contours (Cropped to: " + ofToString(croppedWidth) + "x" + ofToString(croppedHeight) + ")";
+    }
+    
+    
+    ofSetColor(255);
+    ofDrawBitmapString(title, secondSpot.x, secondSpot.y + 10);
+    
+    ofDrawBitmapString("Num Frames Received: " + ofToString(numFramesRec), secondSpot.x, 15);
+    ofDrawBitmapString("CV Thread ID: " + ofToString(imageProcessor.getThreadId()), secondSpot.x, 30);
+    ofDrawBitmapString("Last Data from Thread: " + ofToString(ofGetElapsedTimef() - imageProcessor.lastDataSendTime/1000) + " seconds ago", secondSpot.x, 45);
+    
+
+    
+
     
     
     
@@ -637,6 +679,7 @@ void Camera::drawRaw(int x, int y){
     //draw lines between points
     ofSetColor(mappingCol);
     ofSetLineWidth(0.5);
+    
     ofMesh mapLines;
     
     //we're actually manipulating texcoords so those
@@ -779,9 +822,8 @@ void Camera::drawCV(int x, int y, float scale){
     drawCroppedTex(cropStart);
 
 
-    
-        
     threadOutputImg.setFromPixels(threadOutput);
+    
 
     if(cameraGui.drawThresholdToggle){
         threadOutputImg.draw(cropStart);

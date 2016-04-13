@@ -1,20 +1,21 @@
 <Lobby1Aggregate>
-	<Min_Blob_Area>0</Min_Blob_Area>
+	<Min_Blob_Area>25</Min_Blob_Area>
 	<Max_Blob_Area>50000</Max_Blob_Area>
 	<Persistence>15</Persistence>
 	<Max_Distance>32</Max_Distance>
 	<Draw_threshold>0</Draw_threshold>
 	<Draw_Contours>1</Draw_Contours>
-	<Info>0</Info>
-	<Cam1_Pos>0, 0</Cam1_Pos>
-	<Cam2_Pos>236, 0</Cam2_Pos>
-	<Cam3_Pos>512, 0</Cam3_Pos>
-	<Cam4_Pos>0, 254</Cam4_Pos>
-	<Cam5_Pos>243, 227</Cam5_Pos>
-	<Cam6_Pos>555, 230</Cam6_Pos>
+	<Info>1</Info>
+	<Cam1_Pos>9, 22</Cam1_Pos>
+	<Cam2_Pos>229, 20</Cam2_Pos>
+	<Cam3_Pos>432, 11</Cam3_Pos>
+	<Cam4_Pos>10, 200</Cam4_Pos>
+	<Cam5_Pos>230, 203</Cam5_Pos>
+	<Cam6_Pos>436, 207</Cam6_Pos>
 <Lobby1Aggregate/>
-<Threshold>0</Threshold>
-	<Blur>1</Blur>
+<Threshold>72</Threshold>
+	<Blur>12</Blur>
 	<Number_of_erosions>0</Number_of_erosions>
-	<Number_of_dilations>0</Number_of_dilations>
+	<Number_of_dilations>1</Number_of_dilations>
+<Draw_blurred>0</Draw_blurred>
 </Lobby1Aggregate>

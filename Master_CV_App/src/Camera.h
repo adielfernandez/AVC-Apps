@@ -22,7 +22,7 @@
 #include "ofGstVideoPlayer.h"
 #include "ofxCv.h"
 #include "ofxOpencv.h"
-#include "ThreadedCV.hpp"
+#include "ThreadedSoloCV.hpp"
 
 #pragma once
 
@@ -57,7 +57,7 @@ public:
     void drawMain();
     
     //helpers to draw selected bits:
-    
+
     //raw image (with quad mapping)
     void drawRaw(int x, int y);
     
@@ -119,8 +119,13 @@ public:
     //-----Camera Stream-----
     int staggerTime;
     bool started;
+    int timeBeforeReset;
+    bool connectionStale;
+    unsigned long long lastFrameTime;
     unsigned long long numFramesRec;
-
+    unsigned long long connectionTime;
+    int cameraFPS;
+    
     int feedWidth, feedHeight;
     int scaledWidth, scaledHeight;
     int croppedWidth, croppedHeight;
@@ -174,9 +179,9 @@ public:
     //for drawing the image to screen
     ofImage threadOutputImg;
     
-    //takes in the quad mapped pixels
+    //takes in the mapped pixels
     //outputs threshold and contours
-    ThreadedCV imageProcessor;
+    ThreadedSoloCV imageProcessor;
     
     //what we'll get from the
     //image processing thread
@@ -199,8 +204,7 @@ public:
     //-----Gui-----
     CamGui cameraGui;
     bool bShowGui;
-    float lastFrameTime;
-    int cameraFPS;
+
 
     
     
