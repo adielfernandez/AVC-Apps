@@ -1,6 +1,6 @@
 <Cam-8>
-	<Threshold>104</Threshold>
-	<Blur>11</Blur>
+	<Threshold>67</Threshold>
+	<Blur>7</Blur>
 	<Number_of_erosions>0</Number_of_erosions>
 	<Number_of_dilations>0</Number_of_dilations>
 	<Draw_threshold>0</Draw_threshold>

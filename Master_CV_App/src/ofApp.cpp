@@ -8,6 +8,7 @@ void ofApp::exit(){
     
     for(int i = 0; i < cameras.size(); i++){
         cameras[i] -> closeFeed();
+        cameras[i] -> imageProcessor.stopThread();
     }
     
 }
@@ -79,90 +80,90 @@ void ofApp::setup(){
     names.resize(14);
     
     //All cameras set to single feed
-    names[0] = "Cam-1";
-    addresses[0] = "192.168.1.6";
-    
-    names[1] = "Cam-2";
-    addresses[1] = "192.168.1.6";
-    
-    names[2] = "Cam-3";
-    addresses[2] = "192.168.1.6";
-    
-    names[3] = "Cam-4";
-    addresses[3] = "192.168.1.6";
-    
-    names[4] = "Cam-5";
-    addresses[4] = "192.168.1.6";
-    
-    names[5] = "Cam-6";
-    addresses[5] = "192.168.1.6";
-    
-    names[6] = "Cam-7";
-    addresses[6] = "192.168.1.6";
-    
-    names[7] = "Cam-8";
-    addresses[7] = "192.168.1.6";
-    
-    names[8] = "Cam-9";
-    addresses[8] = "192.168.1.6";
-    
-    names[9] = "Cam-10";
-    addresses[9] = "192.168.1.6";
-    
-    names[10] = "Cam-11";
-    addresses[10] = "192.168.1.6";
-    
-    names[11] = "Cam-12";
-    addresses[11] = "192.168.1.6";
-    
-    names[12] = "Cam-13";
-    addresses[12] = "192.168.1.6";
-    
-    names[13] = "Cam-14";
-    addresses[13] = "192.168.1.6";
-    
-    //AVC Test Setup
 //    names[0] = "Cam-1";
-//    addresses[0] = "192.168.187.39";
+//    addresses[0] = "192.168.1.6";
 //    
 //    names[1] = "Cam-2";
-//    addresses[1] = "192.168.187.45";
+//    addresses[1] = "192.168.1.6";
 //    
 //    names[2] = "Cam-3";
-//    addresses[2] = "192.168.187.37";
+//    addresses[2] = "192.168.1.6";
 //    
 //    names[3] = "Cam-4";
-//    addresses[3] = "192.168.187.35";
+//    addresses[3] = "192.168.1.6";
 //    
 //    names[4] = "Cam-5";
-//    addresses[4] = "192.168.187.44";
+//    addresses[4] = "192.168.1.6";
 //    
 //    names[5] = "Cam-6";
-//    addresses[5] = "192.168.187.38";
+//    addresses[5] = "192.168.1.6";
 //    
 //    names[6] = "Cam-7";
-//    addresses[6] = "192.168.187.34";
+//    addresses[6] = "192.168.1.6";
 //    
 //    names[7] = "Cam-8";
-//    addresses[7] = "192.168.187.36";
+//    addresses[7] = "192.168.1.6";
 //    
 //    names[8] = "Cam-9";
-//    addresses[8] = "192.168.187.47";
+//    addresses[8] = "192.168.1.6";
 //    
 //    names[9] = "Cam-10";
-//    addresses[9] = "192.168.187.46";
+//    addresses[9] = "192.168.1.6";
 //    
 //    names[10] = "Cam-11";
-//    addresses[10] = "192.168.187.39";
+//    addresses[10] = "192.168.1.6";
 //    
 //    names[11] = "Cam-12";
-//    addresses[11] = "192.168.187.45";
+//    addresses[11] = "192.168.1.6";
 //    
 //    names[12] = "Cam-13";
-//    addresses[12] = "192.168.187.37";
+//    addresses[12] = "192.168.1.6";
 //    
 //    names[13] = "Cam-14";
-//    addresses[13] = "192.168.187.35";
+//    addresses[13] = "192.168.1.6";
+    
+    //AVC Test Setup
+    names[0] = "Cam-1";
+    addresses[0] = "192.168.187.39";
+    
+    names[1] = "Cam-2";
+    addresses[1] = "192.168.187.45";
+    
+    names[2] = "Cam-3";
+    addresses[2] = "192.168.187.37";
+    
+    names[3] = "Cam-4";
+    addresses[3] = "192.168.187.35";
+    
+    names[4] = "Cam-5";
+    addresses[4] = "192.168.187.44";
+    
+    names[5] = "Cam-6";
+    addresses[5] = "192.168.187.38";
+    
+    names[6] = "Cam-7";
+    addresses[6] = "192.168.187.34";
+    
+    names[7] = "Cam-8";
+    addresses[7] = "192.168.187.36";
+    
+    names[8] = "Cam-9";
+    addresses[8] = "192.168.187.47";
+    
+    names[9] = "Cam-10";
+    addresses[9] = "192.168.187.46";
+    
+    names[10] = "Cam-11";
+    addresses[10] = "192.168.187.39";
+    
+    names[11] = "Cam-12";
+    addresses[11] = "192.168.187.45";
+    
+    names[12] = "Cam-13";
+    addresses[12] = "192.168.187.37";
+    
+    names[13] = "Cam-14";
+    addresses[13] = "192.168.187.35";
     
     
     
@@ -183,7 +184,7 @@ void ofApp::setup(){
     useLiveFeed = true;
     
     //set up actual feeds
-    int stagger = 250;
+    int stagger = 200;
     
     //set up the cameras
     for(int i = 0; i < numFeeds; i++){
@@ -361,6 +362,20 @@ void ofApp::setup(){
     allLabelsPos[4] = allCamsPos[9];
     allLabelsPos[5] = allCamsPos[10];
     
+    
+    
+    //UI Viewability
+    //Go through all GUIs and minimize all parameters
+    //so long guis dont interfere with visuals
+    //cameras
+    for(int i = 0; i < cameras.size(); i++){
+        cameras[i] -> cameraGui.gui.minimizeAll();
+    }
+    //aggregators
+    Lobby1Aggregate.gui.minimizeAll();
+    Lobby2Aggregate.gui.minimizeAll();
+    
+    
 }
 
 //===============================================================//
@@ -453,7 +468,9 @@ void ofApp::draw(){
         
         currentViewTitle = "Lobby 1 Aggregate";
         
+
         Lobby1Aggregate.drawRaw(mainContentPos.x, mainContentPos.y);
+        
         Lobby1Aggregate.drawCV(mainContentPos.x, mainContentPos.y);
         
         Lobby1Aggregate.drawGui(15, topMargin);
@@ -467,7 +484,7 @@ void ofApp::draw(){
         
     } else if(viewMode == 15){
         
-        //CORRIDOR 1 AGGREGATION
+        //CORRIDOR 2 AGGREGATION
         ofBackgroundGradient(80, 0);
 
         currentViewTitle = "Lobby 2 Aggregate";
@@ -843,6 +860,8 @@ void ofApp::keyPressed(int key){
         cout << "Cameras, Aggregates and OSC settings saved" << endl;
     }
     
+    
+
     
 }
 

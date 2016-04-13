@@ -114,6 +114,7 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
     gui.add(maxBlobAreaSlider.setup("Max Blob Area", 25000, 0, 50000));
     gui.add(persistenceSlider.setup("Persistence", 15, 0, 100));
     gui.add(maxDistanceSlider.setup("Max Distance", 32, 0, 100));
+    gui.add(drawBlurredToggle.setup("Draw blurred", false));
     gui.add(drawThresholdToggle.setup("Draw threshold", false));
     gui.add(drawContoursToggle.setup("Draw Contours", true));
     gui.add(showInfoToggle.setup("Info", false));
@@ -273,15 +274,20 @@ void Aggregator::update(){
     // an object can move up to ___ pixels per frame
     contours.getTracker().setMaximumDistance(maxDistanceSlider);
     
-    //find dem blobs
+    //find dem blob
     contours.findContours(threshMaster);
     
 
     
     //load pixels into an image just for drawing
+    if(drawBlurredToggle){
+        blurredMasterImg.allocate(blurredMaster.getWidth(), blurredMaster.getHeight(), OF_IMAGE_GRAYSCALE);
+        blurredMasterImg.setFromPixels(blurredMaster);
+    }
+    
     if(drawThresholdToggle){
-        masterImg.allocate(masterPix.getWidth(), masterPix.getHeight(), OF_IMAGE_GRAYSCALE);
-        masterImg.setFromPixels(masterPix);
+        threshMasterImg.allocate(threshMaster.getWidth(), threshMaster.getHeight(), OF_IMAGE_GRAYSCALE);
+        threshMasterImg.setFromPixels(threshMaster);
     }
     
     
@@ -400,7 +406,6 @@ void Aggregator::drawRaw(int x, int y){
         ofSetColor(255);
         ofDrawBitmapString("Cam " + ofToString(indices[i] + 1), positions[i].x + 5, positions[i].y + 12);
         
-        
     }
     
     
@@ -419,13 +424,17 @@ void Aggregator::drawCV(int x, int y){
     ofTranslate(x, y);
 
     
+    if(drawBlurredToggle){
+        
+        ofSetColor(255);
+        blurredMasterImg.draw(0, 0);
+        
+    }
     
     if(drawThresholdToggle){
         
-
-
         ofSetColor(255);
-        masterImg.draw(0, 0);
+        threshMasterImg.draw(0, 0);
         
     }
     

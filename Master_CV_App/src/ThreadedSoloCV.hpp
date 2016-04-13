@@ -1,17 +1,17 @@
 //
-//  ThreadedCV.hpp
+//  ThreadedSoloCV.hpp
 //  Master_CV_App
 //
-//  Created by TERRELBY on 3/23/16.
+//  Created by TERRELBY on 4/13/16.
 //
 //
 
-#ifndef ThreadedCV_hpp
-#define ThreadedCV_hpp
+#ifndef ThreadedSoloCV_hpp
+#define ThreadedSoloCV_hpp
 
 #include <stdio.h>
 
-#endif /* ThreadedCV_hpp */
+#endif /* ThreadedSoloCV_hpp */
 
 #include "ofMain.h"
 #include "ofxCv.h"
@@ -34,17 +34,18 @@
  */
 
 
-class ThreadedCV: public ofThread{
+class ThreadedSoloCV: public ofThread{
     
 public:
     
-    ThreadedCV();
-    ~ThreadedCV();
+    ThreadedSoloCV();
+    ~ThreadedSoloCV();
     
     void setup(ofPixels *_mainThreadPix, ofxCv::ContourFinder *_mainThreadCons, bool solo);
     void analyze(ofPixels & pix, vector<int> & settings);
     void update();
     
+    unsigned long long lastDataSendTime;
     
 private:
     
@@ -61,7 +62,7 @@ private:
     ofxCv::ContourFinder *mainThreadContours;
     
     void threadedFunction();
-
+    
     ofPixels threshPix;
     ofxCv::ContourFinder contours;
     
@@ -84,7 +85,7 @@ private:
     
     bool soloCam;
     
-    unsigned long lastFrameTime;
+    
 };
 
 
