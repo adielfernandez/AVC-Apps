@@ -39,7 +39,7 @@
 		8929C79F1CA5AC570024DA93 /* Button.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8929C79D1CA5AC570024DA93 /* Button.cpp */; };
 		8929C7A21CA5C0CD0024DA93 /* NavPanel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8929C7A01CA5C0CD0024DA93 /* NavPanel.cpp */; };
 		8929C7A51CA5D7F40024DA93 /* SubPanel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8929C7A31CA5D7F40024DA93 /* SubPanel.cpp */; };
-		89E059411CBEEA12002C0B87 /* ThreadedSoloCV.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 89E0593F1CBEEA12002C0B87 /* ThreadedSoloCV.cpp */; };
+		89E059411CBEEA12002C0B87 /* ThreadedCV.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 89E0593F1CBEEA12002C0B87 /* ThreadedCV.cpp */; };
 		89E6E37E1CAC58F6005630C1 /* PlaybackBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 89E6E37C1CAC58F6005630C1 /* PlaybackBar.cpp */; };
 		8F5205AEF8861EF234F0651A /* ofxOscSender.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 81967292BFC87A0144BD32C6 /* ofxOscSender.cpp */; };
 		9D99424B122DE3C1D83A3670 /* ofGstVideoGrabber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F198996ED5C849097CC1ABB5 /* ofGstVideoGrabber.cpp */; };
@@ -234,8 +234,8 @@
 		8929C7A31CA5D7F40024DA93 /* SubPanel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SubPanel.cpp; sourceTree = "<group>"; };
 		8929C7A41CA5D7F40024DA93 /* SubPanel.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SubPanel.hpp; sourceTree = "<group>"; };
 		89449E3044D456F7DE7BEA14 /* ofxPanel.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxPanel.h; path = ../../../addons/ofxGui/src/ofxPanel.h; sourceTree = SOURCE_ROOT; };
-		89E0593F1CBEEA12002C0B87 /* ThreadedSoloCV.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ThreadedSoloCV.cpp; sourceTree = "<group>"; };
-		89E059401CBEEA12002C0B87 /* ThreadedSoloCV.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ThreadedSoloCV.hpp; sourceTree = "<group>"; };
+		89E0593F1CBEEA12002C0B87 /* ThreadedCV.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ThreadedCV.cpp; sourceTree = "<group>"; };
+		89E059401CBEEA12002C0B87 /* ThreadedCV.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ThreadedCV.hpp; sourceTree = "<group>"; };
 		89E6E37C1CAC58F6005630C1 /* PlaybackBar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlaybackBar.cpp; sourceTree = "<group>"; };
 		89E6E37D1CAC58F6005630C1 /* PlaybackBar.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PlaybackBar.hpp; sourceTree = "<group>"; };
 		8A4DD23693DFAB8EC05FAA5D /* ofxCvShortImage.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = ofxCvShortImage.cpp; path = ../../../addons/ofxOpenCv/src/ofxCvShortImage.cpp; sourceTree = SOURCE_ROOT; };
@@ -1049,8 +1049,8 @@
 				E4B69E1E0A3A1BDC003C02F2 /* ofApp.cpp */,
 				8929C7831CA1EA540024DA93 /* Camera.h */,
 				8929C7821CA1EA540024DA93 /* Camera.cpp */,
-				89E059401CBEEA12002C0B87 /* ThreadedSoloCV.hpp */,
-				89E0593F1CBEEA12002C0B87 /* ThreadedSoloCV.cpp */,
+				89E059401CBEEA12002C0B87 /* ThreadedCV.hpp */,
+				89E0593F1CBEEA12002C0B87 /* ThreadedCV.cpp */,
 				8929C7851CA1EA540024DA93 /* CamGui.h */,
 				8929C7841CA1EA540024DA93 /* CamGui.cpp */,
 				8912C3771CAEEDE6006D8BE4 /* Aggregator.hpp */,
@@ -1280,7 +1280,7 @@
 				8F5205AEF8861EF234F0651A /* ofxOscSender.cpp in Sources */,
 				ADE367465D2A8EBAD4C7A8D9 /* IpEndpointName.cpp in Sources */,
 				67FE4C7B15C2F0478C8126C2 /* NetworkingUtils.cpp in Sources */,
-				89E059411CBEEA12002C0B87 /* ThreadedSoloCV.cpp in Sources */,
+				89E059411CBEEA12002C0B87 /* ThreadedCV.cpp in Sources */,
 				510CAFE035E576A4E1502D52 /* UdpSocket.cpp in Sources */,
 				62545D179C94265CA1389D4A /* OscOutboundPacketStream.cpp in Sources */,
 				C4782ECC372420ACE0615B74 /* OscPrintReceivedElements.cpp in Sources */,

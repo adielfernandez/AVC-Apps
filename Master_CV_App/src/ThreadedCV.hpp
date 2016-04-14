@@ -1,17 +1,17 @@
 //
-//  ThreadedSoloCV.hpp
+//  ThreadedCV.hpp
 //  Master_CV_App
 //
 //  Created by TERRELBY on 4/13/16.
 //
 //
 
-#ifndef ThreadedSoloCV_hpp
-#define ThreadedSoloCV_hpp
+#ifndef ThreadedCV_hpp
+#define ThreadedCV_hpp
 
 #include <stdio.h>
 
-#endif /* ThreadedSoloCV_hpp */
+#endif /* ThreadedCV_hpp */
 
 #include "ofMain.h"
 #include "ofxCv.h"
@@ -28,20 +28,19 @@
  *          -Blur amt, threshold, etc.
  *
  *  OUTPUT:
- *      -if soloCam: Thresholded ofPixels
- *      -            & Contours
- *      -if !soloCam: Cropped pixels (no threshold)
+ *      -Thresholded ofPixels
+ *      -Contours
  */
 
 
-class ThreadedSoloCV: public ofThread{
+class ThreadedCV: public ofThread{
     
 public:
     
-    ThreadedSoloCV();
-    ~ThreadedSoloCV();
+    ThreadedCV();
+    ~ThreadedCV();
     
-    void setup(ofPixels *_mainThreadPix, ofxCv::ContourFinder *_mainThreadCons, bool solo);
+    void setup(ofPixels *_mainThreadPix, ofxCv::ContourFinder *_mainThreadCons);
     void analyze(ofPixels & pix, vector<int> & settings);
     void update();
     
@@ -70,10 +69,13 @@ private:
     ofPixels threadPixels;
     ofPixels blurredPix;
     
-    int threshold;
     int blurAmt;
     int numErosions;
     int numDilations;
+    int learningTime;
+    bool useBgDiff;
+    bool resetBG;
+    int threshold;
     int minBlobArea;
     int maxBlobArea;
     int persistence;
@@ -83,8 +85,7 @@ private:
     int cropEndX;
     int cropEndY;
     
-    bool soloCam;
-    
+    ofxCv::RunningBackground background;
     
 };
 

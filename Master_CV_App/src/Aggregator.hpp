@@ -18,6 +18,7 @@
 #include "ofxCv.h"
 #include "Camera.h"
 #include "ofxOsc.h"
+#include "ThreadedCV.hpp"
 
 #pragma once
 
@@ -44,6 +45,7 @@ public:
     void drawRaw(int x, int y);
     void drawCV(int x, int y);
     
+
     
     //view control
     int *viewMode;
@@ -57,29 +59,41 @@ public:
     int feedWidth, feedHeight;
     int scaledWidth, scaledHeight;
     
-    //master ofPixels object for aggregate
+    //Where to get the feeds
+    vector<shared_ptr<Camera>> cams;
+    
+    //a helper vector to hold the indices of the cameras we're using
+    //corridor one: cams 0, 1, 2, 3, 4, 5
+    //corridor six: cams 10, 11, 12, 13
+    vector<int> indices;
+    
+    //where all the feeds will be
+    //pasted into the aggregate
+    vector<ofVec2f> positions;
+    
+    
+    //CV Objects for aggregate
     ofPixels masterPix;
     ofPixels blurredMaster;
     ofPixels threshMaster;
     
+    ofImage threshMasterImg;
+    int overallWidth;
+    int overallHeight;
+
     ofxCv::ContourFinder contours;
     
     
-    ofImage blurredMasterImg, threshMasterImg;
-    int overallWidth;
-    int overallHeight;
+    //threaded CV processor
+    ThreadedCV aggregateProcessor;
+    ofPixels threadOutputPix;
+    unsigned long long lastAnalyzeTime;
     
-    //Image Data
-    //control
-    vector<shared_ptr<Camera>> cams;
-    vector<int> indices;
-    
-
-    vector<ofVec2f> positions;
+    //-----Mouse Handling-----
     
     //This holds the upper left corner
-    //of the content area where the camera/quad
-    //is drawn on screen.
+    //of the content area where the
+    //camera/quad is drawn on screen.
     ofVec2f adjustedOrigin;
     
     //This holds the adjusted mouse so clicks
@@ -91,38 +105,49 @@ public:
     ofColor handleCol, grabbedCol;
     
     
-    //Blob Stats
+    //-----OSC Data gathering-----
+    void gatherOscStats();
+
+        //Blob Stats
     ofVec2f avgDir;
     ofVec2f avgPos;
     ofVec2f avgVel;
     float avgSpeed;
     
-    //osc bundles to prepare
+        //osc bundles to prepare
     ofxOscMessage corridorStats;
     ofxOscBundle corridorBundle;
     ofxOscBundle blobsBundle;
     
-    //Gui
+    
+    
+    //-----Gui-----
     void drawGui(int x, int y);
     void loadSettings();
     void saveSettings();
     
     string guiName;
-    
     ofxPanel gui;
-    
-    ofxIntSlider thresholdSlider;
+    ofxLabel manipulationLabel;
     ofxIntSlider blurAmountSlider;
     ofxIntSlider numErosionsSlider;
     ofxIntSlider numDilationsSlider;
+    
+    ofxLabel bgDiffLabel;
+    ofxIntSlider learningTime;
+    ofxButton resetBG;
+    ofxToggle useBgDiff;
+    ofxIntSlider thresholdSlider;
+    ofxToggle drawThresholdToggle;
+    
+    ofxLabel contoursLabel;
     ofxIntSlider minBlobAreaSlider;
     ofxIntSlider maxBlobAreaSlider;
     ofxIntSlider persistenceSlider;
     ofxIntSlider maxDistanceSlider;
-    ofxToggle drawBlurredToggle;
-    ofxToggle drawThresholdToggle;
     ofxToggle drawContoursToggle;
     ofxToggle showInfoToggle;
+
     ofxVec2Slider camPos1;
     ofxVec2Slider camPos2;
     ofxVec2Slider camPos3;

@@ -20,4 +20,8 @@
 	<Point_6>0, 512</Point_6>
 	<Point_7>320, 512</Point_7>
 	<Point_8>640, 512</Point_8>
+<Background_Differencing/>
+	<Frames_to_learn_BG>100</Frames_to_learn_BG>
+	<Use_BG_Diff>0</Use_BG_Diff>
+	<Contour_Finding/>
 </Cam-9>

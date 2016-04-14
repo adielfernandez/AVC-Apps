@@ -214,7 +214,7 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     
     
     //start the image processing thread
-    if(soloCam) imageProcessor.setup(&threadOutput, &contours, soloCam);
+    if(soloCam) imageProcessor.setup(&threadOutput, &contours);
     
 }
 
@@ -417,20 +417,20 @@ void Camera::update(){
         
             //construct a vector of ints with all the settings
             vector<int> settings;
-            settings.resize(12);
+            settings.resize(11);
             
-            settings[0] = (soloCam == true ? cameraGui.thresholdSlider : 0);
-            settings[1] = cameraGui.blurAmountSlider;
-            settings[2] = cameraGui.numErosionsSlider;
-            settings[3] = cameraGui.numDilationsSlider;
-            settings[4] = cameraGui.minBlobAreaSlider;
-            settings[5] = cameraGui.maxBlobAreaSlider;
-            settings[6] = cameraGui.persistenceSlider;
-            settings[7] = cameraGui.maxDistanceSlider;
-            settings[8] = (int)(cameraGui.cropStart -> x * scaledWidth);
-            settings[9] = (int)(cameraGui.cropStart -> y * scaledHeight);
-            settings[10] = (int)(cameraGui.cropEnd -> x * scaledWidth);
-            settings[11] = (int)(cameraGui.cropEnd -> y * scaledHeight);
+            settings[0] = cameraGui.blurAmountSlider;
+            settings[1] = cameraGui.numErosionsSlider;
+            settings[2] = cameraGui.numDilationsSlider;
+            
+            settings[3] = cameraGui.learningTime;
+            settings[4] = cameraGui.useBgDiff;      //bool casted as int into vector
+            settings[5] = cameraGui.resetBG;        //bool casted as int into vector
+            settings[6] = cameraGui.thresholdSlider;
+            settings[7] = cameraGui.minBlobAreaSlider;
+            settings[8] = cameraGui.maxBlobAreaSlider;
+            settings[9] = cameraGui.persistenceSlider;
+            settings[10] = cameraGui.maxDistanceSlider;
 
             //pass the fbo pixels to the processing thread
             imageProcessor.analyze(fboPix, settings);
@@ -439,8 +439,8 @@ void Camera::update(){
             
             //just manually fill the threadOutput pixels
             //with the crop from the fboPix
+            fboPix.setImageType(OF_IMAGE_GRAYSCALE);
             fboPix.cropTo(threadOutput, cropStart.x, cropStart.y, croppedWidth, croppedHeight);
-            
         }
     }
     
@@ -807,33 +807,40 @@ void Camera::drawCV(int x, int y, float scale){
     //draw texture translucent and reddish
     ofSetColor(255, 100);
     mappedTex.draw(0, 0);
-    
 
     
-    //draw light red tint over the mappedTex then the crop on top
+    if(soloCam){
+        //draw the cropped texture
+        ofSetColor(255);
+        drawCroppedTex(cropStart);
+
+        if(cameraGui.drawThresholdToggle){
+            threadOutputImg.setFromPixels(threadOutput);
+            threadOutputImg.draw(cropStart);
+        }
+
+    } else {
+        
+        ofSetColor(255);
+        threadOutputImg.setFromPixels(threadOutput);
+        threadOutputImg.draw(cropStart);
+        
+    }
     
+    
+    //draw border around larger box
     ofNoFill();
     ofSetLineWidth(1);
     ofSetColor(mappingCol);
     ofDrawRectangle(0, 0, mappedTex.getWidth(), mappedTex.getHeight());
     ofFill();
     
-    ofSetColor(255);
-    drawCroppedTex(cropStart);
-
-
-    threadOutputImg.setFromPixels(threadOutput);
-    
-
-    if(cameraGui.drawThresholdToggle){
-        threadOutputImg.draw(cropStart);
-    }
-    
-    //draw border
+    //draw border around crop
     ofNoFill();
     ofSetLineWidth(0.5);
     ofSetColor(croppingCol);
-    ofDrawRectangle(cropStart, threadOutputImg.getWidth(), threadOutputImg.getHeight());
+    ofDrawRectangle(cropStart, croppedWidth, croppedHeight);
+
 
     
     if(cameraGui.drawContoursToggle){

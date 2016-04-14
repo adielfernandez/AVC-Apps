@@ -17,12 +17,20 @@ void CamGui::setup(string name, bool solo){
     gui.setup(guiName, guiName + ".xml", 0, 0);
     
     if(solo){
-        gui.add(thresholdSlider.setup("Threshold", 0, 0, 255));
+        gui.add(manipulationLabel.setup("   IMAGE DISTORTION", ""));
         gui.add(blurAmountSlider.setup("Blur", 1, 0, 50));
         gui.add(numErosionsSlider.setup("Number of erosions", 0, 0, 10));
         gui.add(numDilationsSlider.setup("Number of dilations", 0, 0, 10));
+        gui.add(thresholdSlider.setup("Threshold", 0, 0, 255));
         gui.add(drawThresholdToggle.setup("Draw threshold", false));
-    
+        
+        gui.add(bgDiffLabel.setup("   BG SUBTRACTION", ""));
+        gui.add(useBgDiff.setup("Use BG Diff", false));
+        gui.add(learningTime.setup("Frames to learn BG", 100, 0, 2000));
+        gui.add(resetBG.setup("Reset Background"));
+        
+        
+        gui.add(contoursLabel.setup("   CONTOUR FINDING", ""));
         gui.add(minBlobAreaSlider.setup("Min Blob Area", 0, 0, 1000));
         gui.add(maxBlobAreaSlider.setup("Max Blob Area", 50000, 0, 100000));
         gui.add(persistenceSlider.setup("Persistence", 15, 0, 100));

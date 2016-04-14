@@ -142,7 +142,7 @@ void ofApp::setup(){
     addresses[5] = "192.168.187.38";
     
     names[6] = "Cam-7";
-    addresses[6] = "192.168.187.34";
+    addresses[6] = "192.168.187.39";
     
     names[7] = "Cam-8";
     addresses[7] = "192.168.187.36";

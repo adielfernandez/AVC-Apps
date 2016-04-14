@@ -18,4 +18,8 @@
 	<Number_of_erosions>0</Number_of_erosions>
 	<Number_of_dilations>1</Number_of_dilations>
 <Draw_blurred>0</Draw_blurred>
+<Background_Differencing/>
+	<Frames_to_learn_BG>100</Frames_to_learn_BG>
+	<Use_BG_Diff>0</Use_BG_Diff>
+	<Contour_Finding/>
 </Lobby1Aggregate>

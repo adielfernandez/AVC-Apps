@@ -67,7 +67,6 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
     
     
     //a helper vector to hold the indices of the cameras we're using
-    
     indices.resize(numCams);
     for(int i = 0; i < numCams; i++){
         
@@ -77,15 +76,9 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
         
     }
     
-    
-    
-    
-    
-    
     //need to find the max dimensions of the aggregate
-    //depeding on how much overlap there is
-
-    
+    //depeding on how much overlap there is. This will
+    //overwritten by settings/manipulation later
     if(numCams > 3){
         overallWidth = 3 * scaledWidth;
         overallHeight = 2 * scaledHeight;
@@ -99,23 +92,29 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
     grabbedCol.set(0, 150, 255);
     
     
-    
     //-----Gui-----
     guiName = name;
     
     //param 1 = gui title, param 2 = filename, then 3&4 = startposition
     gui.setup(guiName, guiName + ".xml", 0, 0);
     
-    gui.add(thresholdSlider.setup("Threshold", 0, 0, 255));
+    gui.add(manipulationLabel.setup("   IMAGE MANIPULATION", ""));
     gui.add(blurAmountSlider.setup("Blur", 1, 0, 50));
     gui.add(numErosionsSlider.setup("Number of erosions", 0, 0, 10));
     gui.add(numDilationsSlider.setup("Number of dilations", 0, 0, 10));
-    gui.add(minBlobAreaSlider.setup("Min Blob Area", 0, 0, 500));
-    gui.add(maxBlobAreaSlider.setup("Max Blob Area", 25000, 0, 50000));
+    gui.add(thresholdSlider.setup("Threshold", 0, 0, 255));
+    gui.add(drawThresholdToggle.setup("Draw threshold", false));
+    
+    gui.add(bgDiffLabel.setup("   BG SUBTRACTION", ""));
+    gui.add(useBgDiff.setup("Use BG Diff", false));
+    gui.add(learningTime.setup("Frames to learn BG", 100, 0, 2000));
+    gui.add(resetBG.setup("Reset Background"));
+    
+    gui.add(contoursLabel.setup("   CONTOUR FINDING", ""));
+    gui.add(minBlobAreaSlider.setup("Min Blob Area", 0, 0, 1000));
+    gui.add(maxBlobAreaSlider.setup("Max Blob Area", 50000, 0, 100000));
     gui.add(persistenceSlider.setup("Persistence", 15, 0, 100));
     gui.add(maxDistanceSlider.setup("Max Distance", 32, 0, 100));
-    gui.add(drawBlurredToggle.setup("Draw blurred", false));
-    gui.add(drawThresholdToggle.setup("Draw threshold", false));
     gui.add(drawContoursToggle.setup("Draw Contours", true));
     gui.add(showInfoToggle.setup("Info", false));
     
@@ -132,6 +131,8 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
     loadSettings();
     
     
+    aggregateProcessor.setup(&threadOutputPix, &contours);
+
     
 }
 
@@ -184,26 +185,26 @@ void Aggregator::update(){
     }
     
     
-    //get the furthest left and down parts of the aggregated image
+    //get the furthest Right and down parts of the aggregated image
     //so the masterPix object can be resized appropriately
-    int furthestLeft = 0;
+    int furthestRight = 0;
     int furthestDown = 0;
     
     for(int i = 0; i < positions.size(); i++){
         
-        int thisMaxLeft = positions[i].x + cams[indices[i]] -> threadOutput.getWidth();
-        if(thisMaxLeft > furthestLeft){
-            furthestLeft = thisMaxLeft;
+        int thisMaxRight = positions[i].x + cams[indices[i]] -> threadOutput.getWidth();
+        if(thisMaxRight > furthestRight){
+            furthestRight = thisMaxRight;
         }
         
-        int thisMaxRight = positions[i].y + cams[indices[i]] -> threadOutput.getHeight();
-        if(thisMaxRight > furthestDown){
-            furthestDown = thisMaxRight;
+        int thisMaxBottom = positions[i].y + cams[indices[i]] -> threadOutput.getHeight();
+        if(thisMaxBottom > furthestDown){
+            furthestDown = thisMaxBottom;
         }
         
     }
     
-    overallWidth = furthestLeft;
+    overallWidth = furthestRight;
     overallHeight = furthestDown;
     
     
@@ -225,70 +226,102 @@ void Aggregator::update(){
             ofPixels rotated;
             cams[indices[i]] -> threadOutput.rotate90To(rotated, 1);
             
-            rotated.blendInto(masterPix, positions[i].x, positions[i].y);
+            rotated.pasteInto(masterPix, positions[i].x, positions[i].y);
             
         } else {
             
             //all other cameras get pasted in normally
-            cams[indices[i]] -> threadOutput.blendInto(masterPix, positions[i].x, positions[i].y);
-            
+            cams[indices[i]] -> threadOutput.pasteInto(masterPix, positions[i].x, positions[i].y);
+
         }
         
     }
     
+    //now package and send stuff to the threadedCV object
+    //but only do it about 30 fps since the app will run faster
+    //than we'll be getting frames
     
-    //now take the masterPix object and do some CV on it
+    int desiredFPS = 30;
+    int delayTime = 1000/desiredFPS;
     
-    //blur it
-    GaussianBlur(masterPix, blurredMaster, blurAmountSlider);
-    
-    //threshold it
-    threshold(blurredMaster, threshMaster, thresholdSlider);
-    
-    //ERODE it
-    for(int e = 0; e < numErosionsSlider; e++){
-        erode(threshMaster);
+    if(ofGetElapsedTimeMillis() - lastAnalyzeTime > delayTime){
+        
+        //construct a vector of ints with all the settings
+        vector<int> settings;
+        settings.resize(11);
+        
+        settings[0] = blurAmountSlider;
+        settings[1] = numErosionsSlider;
+        settings[2] = numDilationsSlider;
+        
+        settings[3] = learningTime;
+        settings[4] = useBgDiff;      //bool casted as int into vector
+        settings[5] = resetBG;        //bool casted as int into vector
+        settings[6] = thresholdSlider;
+        settings[7] = minBlobAreaSlider;
+        settings[8] = maxBlobAreaSlider;
+        settings[9] = persistenceSlider;
+        settings[10] = maxDistanceSlider;
+        
+        
+        aggregateProcessor.analyze(masterPix, settings);
+        lastAnalyzeTime = ofGetElapsedTimeMillis();
+
     }
     
-    //DILATE it
-    for(int d = 0; d < numDilationsSlider; d++){
-        dilate(threshMaster);
-    }
+    
+    //update the thread more to receive its data asap
+    aggregateProcessor.update();
     
     
     
     
     
-    //-----Done with image altering-----
-    //------Now do contour finding------
-    
-    
-    //Define contour finder
-    contours.setMinArea(minBlobAreaSlider);
-    contours.setMaxArea(maxBlobAreaSlider);
-    contours.setThreshold(254);  //only detect white
-    
-    // wait for half a frame before forgetting something
-    contours.getTracker().setPersistence(persistenceSlider);
-    
-    // an object can move up to ___ pixels per frame
-    contours.getTracker().setMaximumDistance(maxDistanceSlider);
-    
-    //find dem blob
-    contours.findContours(threshMaster);
+//    //blur it
+//    GaussianBlur(masterPix, blurredMaster, blurAmountSlider);
+//    
+//    //threshold it
+//    threshold(blurredMaster, threshMaster, thresholdSlider);
+//    
+//    //ERODE it
+//    for(int e = 0; e < numErosionsSlider; e++){
+//        erode(threshMaster);
+//    }
+//    
+//    //DILATE it
+//    for(int d = 0; d < numDilationsSlider; d++){
+//        dilate(threshMaster);
+//    }
+//    
+//    //-----Done with image altering-----
+//    //------Now do contour finding------
+//    
+//    
+//    //Define contour finder
+//    contours.setMinArea(minBlobAreaSlider);
+//    contours.setMaxArea(maxBlobAreaSlider);
+//    contours.setThreshold(254);  //only detect white
+//    
+//    // wait for half a frame before forgetting something
+//    contours.getTracker().setPersistence(persistenceSlider);
+//    
+//    // an object can move up to ___ pixels per frame
+//    contours.getTracker().setMaximumDistance(maxDistanceSlider);
+//    
+//    //find dem blob
+//    contours.findContours(threshMaster);
     
 
     
     //load pixels into an image just for drawing
-    if(drawBlurredToggle){
-        blurredMasterImg.allocate(blurredMaster.getWidth(), blurredMaster.getHeight(), OF_IMAGE_GRAYSCALE);
-        blurredMasterImg.setFromPixels(blurredMaster);
+    if(drawThresholdToggle){
+        threshMasterImg.allocate(threadOutputPix.getWidth(), threadOutputPix.getHeight(), OF_IMAGE_GRAYSCALE);
+        threshMasterImg.setFromPixels(threadOutputPix);
     }
     
-    if(drawThresholdToggle){
-        threshMasterImg.allocate(threshMaster.getWidth(), threshMaster.getHeight(), OF_IMAGE_GRAYSCALE);
-        threshMasterImg.setFromPixels(threshMaster);
-    }
+    
+    
+    
     
     
     //if we're in the right view
@@ -298,80 +331,12 @@ void Aggregator::update(){
         ofUnregisterMouseEvents(this);
     }
     
-    
-    
-    
-    //get together all the average blob data for this corridor
-    avgDir.set(0);
-    avgVel.set(0);
-    avgPos.set(0);
-    avgSpeed = 0;
-    
-    corridorBundle.clear();
-    corridorStats.clear();
-    blobsBundle.clear();
-    
-    
-    //which Corridor is it
-    int oneOrSix;
-    
-    if(numCams == 6){
-        oneOrSix = 1;
-    } else {
-        oneOrSix = 6;
-    }
-    
-    
-    
-    //go through the blobs and start collecting data
-    for(int i = 0; i < contours.size(); i++){
-        
-        //get data from contour
-        int label = contours.getLabel(i);
-        ofPoint center = toOf(contours.getCenter(i));
-        ofPoint centerNormalized = center/ofVec2f(scaledWidth, scaledHeight);
-        ofVec2f velocity = toOf(contours.getVelocity(i));
-        
-        //add it to our averages
-        avgVel += velocity;
-        avgSpeed += velocity.length();
-        avgPos += centerNormalized;
-        
-        //prepare a message for this blob then
-        //push it into the blobMessages vector
-        ofxOscMessage m;
-        
-        m.setAddress("/corridor_" + ofToString(oneOrSix) + "/blob_data");
-        m.addIntArg(label);
-        m.addFloatArg(centerNormalized.x);
-        m.addFloatArg(centerNormalized.y);
-        m.addFloatArg(velocity.x);
-        m.addFloatArg(velocity.x);
-        
-        blobsBundle.addMessage(m);
-        
-    }
-    
-    //average out all the data for this corridor
-    avgSpeed = avgSpeed/float(contours.size());
-    avgVel = avgVel/float(contours.size());
-    avgDir = avgVel.getNormalized();
-    avgPos = avgPos/float(contours.size());
+    //Get together all the average blob data for this corridor.
+    //This puts all the data into bundles but does not send
+    //Sending of all the system data happens at once in ofApp.
+    gatherOscStats();
     
 
-    
-    //prepare the corridor stats message
-    corridorStats.setAddress("/corridor_" + ofToString(oneOrSix) + "_stats");
-    corridorStats.addIntArg(contours.size());
-    corridorStats.addFloatArg(avgPos.x);
-    corridorStats.addFloatArg(avgPos.y);
-    corridorStats.addFloatArg(avgDir.x);
-    corridorStats.addFloatArg(avgDir.y);
-    corridorStats.addFloatArg(avgSpeed);
-    
-    //now assemble the corridor bundle from the stats message and all the blobs
-    corridorBundle.addMessage(corridorStats);
-    corridorBundle.addBundle(blobsBundle);
     
 
 }
@@ -413,8 +378,6 @@ void Aggregator::drawRaw(int x, int y){
     ofPopMatrix();
     
     
-    
-    
 }
 
 void Aggregator::drawCV(int x, int y){
@@ -422,20 +385,12 @@ void Aggregator::drawCV(int x, int y){
         
     ofPushMatrix();
     ofTranslate(x, y);
-
-    
-    if(drawBlurredToggle){
-        
-        ofSetColor(255);
-        blurredMasterImg.draw(0, 0);
-        
-    }
     
     if(drawThresholdToggle){
         
         ofSetColor(255);
+
         threshMasterImg.draw(0, 0);
-        
     }
     
     
@@ -574,4 +529,82 @@ void Aggregator::mouseDragged(ofMouseEventArgs & args){}
 void Aggregator::mouseScrolled(ofMouseEventArgs & args){}
 void Aggregator::mouseEntered(ofMouseEventArgs & args){}
 void Aggregator::mouseExited(ofMouseEventArgs & args){}
+
+
+void Aggregator::gatherOscStats(){
+    
+    avgDir.set(0);
+    avgVel.set(0);
+    avgPos.set(0);
+    avgSpeed = 0;
+    
+    corridorBundle.clear();
+    corridorStats.clear();
+    blobsBundle.clear();
+    
+    
+    //which Corridor is it
+    int oneOrSix;
+    
+    if(numCams == 6){
+        oneOrSix = 1;
+    } else {
+        oneOrSix = 6;
+    }
+    
+    
+    
+    //go through the blobs and start collecting data
+    for(int i = 0; i < contours.size(); i++){
+        
+        //get data from contour
+        int label = contours.getLabel(i);
+        ofPoint center = toOf(contours.getCenter(i));
+        ofPoint centerNormalized = center/ofVec2f(scaledWidth, scaledHeight);
+        ofVec2f velocity = toOf(contours.getVelocity(i));
+        
+        //add it to our averages
+        avgVel += velocity;
+        avgSpeed += velocity.length();
+        avgPos += centerNormalized;
+        
+        //prepare a message for this blob then
+        //push it into the blobMessages vector
+        ofxOscMessage m;
+        
+        m.setAddress("/corridor_" + ofToString(oneOrSix) + "/blob_data");
+        m.addIntArg(label);
+        m.addFloatArg(centerNormalized.x);
+        m.addFloatArg(centerNormalized.y);
+        m.addFloatArg(velocity.x);
+        m.addFloatArg(velocity.x);
+        
+        blobsBundle.addMessage(m);
+        
+    }
+    
+    //average out all the data for this corridor
+    avgSpeed = avgSpeed/float(contours.size());
+    avgVel = avgVel/float(contours.size());
+    avgDir = avgVel.getNormalized();
+    avgPos = avgPos/float(contours.size());
+    
+    
+    
+    //prepare the corridor stats message
+    corridorStats.setAddress("/corridor_" + ofToString(oneOrSix) + "_stats");
+    corridorStats.addIntArg(contours.size());
+    corridorStats.addFloatArg(avgPos.x);
+    corridorStats.addFloatArg(avgPos.y);
+    corridorStats.addFloatArg(avgDir.x);
+    corridorStats.addFloatArg(avgDir.y);
+    corridorStats.addFloatArg(avgSpeed);
+    
+    //now assemble the corridor bundle from the stats message and all the blobs
+    corridorBundle.addMessage(corridorStats);
+    corridorBundle.addBundle(blobsBundle);
+    
+    
+}
+
 

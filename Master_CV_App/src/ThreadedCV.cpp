@@ -1,23 +1,23 @@
 //
-//  ThreadedSoloCV.cpp
+//  ThreadedCV.cpp
 //  Master_CV_App
 //
 //  Created by TERRELBY on 4/13/16.
 //
 //
 
-#include "ThreadedSoloCV.hpp"
+#include "ThreadedCV.hpp"
 
 
 using namespace ofxCv;
 
 
-ThreadedSoloCV::ThreadedSoloCV(){
+ThreadedCV::ThreadedCV(){
     
 }
 
 
-ThreadedSoloCV::~ThreadedSoloCV(){
+ThreadedCV::~ThreadedCV(){
     
     //close thread channels
     quadPixelsIn.close();
@@ -25,28 +25,27 @@ ThreadedSoloCV::~ThreadedSoloCV(){
     threshPixOut.close();
     contoursOut.close();
     
-    cout << getThreadName() << " closing...\n" << endl;
+//    cout << getThreadName() << " closing...\n" << endl;
     
     waitForThread(true, 1000);
 }
 
 
-void ThreadedSoloCV::setup(ofPixels *_mainThreadPix, ofxCv::ContourFinder *_mainThreadCons, bool solo){
+void ThreadedCV::setup(ofPixels *_mainThreadPix, ofxCv::ContourFinder *_mainThreadCons){
     
     mainThreadPix = _mainThreadPix;
     mainThreadContours = _mainThreadCons;
-    soloCam = solo;
     lastDataSendTime = 0;
     
     startThread();
-    cout << getThreadName() << " started...\n" << endl;
+//    cout << getThreadName() << " started...\n" << endl;
     
     
     
 }
 
 
-void ThreadedSoloCV::analyze(ofPixels & p, vector<int> & settings){
+void ThreadedCV::analyze(ofPixels & p, vector<int> & settings){
     
     
     //send texture and CV settings to the thread
@@ -56,7 +55,7 @@ void ThreadedSoloCV::analyze(ofPixels & p, vector<int> & settings){
 }
 
 
-void ThreadedSoloCV::update(){
+void ThreadedCV::update(){
 
     
     
@@ -76,7 +75,7 @@ void ThreadedSoloCV::update(){
 
 
 
-void ThreadedSoloCV::threadedFunction(){
+void ThreadedCV::threadedFunction(){
     
     while(isThreadRunning()){
         
@@ -89,18 +88,17 @@ void ThreadedSoloCV::threadedFunction(){
         if(settingsIn.receive(settings) && quadPixelsIn.receive(threadPixels)){
             
             //unpack the vector and save it to the values we'll be using
-            threshold = settings[0];
-            blurAmt = settings[1];
-            numErosions = settings[2];
-            numDilations = settings[3];
-            minBlobArea = settings[4];
-            maxBlobArea = settings[5];
-            persistence = settings[6];
-            maxBlobDist = settings[7];
-            cropStartX = settings[8];
-            cropStartY = settings[9];
-            cropEndX = settings[10];
-            cropEndY = settings[11];
+            blurAmt = settings[0];
+            numErosions = settings[1];
+            numDilations = settings[2];
+            learningTime = settings[3];
+            useBgDiff = settings[4];        //int casted back to bool
+            resetBG = settings[5];
+            threshold = settings[6];
+            minBlobArea = settings[7];
+            maxBlobArea = settings[8];
+            persistence = settings[9];
+            maxBlobDist = settings[10];
             
             //Make grayscale
             threadPixels.setImageType(OF_IMAGE_GRAYSCALE);
@@ -108,8 +106,23 @@ void ThreadedSoloCV::threadedFunction(){
             //blur it
             ofxCv::GaussianBlur(threadPixels, blurredPix, blurAmt);
             
-            //threshold it
-            ofxCv::threshold(blurredPix, threshPix, threshold);
+            if(resetBG) background.reset();
+            
+            //either use BG differencing or just straight up threshold it
+            if(useBgDiff){
+                
+                background.setLearningTime(learningTime);
+                background.setThresholdValue(threshold);
+                
+                background.update(blurredPix, threshPix);
+                
+                
+            } else {
+                
+                //threshold it
+                ofxCv::threshold(blurredPix, threshPix, threshold);
+               
+            }
             
             
             //ERODE it

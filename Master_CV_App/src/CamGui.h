@@ -24,12 +24,20 @@ public:
     string guiName;
     
     ofxPanel gui;
-    ofxIntSlider thresholdSlider;
+
+    ofxLabel manipulationLabel;
     ofxIntSlider blurAmountSlider;
     ofxIntSlider numErosionsSlider;
     ofxIntSlider numDilationsSlider;
+    
+    ofxLabel bgDiffLabel;
+    ofxIntSlider learningTime;
+    ofxButton resetBG;
+    ofxToggle useBgDiff;
+    ofxIntSlider thresholdSlider;
     ofxToggle drawThresholdToggle;
     
+    ofxLabel contoursLabel;
     ofxIntSlider minBlobAreaSlider;
     ofxIntSlider maxBlobAreaSlider;
     ofxIntSlider persistenceSlider;

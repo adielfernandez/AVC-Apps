@@ -22,7 +22,7 @@
 #include "ofGstVideoPlayer.h"
 #include "ofxCv.h"
 #include "ofxOpencv.h"
-#include "ThreadedSoloCV.hpp"
+#include "ThreadedCV.hpp"
 
 #pragma once
 
@@ -181,7 +181,7 @@ public:
     
     //takes in the mapped pixels
     //outputs threshold and contours
-    ThreadedSoloCV imageProcessor;
+    ThreadedCV imageProcessor;
     
     //what we'll get from the
     //image processing thread
