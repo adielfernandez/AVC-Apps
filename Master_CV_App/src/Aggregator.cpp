@@ -80,16 +80,17 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
     //depeding on how much overlap there is. This will
     //overwritten by settings/manipulation later
     if(numCams > 3){
-        overallWidth = 3 * scaledWidth;
-        overallHeight = 2 * scaledHeight;
+        masterWidth = 3 * scaledWidth;
+        masterHeight = 2 * scaledHeight;
     } else {
-        overallWidth = numCams * scaledWidth;
-        overallHeight = scaledHeight;
+        masterWidth = numCams * scaledWidth;
+        masterHeight = scaledHeight;
     }
     
     
     handleCol.set(0, 255, 0);
     grabbedCol.set(0, 150, 255);
+    disableCol.set(255, 100);
     
     
     //-----Gui-----
@@ -112,7 +113,7 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
     
     gui.add(contoursLabel.setup("   CONTOUR FINDING", ""));
     gui.add(minBlobAreaSlider.setup("Min Blob Area", 0, 0, 1000));
-    gui.add(maxBlobAreaSlider.setup("Max Blob Area", 50000, 0, 100000));
+    gui.add(maxBlobAreaSlider.setup("Max Blob Area", 12000, 0, 30000));
     gui.add(persistenceSlider.setup("Persistence", 15, 0, 100));
     gui.add(maxDistanceSlider.setup("Max Distance", 32, 0, 100));
     gui.add(drawContoursToggle.setup("Draw Contours", true));
@@ -133,6 +134,11 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
     
     aggregateProcessor.setup(&threadOutputPix, &contours);
 
+    //background colors (red means thread has crashed)
+    backgroundInCol.set(80);
+    backgroundOutCol.set(0);
+    
+    waitingToBgDiff = true;
     
 }
 
@@ -154,37 +160,39 @@ void Aggregator::update(){
     //handle mouse interaction with map pts
     adjustedMouse.set(ofGetMouseX() - adjustedOrigin.x, ofGetMouseY() - adjustedOrigin.y);
     
+    //disable positioning if we're doing BG Diff
+    disablePositioning = useBgDiff;
+    
     
     //update the positions with the mouse if we've locked on to them
     //from the mousePressed method
-    for(int i = 0; i < positions.size(); i++){
-        
-        if(posMouseLock[i]){
-            positions[i].x = ofClamp(adjustedMouse.x, 0, scaledWidth * 3);
-            positions[i].y = ofClamp(adjustedMouse.y, 0, scaledHeight * 2);
+    if(!disablePositioning){
+        for(int i = 0; i < positions.size(); i++){
             
-            //update the gui values so they can be saved
-            if(i == 0){
-                camPos1 = positions[i];
-            } else if(i == 1){
-                camPos2 = positions[i];
-            } else if(i == 2){
-                camPos3 = positions[i];
-            } else if(i == 3){
-                camPos4 = positions[i];
-            } else if(i == 4){
-                camPos5 = positions[i];
-            } else if(i == 5){
-                camPos6 = positions[i];
+            if(posMouseLock[i]){
+                positions[i].x = ofClamp(adjustedMouse.x, 0, scaledWidth * 3);
+                positions[i].y = ofClamp(adjustedMouse.y, 0, scaledHeight * 2);
+                
+                //update the gui values so they can be saved
+                if(i == 0){
+                    camPos1 = positions[i];
+                } else if(i == 1){
+                    camPos2 = positions[i];
+                } else if(i == 2){
+                    camPos3 = positions[i];
+                } else if(i == 3){
+                    camPos4 = positions[i];
+                } else if(i == 4){
+                    camPos5 = positions[i];
+                } else if(i == 5){
+                    camPos6 = positions[i];
+                }
+                
             }
             
         }
-        
-        
-        
     }
-    
-    
+
     //get the furthest Right and down parts of the aggregated image
     //so the masterPix object can be resized appropriately
     int furthestRight = 0;
@@ -204,8 +212,9 @@ void Aggregator::update(){
         
     }
     
-    overallWidth = furthestRight;
-    overallHeight = furthestDown;
+    masterWidth = furthestRight;
+    masterHeight = furthestDown;
+    
     
     
     //clear it
@@ -213,7 +222,7 @@ void Aggregator::update(){
     
     //recalculate the overall size of the master pixels object
     //based on the positions of the frames within it
-    masterPix.allocate(overallWidth, overallHeight, 1);
+    masterPix.allocate(masterWidth, masterHeight, 1);
     masterPix.setColor(ofColor(0));
     
     //paste the other ofPixels into masterPix
@@ -242,9 +251,22 @@ void Aggregator::update(){
     //than we'll be getting frames
     
     int desiredFPS = 30;
-    int delayTime = 1000/desiredFPS;
+    int delayTime = 1000/(float)desiredFPS;
     
     if(ofGetElapsedTimeMillis() - lastAnalyzeTime > delayTime){
+        
+     
+        bool useBg;
+        if(!waitingToBgDiff){
+            
+            //if we're not waiting, get the value from the gui
+            useBg = useBgDiff;
+        } else {
+            
+            //if we are waiting, then send a false to the aggregate thread
+            useBg = false;
+        }
+        
         
         //construct a vector of ints with all the settings
         vector<int> settings;
@@ -255,7 +277,7 @@ void Aggregator::update(){
         settings[2] = numDilationsSlider;
         
         settings[3] = learningTime;
-        settings[4] = useBgDiff;      //bool casted as int into vector
+        settings[4] = useBg;      //bool casted as int into vector
         settings[5] = resetBG;        //bool casted as int into vector
         settings[6] = thresholdSlider;
         settings[7] = minBlobAreaSlider;
@@ -263,68 +285,33 @@ void Aggregator::update(){
         settings[9] = persistenceSlider;
         settings[10] = maxDistanceSlider;
         
-        
+        masterPix.setImageType(OF_IMAGE_GRAYSCALE);
+    
         aggregateProcessor.analyze(masterPix, settings);
+        
         lastAnalyzeTime = ofGetElapsedTimeMillis();
 
+        
     }
+    
     
     
     //update the thread more to receive its data asap
     aggregateProcessor.update();
     
-    
-    
-    
-    
-//    //blur it
-//    GaussianBlur(masterPix, blurredMaster, blurAmountSlider);
-//    
-//    //threshold it
-//    threshold(blurredMaster, threshMaster, thresholdSlider);
-//    
-//    //ERODE it
-//    for(int e = 0; e < numErosionsSlider; e++){
-//        erode(threshMaster);
-//    }
-//    
-//    //DILATE it
-//    for(int d = 0; d < numDilationsSlider; d++){
-//        dilate(threshMaster);
-//    }
-//    
-//    //-----Done with image altering-----
-//    //------Now do contour finding------
-//    
-//    
-//    //Define contour finder
-//    contours.setMinArea(minBlobAreaSlider);
-//    contours.setMaxArea(maxBlobAreaSlider);
-//    contours.setThreshold(254);  //only detect white
-//    
-//    // wait for half a frame before forgetting something
-//    contours.getTracker().setPersistence(persistenceSlider);
-//    
-//    // an object can move up to ___ pixels per frame
-//    contours.getTracker().setMaximumDistance(maxDistanceSlider);
-//    
-//    //find dem blob
-//    contours.findContours(threshMaster);
-    
+    //don't actually start the background until a few seconds in
+    //when settings are loaded and cameras have started
+    if(ofGetElapsedTimeMillis() < 4000){
+        waitingToBgDiff = true;
+    } else {
+        waitingToBgDiff = false;
+    }
 
     
-    //load pixels into an image just for drawing
-    if(drawThresholdToggle){
-        threshMasterImg.allocate(threadOutputPix.getWidth(), threadOutputPix.getHeight(), OF_IMAGE_GRAYSCALE);
-        threshMasterImg.setFromPixels(threadOutputPix);
-    }
     
     
     
-    
-    
-    
-    //if we're in the right view
+    //if we're in the right view listen to the mouse
     if((*viewMode) == thisView){
         ofRegisterMouseEvents(this);
     } else {
@@ -336,9 +323,15 @@ void Aggregator::update(){
     //Sending of all the system data happens at once in ofApp.
     gatherOscStats();
     
+    //if we haven't received anything from the thread in over a second
+    //assume the thread crashed and change the background color to red as a warning
+    if(!waitingToBgDiff && ofGetElapsedTimeMillis() - aggregateProcessor.lastDataSendTime > 1000){
+        backgroundInCol.lerp(ofColor(100, 0, 0), 0.08);
+        backgroundOutCol.lerp(ofColor(10, 0, 0), 0.08);
+    }
 
     
-
+    
 }
 
 void Aggregator::drawRaw(int x, int y){
@@ -388,9 +381,13 @@ void Aggregator::drawCV(int x, int y){
     
     if(drawThresholdToggle){
         
-        ofSetColor(255);
+        threshMasterImg.allocate(threadOutputPix.getWidth(), threadOutputPix.getHeight(), OF_IMAGE_GRAYSCALE);
+        
+        threshMasterImg.setFromPixels(threadOutputPix);
 
+        ofSetColor(255);
         threshMasterImg.draw(0, 0);
+        
     }
     
     
@@ -443,6 +440,11 @@ void Aggregator::drawCV(int x, int y){
             ofSetLineWidth(0.5);
         }
         
+        if(disablePositioning){
+            c = disableCol;
+            ofSetLineWidth(0.5);
+        }
+        
         ofSetColor(c);
         ofDrawCircle(positions[i], mouseHandleRad);
         
@@ -466,6 +468,24 @@ void Aggregator::drawCV(int x, int y){
     
     ofPopMatrix();
     
+    ofSetColor(255);
+    ofDrawBitmapString("CV Thread ID: " + ofToString(aggregateProcessor.getThreadId()), 800, 30);
+    ofDrawBitmapString("Last Data from Thread: " + ofToString(ofGetElapsedTimeMillis() - aggregateProcessor.lastDataSendTime) + " \tms ago", 800, 45);
+    
+    if(useBgDiff){
+        if(waitingToBgDiff){
+            ofSetColor(255, 0, 0);
+            ofDrawBitmapString("Background Differencing Inactive. System not ready", adjustedOrigin.x, adjustedOrigin.y + masterHeight + 15);
+        } else {
+            ofSetColor(0, 255, 0);
+            ofDrawBitmapString("Background Differencing Active", adjustedOrigin.x, adjustedOrigin.y + masterHeight + 15);
+        }
+    }
+    
+    if(disablePositioning){
+        ofSetColor(255, 0, 0);
+        ofDrawBitmapString("Disable BG differencing to adjust positions", adjustedOrigin.x, adjustedOrigin.y + masterHeight + 30);
+    }
     
     
     
@@ -493,24 +513,28 @@ void Aggregator::saveSettings(){
 
 void Aggregator::mousePressed(ofMouseEventArgs &args){
     
-    //handle mouse interaction with quadMap points
-    for(int i = 0; i < positions.size(); i++){
-        
-        //need to adjust mouse position since we're
-        //translating the raw camera view from the origin with pushmatrix
-        float dist = ofDist(adjustedMouse.x, adjustedMouse.y, positions[i].x, positions[i].y);
-        
-        if(dist < mouseHandleRad){
-            posMouseLock[i] = true;
+    if(!disablePositioning){
+    
+        //handle mouse interaction with quadMap points
+        for(int i = 0; i < positions.size(); i++){
             
-            //exit the for loop, prevents locking
-            //onto multiple handles at once
-            break;
+            //need to adjust mouse position since we're
+            //translating the raw camera view from the origin with pushmatrix
+            float dist = ofDist(adjustedMouse.x, adjustedMouse.y, positions[i].x, positions[i].y);
             
-        } else {
-            posMouseLock[i] = false;
+            if(dist < mouseHandleRad){
+                posMouseLock[i] = true;
+                
+                //exit the for loop, prevents locking
+                //onto multiple handles at once
+                break;
+                
+            } else {
+                posMouseLock[i] = false;
+            }
+            
+            
         }
-        
         
     }
     

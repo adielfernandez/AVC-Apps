@@ -4,16 +4,16 @@
 	<Number_of_erosions>0</Number_of_erosions>
 	<Number_of_dilations>0</Number_of_dilations>
 	<Draw_threshold>0</Draw_threshold>
-	<Point_0>27, 17</Point_0>
-	<Point_1>325, 0</Point_1>
-	<Point_2>613, 8</Point_2>
-	<Point_3>0, 256</Point_3>
+	<Point_0>36, 24</Point_0>
+	<Point_1>313, 0</Point_1>
+	<Point_2>619, 9</Point_2>
+	<Point_3>10, 245</Point_3>
 	<Crop_Start__norm_>0.171875, 0.117188</Crop_Start__norm_>
 	<Crop_End__norm_>0.8125, 0.980469</Crop_End__norm_>
 <Cam-6/>
-<Point_4>353, 254</Point_4>
+<Point_4>329, 247</Point_4>
 	<Point_5>640, 265</Point_5>
-	<Point_6>45, 484</Point_6>
-	<Point_7>357, 511</Point_7>
-	<Point_8>604, 479</Point_8>
+	<Point_6>56, 481</Point_6>
+	<Point_7>329, 509</Point_7>
+	<Point_8>607, 479</Point_8>
 </Cam-6>

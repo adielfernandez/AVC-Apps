@@ -46,6 +46,8 @@ public:
     
     unsigned long long lastDataSendTime;
     
+    bool isThreadCrashed;
+    
 private:
     
     
@@ -62,12 +64,13 @@ private:
     
     void threadedFunction();
     
-    ofPixels threshPix;
     ofxCv::ContourFinder contours;
     
     vector<int> settings;
     ofPixels threadPixels;
     ofPixels blurredPix;
+    ofPixels threshPix;
+
     
     int blurAmt;
     int numErosions;
@@ -86,6 +89,8 @@ private:
     int cropEndY;
     
     ofxCv::RunningBackground background;
+    
+    bool useBgNow;
     
 };
 

@@ -6,14 +6,14 @@
 	<Draw_threshold>0</Draw_threshold>
 	<Point_0>12, 26</Point_0>
 	<Point_1>332, 0</Point_1>
-	<Point_2>589, 2</Point_2>
+	<Point_2>603, 2</Point_2>
 	<Point_3>14, 258</Point_3>
 	<Crop_Start__norm_>0.203125, 0.148438</Crop_Start__norm_>
 	<Crop_End__norm_>0.871875, 0.890625</Crop_End__norm_>
 <Cam-2/>
-<Point_4>364, 256</Point_4>
-	<Point_5>621, 251</Point_5>
+<Point_4>349, 258</Point_4>
+	<Point_5>623, 242</Point_5>
 	<Point_6>79, 506</Point_6>
 	<Point_7>350, 498</Point_7>
-	<Point_8>612, 455</Point_8>
+	<Point_8>621, 455</Point_8>
 </Cam-2>

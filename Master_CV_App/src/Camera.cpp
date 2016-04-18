@@ -216,6 +216,13 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     //start the image processing thread
     if(soloCam) imageProcessor.setup(&threadOutput, &contours);
     
+    
+    //background colors (red means thread has crashed)
+    backgroundInCol.set(80);
+    backgroundOutCol.set(0);
+    
+    
+    
 }
 
 
@@ -333,20 +340,6 @@ void Camera::update(){
             started = true;
             setupFeed();
         }
-        
-        //if we've started but havent received a new
-        //frame in a while, shut down the feed
-//        if(started && ofGetElapsedTimeMillis() - lastFrameTime > timeBeforeReset){
-//            
-//            cout << "\n\n" << name << ": Gone stale, closing\n\n" << endl;
-//            closeFeed();
-//            connectionStale = true;
-//            started = false;
-//            
-//        }
-
-        
-        
 
         
     } else {
@@ -463,77 +456,19 @@ void Camera::update(){
     
     //gather data to track blob stats
     //only if we're soloCams
-    if(soloCam){
-        
-        //get together all the average blob data for this corridor
-        avgDir.set(0);
-        avgVel.set(0);
-        avgPos.set(0);
-        avgSpeed = 0;
-        
-        corridorBundle.clear();
-        corridorStats.clear();
-        blobsBundle.clear();
-        
-        
-        //corridors 2, 3, 4, 5 are:
-        //cameras 6, 7, 8, 9 (zero-indexed)
-        int thisCorridor = thisView - 4;  //i.e. cam 6 = corr 2
-        
-        
-        //go through the blobs and start collecting data
-        for(int i = 0; i < contours.size(); i++){
-            
-            //get data from contour
-            int label = contours.getLabel(i);
-            ofPoint center = toOf(contours.getCenter(i));
-            ofPoint centerNormalized = center/ofVec2f(scaledWidth, scaledHeight);
-            ofVec2f velocity = toOf(contours.getVelocity(i));
-            
-            //add it to our averages
-            avgVel += velocity;
-            avgSpeed += velocity.length();
-            avgPos += centerNormalized;
-            
-            //prepare a message for this blob then
-            //push it into the blobMessages vector
-            ofxOscMessage m;
-            
-            
-            
-            
-            m.setAddress("/corridor_" + ofToString(thisCorridor) + "/blob_data");
-            m.addIntArg(label);
-            m.addFloatArg(centerNormalized.x);
-            m.addFloatArg(centerNormalized.y);
-            m.addFloatArg(velocity.x);
-            m.addFloatArg(velocity.x);
-            
-            blobsBundle.addMessage(m);
-            
-        }
-        
-        //average out all the data for this corridor
-        avgSpeed = avgSpeed/float(contours.size());
-        avgVel = avgVel/float(contours.size());
-        avgDir = avgVel.getNormalized();
-        avgPos = avgPos/float(contours.size());
-        
-        
-        
-        //prepare the corridor stats message
-        corridorStats.setAddress("/corridor_" + ofToString(thisCorridor) + "_stats");
-        corridorStats.addIntArg(contours.size());
-        corridorStats.addFloatArg(avgPos.x);
-        corridorStats.addFloatArg(avgPos.y);
-        corridorStats.addFloatArg(avgDir.x);
-        corridorStats.addFloatArg(avgDir.y);
-        corridorStats.addFloatArg(avgSpeed);
-        
-        //now assemble the corridor bundle from the stats message and all the blobs
-        corridorBundle.addMessage(corridorStats);
-        corridorBundle.addBundle(blobsBundle);
+    if(soloCam)  gatherOscStats();
+    
+    
+    if(soloCam && ofGetElapsedTimeMillis() - imageProcessor.lastDataSendTime > 1000){
+        backgroundInCol.lerp(ofColor(100, 0, 0), 0.08);
+        backgroundOutCol.lerp(ofColor(10, 0, 0), 0.08);
+    } else {
+        backgroundInCol.lerp(ofColor(100), 0.2);
+        backgroundOutCol.lerp(ofColor(0), 0.2);
     }
+    
+    
+    
     
 
     
@@ -635,9 +570,11 @@ void Camera::drawMain(){
     ofDrawBitmapString(title, secondSpot.x, secondSpot.y + 10);
     
     ofDrawBitmapString("Num Frames Received: " + ofToString(numFramesRec), secondSpot.x, 15);
-    ofDrawBitmapString("CV Thread ID: " + ofToString(imageProcessor.getThreadId()), secondSpot.x, 30);
-    ofDrawBitmapString("Last Data from Thread: " + ofToString(ofGetElapsedTimef() - imageProcessor.lastDataSendTime/1000) + " seconds ago", secondSpot.x, 45);
     
+    if(soloCam){
+        ofDrawBitmapString("CV Thread ID: " + ofToString(imageProcessor.getThreadId()), secondSpot.x, 30);
+        ofDrawBitmapString("Last Data from Thread: " + ofToString(ofGetElapsedTimeMillis() - imageProcessor.lastDataSendTime) + " ms ago", secondSpot.x, 45);
+    }
 
     
 
@@ -743,18 +680,8 @@ void Camera::drawMap(int x, int y, float scale){
     ofDrawRectangle(0, 0, scaledWidth, scaledHeight);
     ofFill();
     
-    //draw lines between points
-    ofPolyline cropSquare;
-    cropSquare.addVertex(cropStart);
-    cropSquare.addVertex(cropEnd.x, cropStart.y);
-    cropSquare.addVertex(cropEnd);
-    cropSquare.addVertex(cropStart.x, cropEnd.y);
-    cropSquare.close();
-    
-    ofSetLineWidth(1);
-    
-    ofSetColor(croppingCol);
-    cropSquare.draw();
+    //draw border around crop with tick marks
+    drawCropSquare();
     
     //draw mapping points
     ofPushStyle();
@@ -835,13 +762,8 @@ void Camera::drawCV(int x, int y, float scale){
     ofDrawRectangle(0, 0, mappedTex.getWidth(), mappedTex.getHeight());
     ofFill();
     
-    //draw border around crop
-    ofNoFill();
-    ofSetLineWidth(0.5);
-    ofSetColor(croppingCol);
-    ofDrawRectangle(cropStart, croppedWidth, croppedHeight);
-
-
+    //draw border around crop with tick marks
+    drawCropSquare();
     
     if(cameraGui.drawContoursToggle){
         
@@ -892,7 +814,107 @@ void Camera::drawCroppedTex(ofVec2f pos){
     
 }
 
+void Camera::drawCropSquare(){
+    
+    ofNoFill();
+    ofSetLineWidth(1.0);
+    ofSetColor(croppingCol);
+    ofDrawRectangle(cropStart, croppedWidth, croppedHeight);
+    
+    int tickLength = 10;
+    ofSetLineWidth(2.0);
+    //top middle
+    ofDrawLine(cropStart.x + croppedWidth/2, cropStart.y, cropStart.x + croppedWidth/2, cropStart.y + tickLength);
+    //right middle
+    ofDrawLine(cropStart.x + croppedWidth, cropStart.y + croppedHeight/2, cropStart.x + croppedWidth - tickLength, cropStart.y + croppedHeight/2);
+    //bottom middle
+    ofDrawLine(cropStart.x + croppedWidth/2, cropStart.y + croppedHeight, cropStart.x + croppedWidth/2, cropStart.y + croppedHeight - tickLength);
+    //left middle
+    ofDrawLine(cropStart.x, cropStart.y + croppedHeight/2, cropStart.x + tickLength, cropStart.y + croppedHeight/2);
+    //center cross hair
+    ofDrawLine(cropStart.x + croppedWidth/2 - tickLength/2, cropStart.y + croppedHeight/2, cropStart.x + croppedWidth/2 + tickLength/2, cropStart.y + croppedHeight/2);
+    ofDrawLine(cropStart.x + croppedWidth/2, cropStart.y + croppedHeight/2 - tickLength/2, cropStart.x + croppedWidth/2, cropStart.y + croppedHeight/2 + tickLength/2);
 
+    
+    
+    
+}
+
+
+
+void Camera::gatherOscStats(){
+    
+    //get together all the average blob data for this corridor
+    avgDir.set(0);
+    avgVel.set(0);
+    avgPos.set(0);
+    avgSpeed = 0;
+    
+    corridorBundle.clear();
+    corridorStats.clear();
+    blobsBundle.clear();
+    
+    
+    //corridors 2, 3, 4, 5 are:
+    //cameras 6, 7, 8, 9 (zero-indexed)
+    int thisCorridor = thisView - 4;  //i.e. cam 6 = corr 2
+    
+    
+    //go through the blobs and start collecting data
+    for(int i = 0; i < contours.size(); i++){
+        
+        //get data from contour
+        int label = contours.getLabel(i);
+        ofPoint center = toOf(contours.getCenter(i));
+        ofPoint centerNormalized = center/ofVec2f(scaledWidth, scaledHeight);
+        ofVec2f velocity = toOf(contours.getVelocity(i));
+        
+        //add it to our averages
+        avgVel += velocity;
+        avgSpeed += velocity.length();
+        avgPos += centerNormalized;
+        
+        //prepare a message for this blob then
+        //push it into the blobMessages vector
+        ofxOscMessage m;
+        
+        
+        
+        
+        m.setAddress("/corridor_" + ofToString(thisCorridor) + "/blob_data");
+        m.addIntArg(label);
+        m.addFloatArg(centerNormalized.x);
+        m.addFloatArg(centerNormalized.y);
+        m.addFloatArg(velocity.x);
+        m.addFloatArg(velocity.x);
+        
+        blobsBundle.addMessage(m);
+        
+    }
+    
+    //average out all the data for this corridor
+    avgSpeed = avgSpeed/float(contours.size());
+    avgVel = avgVel/float(contours.size());
+    avgDir = avgVel.getNormalized();
+    avgPos = avgPos/float(contours.size());
+    
+    
+    
+    //prepare the corridor stats message
+    corridorStats.setAddress("/corridor_" + ofToString(thisCorridor) + "_stats");
+    corridorStats.addIntArg(contours.size());
+    corridorStats.addFloatArg(avgPos.x);
+    corridorStats.addFloatArg(avgPos.y);
+    corridorStats.addFloatArg(avgDir.x);
+    corridorStats.addFloatArg(avgDir.y);
+    corridorStats.addFloatArg(avgSpeed);
+    
+    //now assemble the corridor bundle from the stats message and all the blobs
+    corridorBundle.addMessage(corridorStats);
+    corridorBundle.addBundle(blobsBundle);
+    
+    
+}
 
 
 

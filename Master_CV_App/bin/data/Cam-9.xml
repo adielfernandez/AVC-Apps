@@ -22,6 +22,9 @@
 	<Point_8>640, 512</Point_8>
 <Background_Differencing/>
 	<Frames_to_learn_BG>100</Frames_to_learn_BG>
-	<Use_BG_Diff>0</Use_BG_Diff>
+	<Use_BG_Diff>1</Use_BG_Diff>
 	<Contour_Finding/>
+<___IMAGE_DISTORTION/>
+	<___BG_SUBTRACTION/>
+	<___CONTOUR_FINDING/>
 </Cam-9>

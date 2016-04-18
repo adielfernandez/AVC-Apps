@@ -58,6 +58,7 @@ public:
     bool bScaleDown;
     int feedWidth, feedHeight;
     int scaledWidth, scaledHeight;
+    ofColor backgroundInCol, backgroundOutCol;
     
     //Where to get the feeds
     vector<shared_ptr<Camera>> cams;
@@ -71,6 +72,10 @@ public:
     //pasted into the aggregate
     vector<ofVec2f> positions;
     
+    //disable changing of the positions
+    //if we're using BG Diff
+    bool disablePositioning;
+    
     
     //CV Objects for aggregate
     ofPixels masterPix;
@@ -78,9 +83,15 @@ public:
     ofPixels threshMaster;
     
     ofImage threshMasterImg;
-    int overallWidth;
-    int overallHeight;
-
+    int masterWidth, oldMasterWidth;
+    int masterHeight, oldMasterHeight;
+    
+    //if the overall height/width of the
+    //CV image changes we need to reset the BG
+    bool bgResetNeeded;
+    bool waitingToBgDiff;
+    
+    
     ofxCv::ContourFinder contours;
     
     
@@ -102,7 +113,7 @@ public:
     
     vector<bool> posMouseLock;
     float mouseHandleRad;
-    ofColor handleCol, grabbedCol;
+    ofColor handleCol, grabbedCol, disableCol;
     
     
     //-----OSC Data gathering-----

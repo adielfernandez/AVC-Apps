@@ -25,9 +25,9 @@ ThreadedCV::~ThreadedCV(){
     threshPixOut.close();
     contoursOut.close();
     
-//    cout << getThreadName() << " closing...\n" << endl;
     
     waitForThread(true, 1000);
+    
 }
 
 
@@ -37,10 +37,15 @@ void ThreadedCV::setup(ofPixels *_mainThreadPix, ofxCv::ContourFinder *_mainThre
     mainThreadContours = _mainThreadCons;
     lastDataSendTime = 0;
     
+    useBgNow = false;
+    
+    threadPixels.allocate(320, 256, 1);
+    threshPix.allocate(320, 256, 1);
+    blurredPix.allocate(320, 256, 1);
+    
+    isThreadCrashed = false;
+    
     startThread();
-//    cout << getThreadName() << " started...\n" << endl;
-    
-    
     
 }
 
@@ -70,6 +75,14 @@ void ThreadedCV::update(){
         *mainThreadContours = c;
     }
     
+    if(ofGetElapsedTimeMillis() - lastDataSendTime > 1000){
+        isThreadCrashed = true;
+    } else {
+        isThreadCrashed = false;
+    }
+    
+    
+    
 }
 
 
@@ -81,7 +94,6 @@ void ThreadedCV::threadedFunction(){
         
         
         //        cout << getThreadName() << " is running..." << endl;
-        
         
         
         //wait until we have our settings loaded and our pixels
@@ -104,23 +116,42 @@ void ThreadedCV::threadedFunction(){
             threadPixels.setImageType(OF_IMAGE_GRAYSCALE);
             
             //blur it
+            
+            
             ofxCv::GaussianBlur(threadPixels, blurredPix, blurAmt);
             
-            if(resetBG) background.reset();
+
+            
             
             //either use BG differencing or just straight up threshold it
             if(useBgDiff){
                 
+                //if we're going from not using the background to using it again
+                //then reset the background. Also reset it if requested
+                if(!useBgNow || resetBG){
+                    
+                    background.reset();
+                    useBgNow = true;
+                    
+                    if(getThreadId() < 3){
+                        cout << "\n\n[Thread " + ofToString(getThreadId()) + "] Background reset\n\n" << endl;
+                    }
+                    
+                }
+
                 background.setLearningTime(learningTime);
                 background.setThresholdValue(threshold);
                 
                 background.update(blurredPix, threshPix);
+
                 
                 
             } else {
                 
                 //threshold it
                 ofxCv::threshold(blurredPix, threshPix, threshold);
+                
+                useBgNow = false;
                
             }
             

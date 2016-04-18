@@ -49,7 +49,7 @@ void ofApp::setup(){
      17 = all cameras
      
      */
-    viewMode = 0;
+    viewMode = 14;
     
     
     titleFont.load("fonts/Aller_Rg.ttf", 40, true);
@@ -452,6 +452,8 @@ void ofApp::draw(){
     //draw the raw cameras
     if(viewMode >= 0 && viewMode < numFeeds){
         
+        ofBackgroundGradient(cameras[viewMode] -> backgroundInCol, cameras[viewMode] -> backgroundOutCol);
+        
         ofSetColor(255);
         
         currentViewTitle = cameras[viewMode] ->  name;
@@ -464,7 +466,7 @@ void ofApp::draw(){
     } else if(viewMode == 14){
         
         //CORRIDOR 1 AGGREGATION
-        ofBackgroundGradient(80, 0);
+        ofBackgroundGradient(Lobby1Aggregate.backgroundInCol, Lobby1Aggregate.backgroundOutCol);
         
         currentViewTitle = "Lobby 1 Aggregate";
         
@@ -485,7 +487,7 @@ void ofApp::draw(){
     } else if(viewMode == 15){
         
         //CORRIDOR 2 AGGREGATION
-        ofBackgroundGradient(80, 0);
+        ofBackgroundGradient(Lobby2Aggregate.backgroundInCol, Lobby2Aggregate.backgroundOutCol);
 
         currentViewTitle = "Lobby 2 Aggregate";
         

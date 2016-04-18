@@ -65,9 +65,12 @@ public:
     void drawMap(int x, int y, float scale);
     
     void drawCroppedTex(ofVec2f pos);
+    void drawCropSquare();
     
     //draw raw/thresholded & contours
     void drawCV(int x, int y, float scale);
+    
+    
     
     //gui
     void drawGui(int x, int y);
@@ -79,7 +82,7 @@ public:
     string IP;
     ofColor circleCol, circleGrab;
     ofColor mappingCol, croppingCol;
-    ofColor backgroundIn, backgroundOut;
+    ofColor backgroundInCol, backgroundOutCol;
     ofTrueTypeFont *font;
     
     //pointer to the current view in the ofApp
@@ -188,6 +191,8 @@ public:
     ofPixels threadOutput;
     ofxCv::ContourFinder contours;
 
+    //-----OSC Data gathering-----
+    void gatherOscStats();
     
     //Blob Stats
     ofVec2f avgDir;
