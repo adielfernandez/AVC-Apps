@@ -37,7 +37,7 @@ void ThreadedCV::setup(ofPixels *_mainThreadPix, ofxCv::ContourFinder *_mainThre
     mainThreadContours = _mainThreadCons;
     lastDataSendTime = 0;
     
-    useBgNow = false;
+    needsAutoReset = true;
     
     threadPixels.allocate(320, 256, 1);
     threshPix.allocate(320, 256, 1);
@@ -127,15 +127,12 @@ void ThreadedCV::threadedFunction(){
             if(useBgDiff){
                 
                 //if we're going from not using the background to using it again
-                //then reset the background. Also reset it if requested
-                if(!useBgNow || resetBG){
+                //then reset the background (needsAutoReset == true).
+                //Also reset it if requested by the GUI (resetBG == true)
+                if(needsAutoReset || resetBG){
                     
                     background.reset();
-                    useBgNow = true;
-                    
-                    if(getThreadId() < 3){
-                        cout << "\n\n[Thread " + ofToString(getThreadId()) + "] Background reset\n\n" << endl;
-                    }
+                    needsAutoReset = false;
                     
                 }
 
@@ -151,7 +148,7 @@ void ThreadedCV::threadedFunction(){
                 //threshold it
                 ofxCv::threshold(blurredPix, threshPix, threshold);
                 
-                useBgNow = false;
+                needsAutoReset = true;
                
             }
             

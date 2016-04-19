@@ -108,7 +108,7 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
     
     gui.add(bgDiffLabel.setup("   BG SUBTRACTION", ""));
     gui.add(useBgDiff.setup("Use BG Diff", false));
-    gui.add(learningTime.setup("Frames to learn BG", 100, 0, 2000));
+    gui.add(learningTime.setup("Frames to learn BG", 100, 0, 1000));
     gui.add(resetBG.setup("Reset Background"));
     
     gui.add(contoursLabel.setup("   CONTOUR FINDING", ""));
@@ -339,9 +339,18 @@ void Aggregator::drawRaw(int x, int y){
     ofPushMatrix();
     ofTranslate(x, y);
     
+    //draw border around entire masterPix object
+    ofSetColor(180, 0, 0, 100);
+    ofDrawRectangle(0, 0, masterWidth, masterHeight);
+    ofNoFill();
+    ofSetColor(255);
+    ofSetLineWidth(1.0);
+    ofDrawRectangle(0, 0, masterWidth, masterHeight);
+    ofFill();
+    
     for(int i = 0; i < numCams; i++){
         
-        ofSetColor(255, 200);
+        ofSetColor(255, 255);
         
         if(numCams == 4 && i == 1){
 
@@ -366,6 +375,23 @@ void Aggregator::drawRaw(int x, int y){
         
     }
     
+    ofSetColor(200);
+    ofDrawBitmapString("W: " + ofToString(masterWidth) + "\nH: " + ofToString(masterHeight) , masterWidth + 5, masterHeight + 15);
+    
+    
+    //Blob data
+    
+    string blobData = "";
+    
+    blobData += "Num Blobs: " + ofToString(contours.size());
+    blobData += "\nAvg. Pos X (norm): " + ofToString(avgPos.x);
+    blobData += "\nAvg. Pos Y (norm): " + ofToString(avgPos.y);
+    blobData += "\nAvg. Heading X (norm): " + ofToString(avgDir.x);
+    blobData += "\nAvg. Heading Y (norm): " + ofToString(avgDir.y);
+    blobData += "\nAvg. Speed (raw): " + ofToString(avgSpeed);
+    
+    ofSetColor(255);
+    ofDrawBitmapString(blobData, masterWidth + 20, 10);
     
     
     ofPopMatrix();
@@ -385,7 +411,7 @@ void Aggregator::drawCV(int x, int y){
         
         threshMasterImg.setFromPixels(threadOutputPix);
 
-        ofSetColor(255);
+        ofSetColor(255, 180);
         threshMasterImg.draw(0, 0);
         
     }
@@ -584,7 +610,7 @@ void Aggregator::gatherOscStats(){
         //get data from contour
         int label = contours.getLabel(i);
         ofPoint center = toOf(contours.getCenter(i));
-        ofPoint centerNormalized = center/ofVec2f(scaledWidth, scaledHeight);
+        ofPoint centerNormalized = center/ofVec2f(masterWidth, masterHeight);
         ofVec2f velocity = toOf(contours.getVelocity(i));
         
         //add it to our averages

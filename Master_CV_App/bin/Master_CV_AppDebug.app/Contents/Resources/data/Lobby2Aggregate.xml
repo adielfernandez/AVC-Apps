@@ -7,9 +7,9 @@
 	<Draw_Contours>1</Draw_Contours>
 	<Info>0</Info>
 	<Cam1_Pos>0, 0</Cam1_Pos>
-	<Cam2_Pos>260, 0</Cam2_Pos>
-	<Cam3_Pos>480, 0</Cam3_Pos>
-	<Cam4_Pos>0, 220</Cam4_Pos>
+	<Cam2_Pos>196, 0</Cam2_Pos>
+	<Cam3_Pos>384, 0</Cam3_Pos>
+	<Cam4_Pos>0, 169</Cam4_Pos>
 <Lobby2Aggregate/>
 <Threshold>62</Threshold>
 	<Blur>8</Blur>

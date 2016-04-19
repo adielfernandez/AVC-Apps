@@ -44,6 +44,7 @@ void NavPanel::setup(int *_viewMode, vector<shared_ptr<Camera>> _cams){
     float buttonStartY = 35;
     
     //position of entire NavPanel
+    height = (buttonHeight + margin) * 3 - buttonStartY;
     pos = ofVec2f(0, ofGetHeight() - (buttonHeight + margin) * 3 - buttonStartY);
     
     int leftSide = 0;
@@ -214,21 +215,23 @@ void NavPanel::setup(int *_viewMode, vector<shared_ptr<Camera>> _cams){
     
 
     //one button for the last panel to the OSC page
-    Button osc;
     
-
     ofVec2f p;
     p = subPanels[6].pos;
     
     float x, y;
     x = p.x + margin;
     y = p.y + buttonStartY;
+
+    //blobs button
+    Button allBlobs;
     
-    osc.width = buttonWidth;
-    osc.height = buttonHeight;
-    osc.setup("OSC Info", 16, ofVec2f(x, y), &font);
+    allBlobs.width = buttonWidth;
+    allBlobs.height = buttonHeight;
+    allBlobs.setup("People", 16, ofVec2f(x, y), &font);
     
-    
+
+    //all cams button
     Button allCams;
     
     y += buttonHeight + margin;
@@ -238,6 +241,18 @@ void NavPanel::setup(int *_viewMode, vector<shared_ptr<Camera>> _cams){
     allCams.setup("All Cams", 17, ofVec2f(x, y), &font);
     
     
+    
+    //osc data
+    Button osc;
+    
+    y += buttonHeight + margin;
+    
+    osc.width = buttonWidth;
+    osc.height = buttonHeight;
+    osc.setup("OSC Info", 18, ofVec2f(x, y), &font);
+    
+    
+    subPanels[6].buttons.push_back(allBlobs);
     subPanels[6].buttons.push_back(allCams);
     subPanels[6].buttons.push_back(osc);
     
@@ -262,12 +277,16 @@ void NavPanel::setup(int *_viewMode, vector<shared_ptr<Camera>> _cams){
     //Quad Mapping: Camera manipulationMode = 0
     quadMap.width = buttonWidth;
     quadMap.height = buttonHeight;
-    quadMap.setup("Quad Map", 0, manipulationPanel.pos + ofVec2f(margin, buttonStartY), &font);
+    quadMap.setup("Mapping", 0, manipulationPanel.pos + ofVec2f(margin, buttonStartY), &font);
+//    quadMap.activeCol.set(255, 0, 255);
+    quadMap.outlineCol.set(255, 0, 255);
     
     //Cropping: Camera manipulationMode = 1
     cropping.width = buttonWidth;
     cropping.height = buttonHeight;
     cropping.setup("Cropping", 1, manipulationPanel.pos + ofVec2f(margin * 2 + buttonWidth, buttonStartY), &font);
+//    cropping.activeCol.set(0, 255, 255);
+    cropping.outlineCol.set(0, 255, 255);
     
     manipulationPanel.buttons.push_back(quadMap);
     manipulationPanel.buttons.push_back(cropping);

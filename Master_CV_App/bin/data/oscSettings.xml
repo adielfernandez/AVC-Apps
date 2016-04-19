@@ -14,11 +14,11 @@
 		<Send_OSC>1</Send_OSC>
 		<Millis_bet__sends>1000</Millis_bet__sends>
 		<Send_Corridor_1_Data>1</Send_Corridor_1_Data>
-		<Send_Corridor_2_Data>1</Send_Corridor_2_Data>
-		<Send_Corridor_3_Data>1</Send_Corridor_3_Data>
-		<Send_Corridor_4_Data>1</Send_Corridor_4_Data>
-		<Send_Corridor_5_Data>1</Send_Corridor_5_Data>
-		<Send_Corridor_6_Data>1</Send_Corridor_6_Data>
+		<Send_Corridor_2_Data>0</Send_Corridor_2_Data>
+		<Send_Corridor_3_Data>0</Send_Corridor_3_Data>
+		<Send_Corridor_4_Data>0</Send_Corridor_4_Data>
+		<Send_Corridor_5_Data>0</Send_Corridor_5_Data>
+		<Send_Corridor_6_Data>0</Send_Corridor_6_Data>
 		<Send_Audio_Data>0</Send_Audio_Data>
 	</oscSettings>
 </group>

@@ -555,9 +555,23 @@ void Camera::drawMain(){
     if(soloCam){
         title = "Threshold + Contours (Scaled to: " + ofToString(scaledWidth) + "x" + ofToString(scaledHeight) + ")";
         
-        // anddraw num blobs under CV image
+        //Blob data
+        
+        string blobData = "";
+        
+        blobData += "Num Blobs: " + ofToString(contours.size());
+        blobData += "\nAvg. Pos X (norm): " + ofToString(avgPos.x);
+        blobData += "\nAvg. Pos Y (norm): " + ofToString(avgPos.y);
+        blobData += "\nAvg. Heading X (norm): " + ofToString(avgDir.x);
+        blobData += "\nAvg. Heading Y (norm): " + ofToString(avgDir.y);
+        blobData += "\nAvg. Speed (raw): " + ofToString(avgSpeed);
+        
         ofSetColor(255);
-        ofDrawBitmapString("Num Blobs: " + ofToString(contours.size()), secondSpot.x, secondSpot.y + scaledHeight + titleSpace + 20);
+        ofDrawBitmapString(blobData, secondSpot.x, secondSpot.y + scaledHeight + titleSpace + 20);
+        
+        
+        
+        
         
     } else {
         
@@ -681,7 +695,7 @@ void Camera::drawMap(int x, int y, float scale){
     ofFill();
     
     //draw border around crop with tick marks
-    drawCropSquare();
+    if(!soloCam) drawCropSquare();
     
     //draw mapping points
     ofPushStyle();
@@ -763,14 +777,14 @@ void Camera::drawCV(int x, int y, float scale){
     ofFill();
     
     //draw border around crop with tick marks
-    drawCropSquare();
+    if(!soloCam) drawCropSquare();
     
     if(cameraGui.drawContoursToggle){
         
         ofSetColor(255, 0, 0);
         ofPushMatrix();
         ofTranslate(cropStart.x, cropStart.y);
-        
+        ofSetLineWidth(1.0);
         contours.draw();
         
         for(int i = 0; i < contours.size(); i++) {
@@ -816,6 +830,7 @@ void Camera::drawCroppedTex(ofVec2f pos){
 
 void Camera::drawCropSquare(){
     
+    ofPushStyle();
     ofNoFill();
     ofSetLineWidth(1.0);
     ofSetColor(croppingCol);
@@ -835,7 +850,7 @@ void Camera::drawCropSquare(){
     ofDrawLine(cropStart.x + croppedWidth/2 - tickLength/2, cropStart.y + croppedHeight/2, cropStart.x + croppedWidth/2 + tickLength/2, cropStart.y + croppedHeight/2);
     ofDrawLine(cropStart.x + croppedWidth/2, cropStart.y + croppedHeight/2 - tickLength/2, cropStart.x + croppedWidth/2, cropStart.y + croppedHeight/2 + tickLength/2);
 
-    
+    ofPopStyle();
     
     
 }
@@ -903,8 +918,8 @@ void Camera::gatherOscStats(){
     //prepare the corridor stats message
     corridorStats.setAddress("/corridor_" + ofToString(thisCorridor) + "_stats");
     corridorStats.addIntArg(contours.size());
-    corridorStats.addFloatArg(avgPos.x);
-    corridorStats.addFloatArg(avgPos.y);
+    corridorStats.addFloatArg(avgPos.x/(float)scaledWidth);
+    corridorStats.addFloatArg(avgPos.y/(float)scaledHeight);
     corridorStats.addFloatArg(avgDir.x);
     corridorStats.addFloatArg(avgDir.y);
     corridorStats.addFloatArg(avgSpeed);

@@ -65,7 +65,6 @@ class ofApp : public ofBaseApp{
     int scaledWidth, scaledHeight;
     int leftMargin;
     int topMargin;
-    int centerMargin;
     
     NavPanel panel;
     

@@ -1,9 +1,9 @@
 <Cam-7>
-	<Threshold>91</Threshold>
-	<Blur>10</Blur>
+	<Threshold>47</Threshold>
+	<Blur>13</Blur>
 	<Number_of_erosions>0</Number_of_erosions>
 	<Number_of_dilations>0</Number_of_dilations>
-	<Draw_threshold>0</Draw_threshold>
+	<Draw_threshold>1</Draw_threshold>
 	<Min_Blob_Area>100</Min_Blob_Area>
 	<Max_Blob_Area>50000</Max_Blob_Area>
 	<Persistence>15</Persistence>
@@ -20,4 +20,11 @@
 	<Point_6>0, 512</Point_6>
 	<Point_7>320, 512</Point_7>
 	<Point_8>640, 512</Point_8>
+<Background_Differencing/>
+	<Frames_to_learn_BG>220</Frames_to_learn_BG>
+	<Use_BG_Diff>1</Use_BG_Diff>
+	<Contour_Finding/>
+<___IMAGE_DISTORTION/>
+	<___BG_SUBTRACTION/>
+	<___CONTOUR_FINDING/>
 </Cam-7>

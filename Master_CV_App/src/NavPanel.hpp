@@ -47,6 +47,7 @@ public:
     
     float margin;
     float buttonWidth, buttonHeight;
+    float width, height;
     
     int numSubPanels;
     vector<SubPanel> subPanels;

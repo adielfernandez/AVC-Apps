@@ -90,7 +90,7 @@ private:
     
     ofxCv::RunningBackground background;
     
-    bool useBgNow;
+    bool needsAutoReset;
     
 };
 

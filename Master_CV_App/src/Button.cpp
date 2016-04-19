@@ -31,6 +31,8 @@ void Button::setup(string _name, int _dest, ofVec2f _pos, ofTrueTypeFont *_font)
     
     inactiveCol.set(255);
     activeCol.set(0, 120, 255);
+    outlineCol.set(0, 0);
+    outlineThickness = 2.0;
     
     currentRectCol.set(inactiveCol);
     
@@ -81,6 +83,12 @@ void Button::draw(){
     
     ofSetColor(currentRectCol);
     ofDrawRectangle(pos, width, height);
+
+    ofNoFill();
+    ofSetLineWidth(outlineThickness);
+    ofSetColor(outlineCol);
+    ofDrawRectangle(pos, width, height);
+    ofFill();
     
     ofSetColor(textCol);
     

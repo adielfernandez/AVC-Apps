@@ -49,6 +49,8 @@ public:
     
     ofColor activeCol, inactiveCol, currentRectCol;
     ofColor textCol;
+    ofColor outlineCol;
+    float outlineThickness;
     
     
     

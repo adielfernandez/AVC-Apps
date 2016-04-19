@@ -29,7 +29,7 @@ void ofApp::setup(){
     //-----UI-----
     leftMargin = 230;
     topMargin = 70;
-    centerMargin = 20;
+    int centerMargin = 20;
     
     mainContentPos.set(leftMargin, topMargin);
     secondaryContentPos.set(leftMargin + feedWidth + centerMargin, topMargin);
@@ -45,8 +45,9 @@ void ofApp::setup(){
      
      14 = Lobby 1 aggregation
      15 = Lobby 2 aggregation
-     16 = OSC Page
-     17 = all cameras
+     16 = All Blobs
+     17 = All cameras
+     18 = OSC Page
      
      */
     viewMode = 14;
@@ -505,6 +506,128 @@ void ofApp::draw(){
         
     } else if(viewMode == 16){
         
+        //All cameras
+        
+        currentViewTitle = "People";
+        
+        /*
+         *  Shows Data for whole system:
+         *  Num blobs
+         *  Avg Pos, avg Vel, avg dir, avg speed
+         */
+        
+        int numCorridors = 6;
+        int spacer = 15;
+        int infoPanelWidth = (ofGetWidth() - spacer * 7)/numCorridors;
+        int infoPanelHeight = 400;
+
+        vector<ofVec2f> infoPanelPos;
+        infoPanelPos.resize(6);
+        for(int i = 0; i < numCorridors; i++){
+            infoPanelPos[i].set(spacer + i * (infoPanelWidth + spacer), topMargin);
+        
+            ofSetColor(0, 200);
+            ofDrawRectangle(infoPanelPos[i], infoPanelWidth, infoPanelHeight);
+    
+            ofSetColor(255);
+            
+            string name;
+            
+            if(i == 0){
+                name = "Lobby 1";
+            } else if(i == 5){
+                name = "Lobby 2";
+            } else {
+                name = "Corridor " + ofToString(i + 1);
+            }
+            
+            smallerFont.drawString(name, infoPanelPos[i].x + spacer, infoPanelPos[i].y + spacer + smallerFont.stringHeight(name));
+        }
+        
+        
+
+        
+        
+        //Lobby 1
+        string Lobby1Blobs = "";
+        
+        Lobby1Blobs += "Num Blobs:\n" + ofToString(Lobby1Aggregate.contours.size());
+        Lobby1Blobs += "\n\nAvg. Pos X (norm):\n" + ofToString(Lobby1Aggregate.avgPos.x);
+        Lobby1Blobs += "\n\nAvg. Pos Y (norm):\n" + ofToString(Lobby1Aggregate.avgPos.y);
+        Lobby1Blobs += "\n\nAvg. Heading X (norm):\n" + ofToString(Lobby1Aggregate.avgDir.x);
+        Lobby1Blobs += "\n\nAvg. Heading Y (norm):\n" + ofToString(Lobby1Aggregate.avgDir.y);
+        Lobby1Blobs += "\n\nAvg. Speed (raw): " + ofToString(Lobby1Aggregate.avgSpeed);
+        
+        ofSetColor(255);
+        ofDrawBitmapString(Lobby1Blobs, infoPanelPos[0].x + spacer, infoPanelPos[0].y + spacer * 4);
+        
+        
+        //Single Camera Corridors (cameras 6, 7, 8, 9)
+        for(int i = 6; i <= 9; i++){
+            
+            auto c = cameras[i];
+            
+            string blobData = "";
+            
+            blobData += "Num Blobs:\n" + ofToString(c -> contours.size());
+            blobData += "\n\nAvg. Pos X (norm):\n" + ofToString(c -> avgPos.x);
+            blobData += "\n\nAvg. Pos Y (norm):\n" + ofToString(c -> avgPos.y);
+            blobData += "\n\nAvg. Heading X (norm):\n" + ofToString(c -> avgDir.x);
+            blobData += "\n\nAvg. Heading Y (norm):\n" + ofToString(c -> avgDir.y);
+            blobData += "\n\nAvg. Speed (raw):\n" + ofToString(c -> avgSpeed);
+            
+            ofSetColor(255);
+            ofDrawBitmapString(blobData, infoPanelPos[i - 5].x + spacer, infoPanelPos[i - 5].y + spacer * 4);
+            
+        }
+        
+        
+        
+        //Lobby 2
+        string Lobby2Blobs = "";
+        
+        Lobby2Blobs += "Num Blobs:\n" + ofToString(Lobby2Aggregate.contours.size());
+        Lobby2Blobs += "\n\nAvg. Pos X (norm):\n" + ofToString(Lobby2Aggregate.avgPos.x);
+        Lobby2Blobs += "\n\nAvg. Pos Y (norm):\n" + ofToString(Lobby2Aggregate.avgPos.y);
+        Lobby2Blobs += "\n\nAvg. Heading X (norm):\n" + ofToString(Lobby2Aggregate.avgDir.x);
+        Lobby2Blobs += "\n\nAvg. Heading Y (norm):\n" + ofToString(Lobby2Aggregate.avgDir.y);
+        Lobby2Blobs += "\n\nAvg. Speed (raw):\n" + ofToString(Lobby2Aggregate.avgSpeed);
+        
+        ofSetColor(255);
+        ofDrawBitmapString(Lobby1Blobs, infoPanelPos[5].x + spacer, infoPanelPos[5].y + spacer * 4);
+        
+        
+        
+        
+        
+        
+    } else if(viewMode == 17){
+        
+        //All cameras
+        
+        currentViewTitle = "All Cameras";
+        
+        for(int i = 0; i < numFeeds; i++){
+            
+            float scale = frameWidth/(float)cameras[i] -> scaledWidth;
+            
+            cameras[i] -> drawCV(allCamsPos[i].x, allCamsPos[i].y, scale);
+            
+            //draw camera label
+            ofSetColor(180);
+            ofDrawBitmapString(cameras[i] -> name, allCamsPos[i].x + 5, allCamsPos[i].y + 13);
+            
+        }
+        
+        //draw corridor labels
+        for(int i = 0; i < allLabelsPos.size(); i++){
+            ofSetColor(255);
+            smallerFont.drawString("Corridor " + ofToString(i + 1), allLabelsPos[i].x, allLabelsPos[i].y - 5);
+        }
+        
+        
+    } else if(viewMode == 18){
+        
         //OSC VIEWER
         currentViewTitle = "OSC Info";
         
@@ -549,7 +672,7 @@ void ofApp::draw(){
         oscDataFormat += "    Corridor 2 Bundle (same format)\n";
         oscDataFormat += "    Corridor 3 Bundle (same format)\n";
         oscDataFormat += "    Etc. for other corridors\n";
-
+        
         
         int oscBoxWidth = 450;
         int oscBoxHeight = 500;
@@ -635,32 +758,7 @@ void ofApp::draw(){
         ofSetColor(0, sendTrans);
         ofDrawBitmapString("MESSAGE SENT", boxPos.x + 20, boxPos.y + rectHeight/2 + 3);
         ofPopStyle();
-        
-        
-    } else if(viewMode == 17){
-        
-        //All cameras
-        
-        currentViewTitle = "All Cameras";
-        
-        for(int i = 0; i < numFeeds; i++){
-            
-            float scale = frameWidth/(float)cameras[i] -> scaledWidth;
-            
-            cameras[i] -> drawCV(allCamsPos[i].x, allCamsPos[i].y, scale);
-            
-            //draw camera label
-            ofSetColor(180);
-            ofDrawBitmapString(cameras[i] -> name, allCamsPos[i].x + 5, allCamsPos[i].y + 13);
-            
-        }
-        
-        //draw corridor labels
-        for(int i = 0; i < allLabelsPos.size(); i++){
-            ofSetColor(255);
-            smallerFont.drawString("Corridor " + ofToString(i + 1), allLabelsPos[i].x, allLabelsPos[i].y - 5);
-        }
-        
+
         
     }
     
