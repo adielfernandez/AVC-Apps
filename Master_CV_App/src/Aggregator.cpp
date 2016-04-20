@@ -119,6 +119,8 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
     gui.add(drawContoursToggle.setup("Draw Contours", true));
     gui.add(showInfoToggle.setup("Info", false));
     
+    gui.add(positionsLabel.setup("   FEED POSITIONS", ""));
+    gui.add(trimPixels.setup("Trim Dead Space", false));
     gui.add(camPos1.setup("Cam1 Pos", ofVec2f(0, 0), ofVec2f(0, 0), ofVec2f(640, 512)));
     gui.add(camPos2.setup("Cam2 Pos", ofVec2f(0, 0), ofVec2f(0, 0), ofVec2f(640, 512)));
     gui.add(camPos3.setup("Cam3 Pos", ofVec2f(0, 0), ofVec2f(0, 0), ofVec2f(640, 512)));
@@ -197,6 +199,8 @@ void Aggregator::update(){
     //so the masterPix object can be resized appropriately
     int furthestRight = 0;
     int furthestDown = 0;
+    int furthestLeft = 10000;
+    int furthestUp = 10000;
     
     for(int i = 0; i < positions.size(); i++){
         
@@ -210,11 +214,35 @@ void Aggregator::update(){
             furthestDown = thisMaxBottom;
         }
         
+        
+        if(positions[i].x < furthestLeft) furthestLeft = positions[i].x;
+        if(positions[i].y < furthestUp) furthestUp = positions[i].y;
+        
     }
     
     masterWidth = furthestRight;
     masterHeight = furthestDown;
     
+    //trim out the space above and to the left in masterPix
+    //but only if we're not current background differencing
+    //or the thread will crash
+    if(trimPixels && !useBgDiff){
+
+        //subtract from all the camera positions
+        for(int i = 0; i < positions.size(); i++){
+            positions[i].x -= furthestLeft;
+            positions[i].y -= furthestUp;
+        }
+            
+        //and update the gui to store the values
+        camPos1 = positions[0];
+        camPos2 = positions[1];
+        camPos3 = positions[2];
+        camPos4 = positions[3];
+        camPos5 = positions[4];
+        camPos6 = positions[5];
+        
+    }
     
     
     //clear it
@@ -224,6 +252,9 @@ void Aggregator::update(){
     //based on the positions of the frames within it
     masterPix.allocate(masterWidth, masterHeight, 1);
     masterPix.setColor(ofColor(0));
+    
+    
+    
     
     //paste the other ofPixels into masterPix
     for(int i = 0; i < numCams; i++){
@@ -528,7 +559,7 @@ void Aggregator::drawCV(int x, int y){
     
     if(disablePositioning){
         ofSetColor(255, 0, 0);
-        ofDrawBitmapString("Disable BG differencing to adjust positions", adjustedOrigin.x, adjustedOrigin.y + masterHeight + 30);
+        ofDrawBitmapString("Disable BG differencing to adjust positions and trim dead space", adjustedOrigin.x, adjustedOrigin.y + masterHeight + 30);
     }
     
     

@@ -215,7 +215,7 @@ public:
     bool bShowGui;
 
 
-    
+    //Blackout shapes
     
     
 };

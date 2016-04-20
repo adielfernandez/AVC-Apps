@@ -164,6 +164,8 @@ public:
     ofxToggle drawContoursToggle;
     ofxToggle showInfoToggle;
 
+    ofxLabel positionsLabel;
+    ofxButton trimPixels;
     ofxVec2Slider camPos1;
     ofxVec2Slider camPos2;
     ofxVec2Slider camPos3;

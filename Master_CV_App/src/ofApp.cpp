@@ -369,6 +369,7 @@ void ofApp::setup(){
     //UI Viewability
     //Go through all GUIs and minimize all parameters
     //so long guis dont interfere with visuals
+    
     //cameras
     for(int i = 0; i < cameras.size(); i++){
         cameras[i] -> cameraGui.gui.minimizeAll();

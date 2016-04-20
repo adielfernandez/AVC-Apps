@@ -367,30 +367,33 @@ void NavPanel::update(){
                 manipulationPanel.buttons[1].name = "Cropping";
             }
             
-            //Lobby 1 & 2
-        } else {
+            //Lobby 1
+        } else if((*viewMode) == 14){
             
-            if(Lobby1 -> manipulationMode == 0 || Lobby2 -> manipulationMode == 0){
-                
+            if(Lobby1 -> manipulationMode == 0){
                 manipulationPanel.buttons[0].isActive = true;
                 manipulationPanel.buttons[1].isActive = false;
-                
             } else {
-                
                 manipulationPanel.buttons[0].isActive = false;
                 manipulationPanel.buttons[1].isActive = true;
-                
+            }
+            
+            manipulationPanel.buttons[1].name = "Masking";
+            
+            //Lobby 2
+        } else {
+
+            if(Lobby2 -> manipulationMode == 0){
+                manipulationPanel.buttons[0].isActive = true;
+                manipulationPanel.buttons[1].isActive = false;
+            } else {
+                manipulationPanel.buttons[0].isActive = false;
+                manipulationPanel.buttons[1].isActive = true;
             }
             
             manipulationPanel.buttons[1].name = "Masking";
             
         }
-        
-    
-        
-
-
-        
         
         
         manipulationPanel.update();
@@ -481,11 +484,19 @@ void NavPanel::checkForClicks(int x, int y){
                 //then set the right mode based on the button
                 if((*viewMode) <= 13){
                     cams[*viewMode] -> manipulationMode = manipulationPanel.buttons[i].clickDest;
+                     cout << "Camera Button " + ofToString(i + 1) + " Pressed" << endl;
+                
                 } else if((*viewMode) == 14){
                     Lobby1 -> manipulationMode = manipulationPanel.buttons[i].clickDest;
+                    cout << "LOBBY 1 Button " + ofToString(i + 1) + " Pressed" << endl;
                 } else {
                     Lobby2 -> manipulationMode = manipulationPanel.buttons[i].clickDest;
+                    cout << "LOBBY 2 Button " + ofToString(i + 1) + " Pressed" << endl;
                 }
+                
+                
+                //no need to check other buttons
+                break;
                 
             }
             

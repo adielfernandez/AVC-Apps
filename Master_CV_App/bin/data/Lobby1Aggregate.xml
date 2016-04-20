@@ -6,12 +6,12 @@
 	<Draw_threshold>0</Draw_threshold>
 	<Draw_Contours>1</Draw_Contours>
 	<Info>1</Info>
-	<Cam1_Pos>9, 22</Cam1_Pos>
-	<Cam2_Pos>229, 20</Cam2_Pos>
-	<Cam3_Pos>427, 8</Cam3_Pos>
-	<Cam4_Pos>10, 200</Cam4_Pos>
-	<Cam5_Pos>230, 203</Cam5_Pos>
-	<Cam6_Pos>433, 204</Cam6_Pos>
+	<Cam1_Pos>0, 14</Cam1_Pos>
+	<Cam2_Pos>220, 12</Cam2_Pos>
+	<Cam3_Pos>418, 0</Cam3_Pos>
+	<Cam4_Pos>1, 192</Cam4_Pos>
+	<Cam5_Pos>221, 195</Cam5_Pos>
+	<Cam6_Pos>424, 196</Cam6_Pos>
 <Lobby1Aggregate/>
 <Threshold>112</Threshold>
 	<Blur>6</Blur>
@@ -25,4 +25,6 @@
 <___IMAGE_MANIPULATION/>
 	<___BG_SUBTRACTION/>
 	<___CONTOUR_FINDING/>
+<___FEED_POSITIONS/>
+	<Trim_Dead_Space>1</Trim_Dead_Space>
 </Lobby1Aggregate>
