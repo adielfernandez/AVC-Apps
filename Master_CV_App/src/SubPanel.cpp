@@ -77,6 +77,18 @@ bool SubPanel::isInside(int x, int y){
     
 }
 
+void SubPanel::setButtonsInactive(){
+    
+    
+    for(int i = 0; i < buttons.size(); i++){
+        
+        buttons[i].isActive = false;
+        
+    }
+    
+}
+
+
 
 
 

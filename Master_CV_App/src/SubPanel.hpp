@@ -27,11 +27,10 @@ public:
     void setFont(ofTrueTypeFont *_font);
     void update();
     void draw();
-    bool isInside(int x, int y);
     
-    //pointer to the viewMode variable
-    //in ofApp that cycles the views
-    int *viewChanger;
+    void setButtonsInactive();
+    bool isInside(int x, int y);
+
     
     ofTrueTypeFont *font;
     

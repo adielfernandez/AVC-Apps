@@ -505,10 +505,10 @@ void Camera::drawMain(){
     
     if(manipulationMode == 0){
         
-        string title = "Raw Feed (640x512) -> Mapping";
+        string title = "Map/Warp the image (Raw: 640x512)";
         ofDrawBitmapString(title, adjustedOrigin.x, adjustedOrigin.y + 10);
         
-        drawRaw(adjustedOrigin.x, adjustedOrigin.y + titleSpace);
+        drawRawWindow(adjustedOrigin.x, adjustedOrigin.y + titleSpace);
         
         
         secondSpot.set(adjustedOrigin.x + feedWidth + 20, adjustedOrigin.y);
@@ -517,13 +517,27 @@ void Camera::drawMain(){
         
     } else {
         
-        //this part wont happen even if manipulationMode is 1, unless soloCam is false
-        //since there's no way to set the mode with the buttons gone
-        
-        string title = "Mapped & scaled to: " + ofToString(scaledWidth) + "x" + ofToString(scaledHeight) + ")";
-        ofSetColor(255);
-        ofDrawBitmapString(title, adjustedOrigin.x, adjustedOrigin.y + 10);
-        drawMap(adjustedOrigin.x, adjustedOrigin.y + titleSpace, 1.0f);
+        if(soloCam){
+            
+            
+            //draws the already mapped image with cropping data over it
+            string title = "Select Black-out Mask (Scaled: " + ofToString(scaledWidth) + "x" + ofToString(scaledHeight) + ")";
+            ofSetColor(255);
+            ofDrawBitmapString(title, adjustedOrigin.x, adjustedOrigin.y + 10);
+            drawMaskingWindow(adjustedOrigin.x, adjustedOrigin.y + titleSpace, 1.0f);
+            
+            
+        } else {
+
+            
+            //draws the already mapped image with cropping data over it
+            string title = "Select Cropping region (Scaled: " + ofToString(scaledWidth) + "x" + ofToString(scaledHeight) + ")";
+            ofSetColor(255);
+            ofDrawBitmapString(title, adjustedOrigin.x, adjustedOrigin.y + 10);
+            drawCroppingWindow(adjustedOrigin.x, adjustedOrigin.y + titleSpace, 1.0f);
+            
+            
+        }
         
         secondSpot.set(adjustedOrigin.x + scaledWidth + 20, adjustedOrigin.y);
         
@@ -541,7 +555,7 @@ void Camera::drawMain(){
         scale = 0.5;
     }
     
-    drawCV(secondSpot.x, secondSpot.y + titleSpace, scale);
+    drawPostCvWindow(secondSpot.x, secondSpot.y + titleSpace, scale);
     
     
     drawGui(15, adjustedOrigin.y);
@@ -553,7 +567,7 @@ void Camera::drawMain(){
     
     string title;
     if(soloCam){
-        title = "Threshold + Contours (Scaled to: " + ofToString(scaledWidth) + "x" + ofToString(scaledHeight) + ")";
+        title = "Thresholded + Contoured (Scaled: " + ofToString(scaledWidth) + "x" + ofToString(scaledHeight) + ")";
         
         //Blob data
         
@@ -605,7 +619,7 @@ void Camera::drawMain(){
 
 
 
-void Camera::drawRaw(int x, int y){
+void Camera::drawRawWindow(int x, int y){
     
     //WARNING: certain things can be drawn with matrix translations
     // but others need to be drawn raw since they depend on mouse interaction
@@ -672,7 +686,7 @@ void Camera::drawRaw(int x, int y){
     
 }
 
-void Camera::drawMap(int x, int y, float scale){
+void Camera::drawCroppingWindow(int x, int y, float scale){
     
     //WARNING: certain things can be drawn with matrix translations
     // but others need to be drawn raw since they depend on mouse interaction
@@ -736,7 +750,18 @@ void Camera::drawMap(int x, int y, float scale){
 }
 
 
-void Camera::drawCV(int x, int y, float scale){
+void Camera::drawMaskingWindow(int x, int y, float scale){
+    
+
+    
+    
+    
+    
+}
+
+
+
+void Camera::drawPostCvWindow(int x, int y, float scale){
     
     ofPushMatrix();
     
@@ -935,6 +960,7 @@ void Camera::gatherOscStats(){
 
 void Camera::mousePressed(ofMouseEventArgs &args){
     
+    //mapping the quad
     if(manipulationMode == 0){
         
         //handle mouse interaction with Map points
@@ -958,7 +984,7 @@ void Camera::mousePressed(ofMouseEventArgs &args){
             
         }
         
-    } else {
+    } else {    //cropping
         
         //check for start point first then end point later
         //so we don't grab two points at once

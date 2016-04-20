@@ -334,6 +334,24 @@ void Aggregator::update(){
     
 }
 
+
+void Aggregator::drawMain(){
+    
+    
+    drawRaw(adjustedOrigin.x, adjustedOrigin.y);
+    
+    drawCV(adjustedOrigin.x, adjustedOrigin.y);
+    
+    drawGui(15, adjustedOrigin.y);
+    
+    
+    
+}
+
+
+
+
+
 void Aggregator::drawRaw(int x, int y){
     
     ofPushMatrix();

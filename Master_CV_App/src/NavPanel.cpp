@@ -15,11 +15,12 @@ NavPanel::NavPanel(){
 
 
 
-void NavPanel::setup(int *_viewMode, vector<shared_ptr<Camera>> _cams){
+void NavPanel::setup(int *_viewMode, vector<shared_ptr<Camera>> _cams, Aggregator *_Lobby1, Aggregator *_Lobby2){
 
     viewMode = _viewMode;
     cams = _cams;
-    
+    Lobby1 = _Lobby1;
+    Lobby2 = _Lobby2;
     
     font.load("fonts/Aller_Rg.ttf", 12);
     
@@ -49,7 +50,7 @@ void NavPanel::setup(int *_viewMode, vector<shared_ptr<Camera>> _cams){
     
     int leftSide = 0;
     
-    numSubPanels = 7;
+    int numSubPanels = 7;
     for(int i = 0; i < numSubPanels; i++){
         
         SubPanel s;
@@ -259,6 +260,7 @@ void NavPanel::setup(int *_viewMode, vector<shared_ptr<Camera>> _cams){
     
     
     //subpanel for each camera's manipulationMode
+    //this chooses between mapping the quad and cropping
     manipulationPanel.setup(ofVec2f(0));
     
     manipulationPanel.margin = margin;
@@ -278,53 +280,123 @@ void NavPanel::setup(int *_viewMode, vector<shared_ptr<Camera>> _cams){
     quadMap.width = buttonWidth;
     quadMap.height = buttonHeight;
     quadMap.setup("Mapping", 0, manipulationPanel.pos + ofVec2f(margin, buttonStartY), &font);
-//    quadMap.activeCol.set(255, 0, 255);
-    quadMap.outlineCol.set(255, 0, 255);
+//    quadMap.outlineCol.set(255, 0, 255);
+    quadMap.isActive = true;
+
     
     //Cropping: Camera manipulationMode = 1
     cropping.width = buttonWidth;
     cropping.height = buttonHeight;
     cropping.setup("Cropping", 1, manipulationPanel.pos + ofVec2f(margin * 2 + buttonWidth, buttonStartY), &font);
-//    cropping.activeCol.set(0, 255, 255);
-    cropping.outlineCol.set(0, 255, 255);
+//    cropping.outlineCol.set(0, 255, 255);
     
     manipulationPanel.buttons.push_back(quadMap);
     manipulationPanel.buttons.push_back(cropping);
     manipulationPanel.isActive = true;
-
+    
+    
+    //Subpanel for switching between mapping and masking modes
+    //for aggregates and soloCams only
+//    maskingPanel.setup(ofVec2f(0));
+//    
+//    maskingPanel.margin = margin;
+//    maskingPanel.buttonWidth = buttonWidth;
+//    maskingPanel.buttonHeight = buttonHeight;
+//    maskingPanel.width = buttonWidth * 2 + margin * 3;
+//    maskingPanel.title = "Map or Mask";
+//    maskingPanel.height = buttonStartY + buttonHeight + margin;
+//    maskingPanel.pos.set(ofGetWidth() - manipulationPanel.width - margin, pos.y - manipulationPanel.height - margin );
+//    maskingPanel.setFont(&font);
+//    
+//    //add two buttons
+//    Button map;
+//    Button mask;
+//    
+//    //Mapping: Camera manipulationMode = 0
+//    map.width = buttonWidth;
+//    map.height = buttonHeight;
+//    map.setup("Mapping", 0, manipulationPanel.pos + ofVec2f(margin, buttonStartY), &font);
+//    map.isActive = true;
+//    
+//    //Masking: Camera manipulationMode = 1
+//    mask.width = buttonWidth;
+//    mask.height = buttonHeight;
+//    mask.setup("Masking", 1, manipulationPanel.pos + ofVec2f(margin * 2 + buttonWidth, buttonStartY), &font);
+//    
+//    maskingPanel.buttons.push_back(map);
+//    maskingPanel.buttons.push_back(mask);
+//    maskingPanel.isActive = true;
+    
 }
-
 
 void NavPanel::update(){
     
     for(int i = 0; i < subPanels.size(); i++){
+    
         subPanels[i].update();
+        
     }
     
     
-    //check the manipulationMode variable in the current camera
+//    maskingPanel.update();
+    
+    //check the manipulationMode variable in the current camera and Aggregates
     //and modify the button visuals accordingly
-    if((*viewMode) >= 0 && (*viewMode) <= 13){
+    if((*viewMode) >= 0 && (*viewMode) <= 15){
         
-        if(cams[(*viewMode)] -> manipulationMode == 0){
-            manipulationPanel.buttons[0].isActive = true;
-            manipulationPanel.buttons[1].isActive = false;
+        //cameras
+        if((*viewMode) <= 13){
+            
+            if(cams[(*viewMode)] -> manipulationMode == 0){
+                
+                manipulationPanel.buttons[0].isActive = true;
+                manipulationPanel.buttons[1].isActive = false;
+                
+            } else {
+                
+                manipulationPanel.buttons[0].isActive = false;
+                manipulationPanel.buttons[1].isActive = true;
+                
+            }
+        
+            //if we're in a soloCam or Aggregate, button 2 is
+            //Masking, else it's cropping
+            if(cams[(*viewMode)] -> soloCam){
+                manipulationPanel.buttons[1].name = "Masking";
+            } else {
+                manipulationPanel.buttons[1].name = "Cropping";
+            }
+            
+            //Lobby 1 & 2
         } else {
-            manipulationPanel.buttons[0].isActive = false;
-            manipulationPanel.buttons[1].isActive = true;
+            
+            if(Lobby1 -> manipulationMode == 0 || Lobby2 -> manipulationMode == 0){
+                
+                manipulationPanel.buttons[0].isActive = true;
+                manipulationPanel.buttons[1].isActive = false;
+                
+            } else {
+                
+                manipulationPanel.buttons[0].isActive = false;
+                manipulationPanel.buttons[1].isActive = true;
+                
+            }
+            
+            manipulationPanel.buttons[1].name = "Masking";
+            
         }
         
-        if(cams[*viewMode] -> soloCam == false){
-            manipulationPanel.update();
-        }
+    
+        
+
+
+        
+        
+        
+        manipulationPanel.update();
+
     }
-    
-    
-    
-    
-    
-    
-    
+
 }
 
 void NavPanel::draw(){
@@ -343,13 +415,13 @@ void NavPanel::draw(){
         
     }
     
-    
-    if((*viewMode) >= 0 && (*viewMode) <= 13){
+    //Draw the other subpanels
+    if((*viewMode) >= 0 && (*viewMode) <= 15){
         
-        if(cams[*viewMode] -> soloCam == false){
             manipulationPanel.draw();
-        }
+
     }
+    
 }
 
 
@@ -393,19 +465,33 @@ void NavPanel::checkForClicks(int x, int y){
         }
     }
     
-    //only check the manipulationMode buttons if we're in a camera view
-    if((*viewMode) >= 0 && (*viewMode) <= 13){
-    
-        if(cams[*viewMode] -> soloCam == false){
-            //check for clicks in the manipulationMode panel too
-            if(manipulationPanel.buttons[0].isInside(x, y)){
-                cams[*viewMode] -> manipulationMode = 0;
+    //only check the manipulationMode buttons if we're in a camera/aggregate view
+    if((*viewMode) >= 0 && (*viewMode) <= 15){
+        
+        for(int i = 0; i < manipulationPanel.buttons.size(); i++){
+            
+            if(manipulationPanel.buttons[i].isInside(x, y)){
+                
+                //set all other buttons in panel to inactive
+                manipulationPanel.setButtonsInactive();
+                
+                //then set THIS button to active
+                manipulationPanel.buttons[i].isActive = true;
+                
+                //then set the right mode based on the button
+                if((*viewMode) <= 13){
+                    cams[*viewMode] -> manipulationMode = manipulationPanel.buttons[i].clickDest;
+                } else if((*viewMode) == 14){
+                    Lobby1 -> manipulationMode = manipulationPanel.buttons[i].clickDest;
+                } else {
+                    Lobby2 -> manipulationMode = manipulationPanel.buttons[i].clickDest;
+                }
+                
             }
-
-            if(manipulationPanel.buttons[1].isInside(x, y)){
-                cams[*viewMode] -> manipulationMode = 1;
-            }
+            
         }
+            
+        
     }
     
     
@@ -421,9 +507,8 @@ void NavPanel::setAllInactive(){
         
         subPanels[i].isActive = false;
 
-        for(int j = 0; j < subPanels[i].buttons.size(); j++){
-            subPanels[i].buttons[j].isActive = false;
-        }
+        subPanels[i].setButtonsInactive();
+
     }
     
 }

@@ -35,7 +35,6 @@ public:
     bool isInside(int x, int y);
     
     int clickDest;
-    int viewMode;
     int width, height;
     
     ofVec2f pos;

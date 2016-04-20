@@ -59,16 +59,19 @@ public:
     //helpers to draw selected bits:
 
     //raw image (with quad mapping)
-    void drawRaw(int x, int y);
+    void drawRawWindow(int x, int y);
     
-    //quad mapped image (with cropping pts)
-    void drawMap(int x, int y, float scale);
+    //Mapped image (with cropping pts)
+    void drawCroppingWindow(int x, int y, float scale);
+    
+    //Mapped image with mask
+    void drawMaskingWindow(int x, int y, float scale);
     
     void drawCroppedTex(ofVec2f pos);
     void drawCropSquare();
     
     //draw raw/thresholded & contours
-    void drawCV(int x, int y, float scale);
+    void drawPostCvWindow(int x, int y, float scale);
     
     
     
@@ -92,8 +95,9 @@ public:
     int thisView;
     
     //decides if we're tweaking the
-    //quad mapping (0) or cropped sub-image (1)
+    //soloCam: quad mapping (0) or cropped sub-image (1)
     int manipulationMode;
+
     
     
     

@@ -17,6 +17,7 @@
 #include "SubPanel.hpp"
 #include "ofMain.h"
 #include "Camera.h"
+#include "Aggregator.hpp"
 
 #pragma once
 
@@ -27,7 +28,7 @@ public:
     
     NavPanel();
     
-    void setup(int *_viewMode, vector<shared_ptr<Camera>> _cams);
+    void setup(int *_viewMode, vector<shared_ptr<Camera>> _cams, Aggregator *_Lobby1, Aggregator *_Lobby2);
     void update();
     void draw();
     
@@ -38,7 +39,7 @@ public:
     //in ofApp that cycles the views
     int *viewMode;
     vector<shared_ptr<Camera>> cams;
-    
+    Aggregator *Lobby1, *Lobby2;
     
     ofTrueTypeFont font;
     
@@ -48,9 +49,12 @@ public:
     float margin;
     float buttonWidth, buttonHeight;
     float width, height;
-    
-    int numSubPanels;
+
     vector<SubPanel> subPanels;
-    SubPanel manipulationPanel;    
+    SubPanel manipulationPanel;
+//    SubPanel maskingPanel;
     
 };
+
+
+

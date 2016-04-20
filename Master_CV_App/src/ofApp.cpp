@@ -299,7 +299,8 @@ void ofApp::setup(){
     
     
     //-----create buttons for UI navigation-----
-    panel.setup(&viewMode, cameras);
+    //pass it all the things it needs to control
+    panel.setup(&viewMode, cameras, &Lobby1Aggregate, &Lobby2Aggregate);
     
     //video playback
     if(!useLiveFeed){
@@ -391,9 +392,8 @@ void ofApp::setup(){
 
 void ofApp::update(){
 
-    //button panel
+    //Update the UI Panel
     panel.update();
-    
     
     //update the playback bar if we're not live
     if(!useLiveFeed) playback.update();
@@ -453,13 +453,13 @@ void ofApp::draw(){
     //draw the raw cameras
     if(viewMode >= 0 && viewMode < numFeeds){
         
+        //camera background
         ofBackgroundGradient(cameras[viewMode] -> backgroundInCol, cameras[viewMode] -> backgroundOutCol);
         
-        ofSetColor(255);
-        
+        //title
         currentViewTitle = cameras[viewMode] ->  name;
         
-        
+        //camera visuals
         cameras[viewMode] -> drawMain();
         
         
@@ -469,19 +469,11 @@ void ofApp::draw(){
         //CORRIDOR 1 AGGREGATION
         ofBackgroundGradient(Lobby1Aggregate.backgroundInCol, Lobby1Aggregate.backgroundOutCol);
         
+        //Title
         currentViewTitle = "Lobby 1 Aggregate";
         
-
-        Lobby1Aggregate.drawRaw(mainContentPos.x, mainContentPos.y);
-        
-        Lobby1Aggregate.drawCV(mainContentPos.x, mainContentPos.y);
-        
-        Lobby1Aggregate.drawGui(15, topMargin);
-        
-        
-        
-        
-        
+        //aggregator visuals
+        Lobby1Aggregate.drawMain();
         
         
         
@@ -490,25 +482,19 @@ void ofApp::draw(){
         //CORRIDOR 2 AGGREGATION
         ofBackgroundGradient(Lobby2Aggregate.backgroundInCol, Lobby2Aggregate.backgroundOutCol);
 
+        //Title
         currentViewTitle = "Lobby 2 Aggregate";
         
-        Lobby2Aggregate.drawRaw(mainContentPos.x, mainContentPos.y);
-        Lobby2Aggregate.drawCV(mainContentPos.x, mainContentPos.y);
-        
-        Lobby2Aggregate.drawGui(15, topMargin);
-        
-        
-        
-        
-        
+        //Aggregator visuals
+        Lobby2Aggregate.drawMain();
         
         
         
     } else if(viewMode == 16){
         
-        //All cameras
+        //All Blob Data Mode
         
-        currentViewTitle = "People";
+        currentViewTitle = "All Blob Data";
         
         /*
          *  Shows Data for whole system:
@@ -611,7 +597,7 @@ void ofApp::draw(){
             
             float scale = frameWidth/(float)cameras[i] -> scaledWidth;
             
-            cameras[i] -> drawCV(allCamsPos[i].x, allCamsPos[i].y, scale);
+            cameras[i] -> drawPostCvWindow(allCamsPos[i].x, allCamsPos[i].y, scale);
             
             //draw camera label
             ofSetColor(180);

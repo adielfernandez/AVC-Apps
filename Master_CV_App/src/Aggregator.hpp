@@ -44,12 +44,17 @@ public:
     
     void drawRaw(int x, int y);
     void drawCV(int x, int y);
-    
+    void drawMain();
 
     
     //view control
     int *viewMode;
     int thisView;
+    
+    
+    //decides if we're tweaking the
+    //mapping (0) or masking (1)
+    int manipulationMode;
     
     
     //General info and UI
