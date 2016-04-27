@@ -112,8 +112,8 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
     gui.add(resetBG.setup("Reset Background"));
     
     gui.add(contoursLabel.setup("   CONTOUR FINDING", ""));
-    gui.add(minBlobAreaSlider.setup("Min Blob Area", 0, 0, 1000));
-    gui.add(maxBlobAreaSlider.setup("Max Blob Area", 12000, 0, 30000));
+    gui.add(minBlobAreaSlider.setup("Min Blob Area", 0, 0, 500));
+    gui.add(maxBlobAreaSlider.setup("Max Blob Area", 12000, 0, 5000));
     gui.add(persistenceSlider.setup("Persistence", 15, 0, 100));
     gui.add(maxDistanceSlider.setup("Max Distance", 32, 0, 100));
     gui.add(drawContoursToggle.setup("Draw Contours", true));
@@ -266,12 +266,12 @@ void Aggregator::update(){
             ofPixels rotated;
             cams[indices[i]] -> threadOutput.rotate90To(rotated, 1);
             
-            rotated.pasteInto(masterPix, positions[i].x, positions[i].y);
+            rotated.blendInto(masterPix, positions[i].x, positions[i].y);
             
         } else {
             
             //all other cameras get pasted in normally
-            cams[indices[i]] -> threadOutput.pasteInto(masterPix, positions[i].x, positions[i].y);
+            cams[indices[i]] -> threadOutput.blendInto(masterPix, positions[i].x, positions[i].y);
 
         }
         

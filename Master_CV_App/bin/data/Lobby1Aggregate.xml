@@ -1,6 +1,6 @@
 <Lobby1Aggregate>
-	<Min_Blob_Area>155</Min_Blob_Area>
-	<Max_Blob_Area>12000</Max_Blob_Area>
+	<Min_Blob_Area>0</Min_Blob_Area>
+	<Max_Blob_Area>1000</Max_Blob_Area>
 	<Persistence>15</Persistence>
 	<Max_Distance>32</Max_Distance>
 	<Draw_threshold>0</Draw_threshold>
@@ -13,14 +13,14 @@
 	<Cam5_Pos>221, 195</Cam5_Pos>
 	<Cam6_Pos>424, 196</Cam6_Pos>
 <Lobby1Aggregate/>
-<Threshold>112</Threshold>
-	<Blur>6</Blur>
+<Threshold>181</Threshold>
+	<Blur>18</Blur>
 	<Number_of_erosions>0</Number_of_erosions>
-	<Number_of_dilations>0</Number_of_dilations>
+	<Number_of_dilations>4</Number_of_dilations>
 <Draw_blurred>0</Draw_blurred>
 <Background_Differencing/>
 	<Frames_to_learn_BG>400</Frames_to_learn_BG>
-	<Use_BG_Diff>1</Use_BG_Diff>
+	<Use_BG_Diff>0</Use_BG_Diff>
 	<Contour_Finding/>
 <___IMAGE_MANIPULATION/>
 	<___BG_SUBTRACTION/>

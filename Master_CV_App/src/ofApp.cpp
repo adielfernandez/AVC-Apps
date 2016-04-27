@@ -171,18 +171,19 @@ void ofApp::setup(){
     
     //file names for test movies
     vector<string> movieFiles;
-    movieFiles.resize(6);
+    movieFiles.resize(14);
     
-    movieFiles[0] = "movies/flir_gray.mov";
-//    movieFiles[0] = "movies/2016-03-17-11-05-27_FLIR_1001.mov";
-//    movieFiles[1] = "movies/2016-03-17-11-05-29_FLIR_1002.mov";
-//    movieFiles[2] = "movies/2016-03-17-11-05-31_FLIR_1003.mov";
-//    movieFiles[3] = "movies/2016-03-17-11-05-33_FLIR_1005.mov";
-//    movieFiles[4] = "movies/2016-03-17-11-05-35_FLIR_1004.mov";
+
+    
+    for(int i = 0; i < 14; i++){
+        
+        movieFiles[i] = "movies/lobby_1_sim/Cam_" + ofToString(i + 1) + ".mov";
+        
+    }
     
     
     //master control of live vs video
-    useLiveFeed = true;
+    useLiveFeed = false;
     
     //set up actual feeds
     int stagger = 200;
@@ -194,7 +195,7 @@ void ofApp::setup(){
         auto cor = std::make_shared<Camera>();
         
         //do these first
-        cor -> setMovieFile(movieFiles[0]);
+        cor -> setMovieFile(movieFiles[i]);
         cor -> setFont(&smallerFont);
         
         //params: the view of this camera, the view control variable,
@@ -581,7 +582,7 @@ void ofApp::draw(){
         Lobby2Blobs += "\n\nAvg. Speed (raw):\n" + ofToString(Lobby2Aggregate.avgSpeed);
         
         ofSetColor(255);
-        ofDrawBitmapString(Lobby1Blobs, infoPanelPos[5].x + spacer, infoPanelPos[5].y + spacer * 4);
+        ofDrawBitmapString(Lobby2Blobs, infoPanelPos[5].x + spacer, infoPanelPos[5].y + spacer * 4);
         
         
         
