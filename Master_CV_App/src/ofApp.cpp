@@ -309,8 +309,8 @@ void ofApp::setup(){
         ofVec2f p;
         p.set(panel.pos.x + 10, panel.pos.y - playback.bgHeight - 10);
         
-        cout << "[ofApp] cam vector address: " << &cameras << endl;
-        cout << "[ofApp] cam vector first cam address: " << cameras[0] << endl;
+//        cout << "[ofApp] cam vector address: " << &cameras << endl;
+//        cout << "[ofApp] cam vector first cam address: " << cameras[0] << endl;
         playback.setup(p, cameras, &smallerFont);
         
     }
@@ -639,14 +639,8 @@ void ofApp::draw(){
         oscDataFormat += "        int32 Arg: total blobs in system\n";
         oscDataFormat += "\n";
         oscDataFormat += "    Corridor 1 Bundle:\n";
-        oscDataFormat += "        Corridor Message:\n";
-        oscDataFormat += "            Address: /corridor_[num]_stats\n";
-        oscDataFormat += "            int32 Arg: numBlobs in corridor\n";
-        oscDataFormat += "            Float Arg: avg blob position in X\n";
-        oscDataFormat += "            Float Arg: avg blob position in Y\n";
-        oscDataFormat += "            Float Arg: avg velocity position in X\n";
-        oscDataFormat += "            Float Arg: avg velocity position in Y\n";
-        oscDataFormat += "            Float Arg: avg speed\n";
+        oscDataFormat += "        Corridor Start Blobs Message:\n";
+        oscDataFormat += "            Address: /corridor_[num]/start_blobs\n";
         oscDataFormat += "\n";
         oscDataFormat += "        Blob Bundle:\n";
         oscDataFormat += "            Individual Blob Message:\n";
@@ -657,13 +651,22 @@ void ofApp::draw(){
         oscDataFormat += "            Float Arg: avg velocity position in X\n";
         oscDataFormat += "            Float Arg: avg velocity position in Y\n";
         oscDataFormat += "\n";
+        oscDataFormat += "        Corridor Message:\n";
+        oscDataFormat += "            Address: /corridor_[num]/stats\n";
+        oscDataFormat += "            int32 Arg: numBlobs in corridor\n";
+        oscDataFormat += "            Float Arg: avg blob position in X\n";
+        oscDataFormat += "            Float Arg: avg blob position in Y\n";
+        oscDataFormat += "            Float Arg: avg velocity position in X\n";
+        oscDataFormat += "            Float Arg: avg velocity position in Y\n";
+        oscDataFormat += "            Float Arg: avg speed\n";
+        oscDataFormat += "\n";
         oscDataFormat += "    Corridor 2 Bundle (same format)\n";
         oscDataFormat += "    Corridor 3 Bundle (same format)\n";
         oscDataFormat += "    Etc. for other corridors\n";
         
         
         int oscBoxWidth = 450;
-        int oscBoxHeight = 500;
+        int oscBoxHeight = 550;
         int oscGap = 20;
         int textX = 15;
         int textY = 25;

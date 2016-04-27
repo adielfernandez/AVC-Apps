@@ -638,6 +638,7 @@ void Aggregator::gatherOscStats(){
     avgSpeed = 0;
     
     corridorBundle.clear();
+    corridorStartFlag.clear();
     corridorStats.clear();
     blobsBundle.clear();
     
@@ -687,11 +688,13 @@ void Aggregator::gatherOscStats(){
     avgVel = avgVel/float(contours.size());
     avgDir = avgVel.getNormalized();
     avgPos = avgPos/float(contours.size());
+
+    //set the corridor start flag message
+    corridorStartFlag.setAddress("/corridor_" + ofToString(oneOrSix) + "/start_blobs");
     
     
-    
-    //prepare the corridor stats message
-    corridorStats.setAddress("/corridor_" + ofToString(oneOrSix) + "_stats");
+    //prepare the corridor stats (also the blobs end delimiter) message
+    corridorStats.setAddress("/corridor_" + ofToString(oneOrSix) + "/stats");
     corridorStats.addIntArg(contours.size());
     corridorStats.addFloatArg(avgPos.x);
     corridorStats.addFloatArg(avgPos.y);
@@ -700,8 +703,9 @@ void Aggregator::gatherOscStats(){
     corridorStats.addFloatArg(avgSpeed);
     
     //now assemble the corridor bundle from the stats message and all the blobs
-    corridorBundle.addMessage(corridorStats);
+    corridorBundle.addMessage(corridorStartFlag);
     corridorBundle.addBundle(blobsBundle);
+    corridorBundle.addMessage(corridorStats);
     
     
 }

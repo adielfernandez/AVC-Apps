@@ -132,6 +132,7 @@ public:
     
         //osc bundles to prepare
     ofxOscMessage corridorStats;
+    ofxOscMessage corridorStartFlag;
     ofxOscBundle corridorBundle;
     ofxOscBundle blobsBundle;
     
