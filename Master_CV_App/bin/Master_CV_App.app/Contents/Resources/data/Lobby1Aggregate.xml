@@ -1,0 +1,30 @@
+<Lobby1Aggregate>
+	<Min_Blob_Area>0</Min_Blob_Area>
+	<Max_Blob_Area>1000</Max_Blob_Area>
+	<Persistence>15</Persistence>
+	<Max_Distance>32</Max_Distance>
+	<Draw_threshold>0</Draw_threshold>
+	<Draw_Contours>1</Draw_Contours>
+	<Info>1</Info>
+	<Cam1_Pos>0, 14</Cam1_Pos>
+	<Cam2_Pos>220, 12</Cam2_Pos>
+	<Cam3_Pos>418, 0</Cam3_Pos>
+	<Cam4_Pos>1, 192</Cam4_Pos>
+	<Cam5_Pos>221, 195</Cam5_Pos>
+	<Cam6_Pos>424, 196</Cam6_Pos>
+<Lobby1Aggregate/>
+<Threshold>181</Threshold>
+	<Blur>18</Blur>
+	<Number_of_erosions>0</Number_of_erosions>
+	<Number_of_dilations>4</Number_of_dilations>
+<Draw_blurred>0</Draw_blurred>
+<Background_Differencing/>
+	<Frames_to_learn_BG>400</Frames_to_learn_BG>
+	<Use_BG_Diff>0</Use_BG_Diff>
+	<Contour_Finding/>
+<___IMAGE_MANIPULATION/>
+	<___BG_SUBTRACTION/>
+	<___CONTOUR_FINDING/>
+<___FEED_POSITIONS/>
+	<Trim_Dead_Space>1</Trim_Dead_Space>
+</Lobby1Aggregate>

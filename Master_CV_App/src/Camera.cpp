@@ -895,10 +895,18 @@ void Camera::gatherOscStats(){
     corridorStats.clear();
     blobsBundle.clear();
     
+
     
     //corridors 2, 3, 4, 5 are:
     //cameras 6, 7, 8, 9 (zero-indexed)
     int thisCorridor = thisView - 4;  //i.e. cam 6 = corr 2
+    
+    
+    
+    //set the corridor start flag message
+    corridorStartFlag.setAddress("/corridor_" + ofToString(thisCorridor) + "/start_blobs");
+    blobsBundle.addMessage(corridorStartFlag);
+    
     
     
     //go through the blobs and start collecting data
@@ -939,8 +947,7 @@ void Camera::gatherOscStats(){
     avgDir = avgVel.getNormalized();
     avgPos = avgPos/float(contours.size());
     
-    //set the corridor start flag message
-    corridorStartFlag.setAddress("/corridor_" + ofToString(thisCorridor) + "/start_blobs");
+
     
     //prepare the corridor stats message
     corridorStats.setAddress("/corridor_" + ofToString(thisCorridor) + "/stats");
@@ -952,7 +959,7 @@ void Camera::gatherOscStats(){
     corridorStats.addFloatArg(avgSpeed);
     
     //now assemble the corridor bundle from the stats message and all the blobs
-    corridorBundle.addMessage(corridorStartFlag);
+//    corridorBundle.addMessage(corridorStartFlag);
     corridorBundle.addBundle(blobsBundle);
     corridorBundle.addMessage(corridorStats);
     
