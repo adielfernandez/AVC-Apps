@@ -29,14 +29,20 @@ void CamGui::setup(string name, bool solo){
         gui.add(learningTime.setup("Frames to learn BG", 100, 0, 2000));
         gui.add(resetBG.setup("Reset Background"));
         
-        
         gui.add(contoursLabel.setup("   CONTOUR FINDING", ""));
         gui.add(minBlobAreaSlider.setup("Min Blob Area", 0, 0, 1000));
-        gui.add(maxBlobAreaSlider.setup("Max Blob Area", 12000, 0, 40000));
+        gui.add(maxBlobAreaSlider.setup("Max Blob Area", 1000, 0, 5000));
         gui.add(persistenceSlider.setup("Persistence", 15, 0, 100));
         gui.add(maxDistanceSlider.setup("Max Distance", 32, 0, 100));
         gui.add(drawContoursToggle.setup("Draw Contours", true));
         gui.add(showInfoToggle.setup("Info", false));
+        
+        gui.add(maskingLabel.setup("   MASKING", ""));
+        gui.add(useMask.setup("Use Mask", true));
+        gui.add(drawOrErase.setup("Draw or Erase", true));
+        gui.add(clearMask.setup("Clear Mask"));
+        gui.add(saveMask.setup("Save Mask"));
+        gui.add(loadMask.setup("Load Mask"));
         
     } else {
         gui.add(cropStart.setup("Crop Start (norm)", ofVec2f(0, 0), ofVec2f(0, 0), ofVec2f(1.0, 1.0)));
@@ -57,7 +63,19 @@ void CamGui::setup(string name, bool solo){
     gui.add(mapPt7.setup("Point 7", ofVec2f(feedWidth/2, feedHeight), ofVec2f(0, 0), feedDim));
     gui.add(mapPt8.setup("Point 8", ofVec2f(feedWidth, feedHeight), ofVec2f(0, 0), feedDim));
     
+
+    gui.setHeaderBackgroundColor(ofColor(255));
     
+    //color applies to gui title only
+    gui.setTextColor(ofColor(0));
+    
+    maskingLabel.setBackgroundColor(ofColor(255));
+    bgDiffLabel.setBackgroundColor(ofColor(255));
+    manipulationLabel.setBackgroundColor(ofColor(255));
+    contoursLabel.setBackgroundColor(ofColor(255));
+    
+    //this changes the color of all the labels
+    contoursLabel.setDefaultTextColor(ofColor(255));
     
 }
 

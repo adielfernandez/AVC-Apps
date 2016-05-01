@@ -112,16 +112,9 @@ void ThreadedCV::threadedFunction(){
             persistence = settings[9];
             maxBlobDist = settings[10];
             
-            //Make grayscale
-            threadPixels.setImageType(OF_IMAGE_GRAYSCALE);
-            
-            //blur it
-            
-            
-            ofxCv::GaussianBlur(threadPixels, blurredPix, blurAmt);
-            
 
-            
+            //blur it
+            ofxCv::GaussianBlur(threadPixels, blurredPix, blurAmt);
             
             //either use BG differencing or just straight up threshold it
             if(useBgDiff){

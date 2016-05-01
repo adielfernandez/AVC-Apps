@@ -309,8 +309,6 @@ void ofApp::setup(){
         ofVec2f p;
         p.set(panel.pos.x + 10, panel.pos.y - playback.bgHeight - 10);
         
-//        cout << "[ofApp] cam vector address: " << &cameras << endl;
-//        cout << "[ofApp] cam vector first cam address: " << cameras[0] << endl;
         playback.setup(p, cameras, &smallerFont);
         
     }

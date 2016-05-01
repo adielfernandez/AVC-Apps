@@ -45,6 +45,13 @@ public:
     ofxToggle drawContoursToggle;
     ofxToggle showInfoToggle;
     
+    ofxLabel maskingLabel;
+    ofxToggle useMask;
+    ofxToggle drawOrErase;
+    ofxButton clearMask;
+    ofxButton saveMask;
+    ofxButton loadMask;
+    
     ofxVec2Slider mapPt0;
     ofxVec2Slider mapPt1;
     ofxVec2Slider mapPt2;

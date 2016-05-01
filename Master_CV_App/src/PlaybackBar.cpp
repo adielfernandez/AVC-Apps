@@ -21,9 +21,6 @@ void PlaybackBar::setup(ofVec2f _pos, const vector<shared_ptr<Camera>> _cams, of
     //pointer to the cameras vector
     cams = _cams;
     
-    cout << "[PlaybackBar] cam vector address: " << &cams << endl;
-    cout << "[PlaybackBar] cam vector first cam address: " << cams[0] << endl;
-    
     //pointer to a font
     font = _font;
     

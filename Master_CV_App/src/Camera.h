@@ -73,6 +73,7 @@ public:
     //draw raw/thresholded & contours
     void drawPostCvWindow(int x, int y, float scale);
     
+
     
     
     //gui
@@ -84,7 +85,7 @@ public:
     string name;
     string IP;
     ofColor circleCol, circleGrab;
-    ofColor mappingCol, croppingCol;
+    ofColor mappingCol, croppingCol, maskingCol;
     ofColor backgroundInCol, backgroundOutCol;
     ofTrueTypeFont *font;
     
@@ -176,6 +177,16 @@ public:
     //still make sense in the quad's reference frame
     ofVec2f adjustedMouse;
     float mapPtRad;
+    
+    //mouse stuff for masking
+    int maskToolSize;
+    bool maskPressed;
+    string maskFileName;
+    
+
+    //Masking stuff
+    ofPixels maskPix;
+    ofImage maskImg;
 
     //Skewed/keystoned mesh
     ofMesh mappedMesh;

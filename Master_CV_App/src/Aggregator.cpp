@@ -113,18 +113,39 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
     
     gui.add(contoursLabel.setup("   CONTOUR FINDING", ""));
     gui.add(minBlobAreaSlider.setup("Min Blob Area", 0, 0, 500));
-    gui.add(maxBlobAreaSlider.setup("Max Blob Area", 12000, 0, 5000));
+    gui.add(maxBlobAreaSlider.setup("Max Blob Area", 1000, 0, 5000));
     gui.add(persistenceSlider.setup("Persistence", 15, 0, 100));
     gui.add(maxDistanceSlider.setup("Max Distance", 32, 0, 100));
     gui.add(drawContoursToggle.setup("Draw Contours", true));
     gui.add(showInfoToggle.setup("Info", false));
     
+    gui.add(maskingLabel.setup("   MASKING", ""));
+    gui.add(useMask.setup("Use Mask", false));
+    gui.add(drawOrErase.setup("Draw or Erase", true));
+    gui.add(clearMask.setup("Clear Mask"));
+    gui.add(saveMask.setup("Save Mask"));
+    gui.add(loadMask.setup("Load Mask"));
+    
+    gui.setHeaderBackgroundColor(ofColor(255));
+    //sets gui title only to black
+    gui.setTextColor(ofColor(0));
+    
+    maskingLabel.setBackgroundColor(ofColor(255));
+    bgDiffLabel.setBackgroundColor(ofColor(255));
+    manipulationLabel.setBackgroundColor(ofColor(255));
+    contoursLabel.setBackgroundColor(ofColor(255));
+    positionsLabel.setBackgroundColor(ofColor(255));
+    
+    //this sets the default color to black for all labels
+    contoursLabel.setDefaultTextColor(ofColor(0));
+
     gui.add(positionsLabel.setup("   FEED POSITIONS", ""));
     gui.add(trimPixels.setup("Trim Dead Space", false));
     gui.add(camPos1.setup("Cam1 Pos", ofVec2f(0, 0), ofVec2f(0, 0), ofVec2f(640, 512)));
     gui.add(camPos2.setup("Cam2 Pos", ofVec2f(0, 0), ofVec2f(0, 0), ofVec2f(640, 512)));
     gui.add(camPos3.setup("Cam3 Pos", ofVec2f(0, 0), ofVec2f(0, 0), ofVec2f(640, 512)));
     gui.add(camPos4.setup("Cam4 Pos", ofVec2f(0, 0), ofVec2f(0, 0), ofVec2f(640, 512)));
+    
     
     if(numCams > 4){
         gui.add(camPos5.setup("Cam5 Pos", ofVec2f(0, 0), ofVec2f(0, 0), ofVec2f(640, 512)));
@@ -142,6 +163,28 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
     
     waitingToBgDiff = true;
     
+    
+    
+    maskFileName = "masks/" + name + ".png";
+    
+    if(maskImg.load(maskFileName)){
+        
+        cout << "Image loaded" << endl;
+        maskPix = maskImg.getPixels();
+    } else {
+        
+        cout << maskFileName << " not found, creating..." << endl;
+        
+        maskPix.allocate(masterWidth, masterHeight, 1);
+        maskPix.setColor(ofColor(0));
+        
+        maskImg.setFromPixels(maskPix);
+        maskImg.save(maskFileName);
+        
+    }
+    
+    maskingCol.set(255, 200, 0);
+    maskToolSize = 10;
 }
 
 
@@ -165,36 +208,97 @@ void Aggregator::update(){
     //disable positioning if we're doing BG Diff
     disablePositioning = useBgDiff;
     
-    
-    //update the positions with the mouse if we've locked on to them
-    //from the mousePressed method
-    if(!disablePositioning){
-        for(int i = 0; i < positions.size(); i++){
-            
-            if(posMouseLock[i]){
-                positions[i].x = ofClamp(adjustedMouse.x, 0, scaledWidth * 3);
-                positions[i].y = ofClamp(adjustedMouse.y, 0, scaledHeight * 2);
+    if(manipulationMode == 0){
+        
+        //update the positions with the mouse if we've locked on to them
+        //from the mousePressed method
+        if(!disablePositioning){
+            for(int i = 0; i < positions.size(); i++){
                 
-                //update the gui values so they can be saved
-                if(i == 0){
-                    camPos1 = positions[i];
-                } else if(i == 1){
-                    camPos2 = positions[i];
-                } else if(i == 2){
-                    camPos3 = positions[i];
-                } else if(i == 3){
-                    camPos4 = positions[i];
-                } else if(i == 4){
-                    camPos5 = positions[i];
-                } else if(i == 5){
-                    camPos6 = positions[i];
+                if(posMouseLock[i]){
+                    positions[i].x = ofClamp(adjustedMouse.x, 0, scaledWidth * 3);
+                    positions[i].y = ofClamp(adjustedMouse.y, 0, scaledHeight * 2);
+                    
+                    //update the gui values so they can be saved
+                    if(i == 0){
+                        camPos1 = positions[i];
+                    } else if(i == 1){
+                        camPos2 = positions[i];
+                    } else if(i == 2){
+                        camPos3 = positions[i];
+                    } else if(i == 3){
+                        camPos4 = positions[i];
+                    } else if(i == 4){
+                        camPos5 = positions[i];
+                    } else if(i == 5){
+                        camPos6 = positions[i];
+                    }
+                    
+                }
+                
+            }
+        }
+        
+    } else {
+        
+        //if we're inside the mask and clicking
+        //set the pixels of the mask
+        if(maskPressed){
+            
+            //go through all the pixels inside the cursor
+            //and set the pixel value to white.
+            //Going through the cursor pixels should be faster
+            //than going through all the pixels of the pixel object
+            for(int i = 0; i < maskToolSize * maskToolSize; i++){
+                
+                //XY value from the for loop iterator
+                int x = i % maskToolSize;
+                int y = (i - x)/maskToolSize;
+                
+                //then adjust to the mouse position within the pixel object
+                //(also minus half because the cursor is centered at mouse)
+                x += adjustedMouse.x - maskToolSize/2;
+                y += adjustedMouse.y - maskToolSize/2;
+                
+                //only set pixels of the mask for cursors pixels that
+                //are actually inside (near-border cases)
+                if(x > 0 && y > 0 && x < maskPix.getWidth() && y < maskPix.getHeight()){
+                    
+                    int pixel = y * maskPix.getWidth() + x;
+                    
+                    int value = (drawOrErase ? 255 : 0);
+                    
+                    maskPix.setColor(pixel, ofColor(value));
                 }
                 
             }
             
         }
-    }
 
+        
+    }
+    
+    
+    
+    if(clearMask){
+        maskPix.setColor(0);
+    }
+    
+    if(saveMask){
+        maskImg.setFromPixels(maskImg);
+        maskImg.save(maskFileName);
+    }
+    
+    if(loadMask){
+        maskImg.load(maskFileName);
+        maskPix = maskImg.getPixels();
+    }
+    
+    
+    
+    
+    
+    
     //get the furthest Right and down parts of the aggregated image
     //so the masterPix object can be resized appropriately
     int furthestRight = 0;
@@ -223,6 +327,25 @@ void Aggregator::update(){
     masterWidth = furthestRight;
     masterHeight = furthestDown;
     
+    
+    //reset the mask dimensions if needed
+    //this covers the masterPix object stretching to the right and down
+    //trimming covered later
+    if(maskPix.getWidth() != masterWidth || maskPix.getHeight() != masterHeight){
+        
+        ofPixels newMask;
+        newMask.allocate(masterWidth, masterHeight, 1);
+        newMask.setColor(0);
+        
+        //save the old mask into the new one
+        maskPix.pasteInto(newMask, 0, 0);
+        
+        //then reset the original
+        maskPix = newMask;
+        
+    }
+    
+    
     //trim out the space above and to the left in masterPix
     //but only if we're not current background differencing
     //or the thread will crash
@@ -233,6 +356,12 @@ void Aggregator::update(){
             positions[i].x -= furthestLeft;
             positions[i].y -= furthestUp;
         }
+        
+        //subtract the trim amount from the master dimensions too
+        //so that the masterPix object doesnt have to wait for the next
+        //frame to update the trim
+        masterWidth -= furthestLeft;
+        masterHeight -= furthestUp;
             
         //and update the gui to store the values
         camPos1 = positions[0];
@@ -241,6 +370,12 @@ void Aggregator::update(){
         camPos4 = positions[3];
         camPos5 = positions[4];
         camPos6 = positions[5];
+        
+        
+        //do the same for the mask: trim the pixels from top and left
+        //while preserving the mask data
+        maskPix.crop(furthestLeft, furthestUp, maskPix.getWidth() - furthestLeft, maskPix.getHeight() - furthestUp);
+        
         
     }
     
@@ -252,6 +387,10 @@ void Aggregator::update(){
     //based on the positions of the frames within it
     masterPix.allocate(masterWidth, masterHeight, 1);
     masterPix.setColor(ofColor(0));
+    
+    
+    
+
     
     
     
@@ -286,6 +425,19 @@ void Aggregator::update(){
     
     if(ofGetElapsedTimeMillis() - lastAnalyzeTime > delayTime){
         
+        
+        masterPix.setImageType(OF_IMAGE_GRAYSCALE);
+        
+        //subtract the mask before sending to the CV thread
+        //go through all the pixels and set them according to the mask
+        if(useMask){
+            for(int i = 0; i < masterWidth * masterHeight; i++){
+                if(maskPix[i] == 255)
+                    masterPix[i] = 0;
+            }
+        }
+        
+        
      
         bool useBg;
         if(!waitingToBgDiff){
@@ -316,8 +468,6 @@ void Aggregator::update(){
         settings[9] = persistenceSlider;
         settings[10] = maxDistanceSlider;
         
-        masterPix.setImageType(OF_IMAGE_GRAYSCALE);
-    
         aggregateProcessor.analyze(masterPix, settings);
         
         lastAnalyzeTime = ofGetElapsedTimeMillis();
@@ -466,6 +616,105 @@ void Aggregator::drawCV(int x, int y){
     }
     
     
+    if(manipulationMode == 0){
+        
+        ofNoFill();
+        
+        //draw mouse handles
+        for(int i = 0; i < positions.size(); i++){
+            
+            ofColor c;
+            
+            if(posMouseLock[i]){
+                c = grabbedCol;
+                ofSetLineWidth(2);
+            } else {
+                c = handleCol;
+                ofSetLineWidth(0.5);
+            }
+            
+            if(disablePositioning){
+                c = disableCol;
+                ofSetLineWidth(0.5);
+            }
+            
+            ofSetColor(c);
+            ofDrawCircle(positions[i], mouseHandleRad);
+            
+            //draw camera frames to show overlap regions
+            ofSetColor(c, 100);
+            //if we're camera 2 in corridor 6 draw it rotated
+            if(numCams == 4 && i == 1){
+                
+                //draw with width/height switched
+                ofDrawRectangle(positions[i], cams[indices[i]] -> threadOutput.getHeight(), cams[indices[i]] -> threadOutput.getWidth());
+                
+            } else {
+                
+                //draw normally
+                ofDrawRectangle(positions[i], cams[indices[i]] -> threadOutput.getWidth(), cams[indices[i]] -> threadOutput.getHeight());
+            }
+            
+        }
+        
+        ofFill();
+        
+        
+        
+    } else {
+    
+        
+        //draw mask
+        if(useMask){
+            
+            maskImg.setFromPixels(maskPix);
+            
+            ofSetColor(maskingCol, 100);
+            maskImg.draw(0, 0);
+            
+            //draw cursor if we're using the mask feature and we're inside the mask
+            if(adjustedMouse.x > 0 && adjustedMouse.x < masterWidth && adjustedMouse.y > 0 && adjustedMouse.y < masterHeight){
+                
+                ofHideCursor();
+                
+                //draw a filled rect if we're drawing a blank one with an ex if we're erasing
+                if(drawOrErase){
+                    
+                    ofFill();
+                    ofSetColor(maskingCol);
+                    ofDrawRectangle(adjustedMouse.x - maskToolSize/2, adjustedMouse.y - maskToolSize/2, maskToolSize, maskToolSize);
+                    
+                } else {
+                    
+                    //Draw x from corner to corner
+                    ofSetLineWidth(1);
+                    ofSetColor(255, 0, 0);
+                    ofDrawLine(adjustedMouse.x - maskToolSize/2, adjustedMouse.y - maskToolSize/2, adjustedMouse.x + maskToolSize/2, adjustedMouse.y + maskToolSize/2);
+                    ofDrawLine(adjustedMouse.x - maskToolSize/2, adjustedMouse.y + maskToolSize/2, adjustedMouse.x + maskToolSize/2, adjustedMouse.y - maskToolSize/2);
+                    
+                    ofNoFill();
+                    ofSetColor(255);
+                    ofDrawRectangle(adjustedMouse.x - maskToolSize/2, adjustedMouse.y - maskToolSize/2, maskToolSize, maskToolSize);
+                    
+                }
+                
+            } else {
+                ofShowCursor();
+            }
+            
+        }
+        
+        
+        //draw border around entire masterPix object
+        ofNoFill();
+        ofSetColor(maskingCol);
+        ofSetLineWidth(2.0);
+        ofDrawRectangle(0, 0, masterWidth, masterHeight);
+        ofFill();
+        
+    }
+    
+    
     if(drawContoursToggle){
         
         ofSetColor(255, 0, 0);
@@ -484,9 +733,6 @@ void Aggregator::drawCV(int x, int y){
             string msg = ofToString(label);
             
             if(showInfoToggle){
-               
-//                msg = ofToString(label) + " : " + ofToString(center.x) + "," + ofToString(center.y) + " : " + ofToString(velocity.x) + "," + ofToString(velocity.y);
-
                 ofSetColor(0, 100, 255);
                 ofDrawBitmapString(msg, 0, 0);
             }
@@ -496,50 +742,6 @@ void Aggregator::drawCV(int x, int y){
         
     }
     
-    
-    
-    ofNoFill();
-    
-    
-    
-    //draw mouse handles
-    for(int i = 0; i < positions.size(); i++){
-
-        ofColor c;
-        
-        if(posMouseLock[i]){
-            c = grabbedCol;
-            ofSetLineWidth(2);
-        } else {
-            c = handleCol;
-            ofSetLineWidth(0.5);
-        }
-        
-        if(disablePositioning){
-            c = disableCol;
-            ofSetLineWidth(0.5);
-        }
-        
-        ofSetColor(c);
-        ofDrawCircle(positions[i], mouseHandleRad);
-        
-        //draw camera frames to show overlap regions
-        ofSetColor(c, 100);
-        //if we're camera 2 in corridor 6 draw it rotated
-        if(numCams == 4 && i == 1){
-            
-            //draw with width/height switched
-            ofDrawRectangle(positions[i], cams[indices[i]] -> threadOutput.getHeight(), cams[indices[i]] -> threadOutput.getWidth());
-            
-        } else {
-            
-            //draw normally
-            ofDrawRectangle(positions[i], cams[indices[i]] -> threadOutput.getWidth(), cams[indices[i]] -> threadOutput.getHeight());
-        }
-        
-    }
-    
-    ofFill();
     
     ofPopMatrix();
     
@@ -586,48 +788,6 @@ void Aggregator::saveSettings(){
     
 }
 
-void Aggregator::mousePressed(ofMouseEventArgs &args){
-    
-    if(!disablePositioning){
-    
-        //handle mouse interaction with quadMap points
-        for(int i = 0; i < positions.size(); i++){
-            
-            //need to adjust mouse position since we're
-            //translating the raw camera view from the origin with pushmatrix
-            float dist = ofDist(adjustedMouse.x, adjustedMouse.y, positions[i].x, positions[i].y);
-            
-            if(dist < mouseHandleRad){
-                posMouseLock[i] = true;
-                
-                //exit the for loop, prevents locking
-                //onto multiple handles at once
-                break;
-                
-            } else {
-                posMouseLock[i] = false;
-            }
-            
-            
-        }
-        
-    }
-    
-}
-
-void Aggregator::mouseReleased(ofMouseEventArgs &args){
-    
-    for(int i = 0; i < posMouseLock.size(); i++){
-        posMouseLock[i] = false;
-    }
-    
-}
-
-void Aggregator::mouseMoved(ofMouseEventArgs &args){}
-void Aggregator::mouseDragged(ofMouseEventArgs & args){}
-void Aggregator::mouseScrolled(ofMouseEventArgs & args){}
-void Aggregator::mouseEntered(ofMouseEventArgs & args){}
-void Aggregator::mouseExited(ofMouseEventArgs & args){}
 
 
 void Aggregator::gatherOscStats(){
@@ -691,8 +851,8 @@ void Aggregator::gatherOscStats(){
     avgVel = avgVel/float(contours.size());
     avgDir = avgVel.getNormalized();
     avgPos = avgPos/float(contours.size());
-
-
+    
+    
     
     
     //prepare the corridor stats (also the blobs end delimiter) message
@@ -705,11 +865,76 @@ void Aggregator::gatherOscStats(){
     corridorStats.addFloatArg(avgSpeed);
     
     //now assemble the corridor bundle from the stats message and all the blobs
-//    corridorBundle.addMessage(corridorStartFlag);
+    //    corridorBundle.addMessage(corridorStartFlag);
     corridorBundle.addBundle(blobsBundle);
     corridorBundle.addMessage(corridorStats);
     
     
 }
+
+
+
+
+
+
+void Aggregator::mousePressed(ofMouseEventArgs &args){
+    
+    if(manipulationMode == 0){
+    
+        if(!disablePositioning){
+        
+            //handle mouse interaction with quadMap points
+            for(int i = 0; i < positions.size(); i++){
+                
+                //need to adjust mouse position since we're
+                //translating the raw camera view from the origin with pushmatrix
+                float dist = ofDist(adjustedMouse.x, adjustedMouse.y, positions[i].x, positions[i].y);
+                
+                if(dist < mouseHandleRad){
+                    posMouseLock[i] = true;
+                    
+                    //exit the for loop, prevents locking
+                    //onto multiple handles at once
+                    break;
+                    
+                } else {
+                    posMouseLock[i] = false;
+                }
+                
+                
+            }
+            
+        }
+    
+        
+        //Masking
+    } else {
+        
+        if(adjustedMouse.x > 0 && adjustedMouse.x < masterWidth && adjustedMouse.y > 0 && adjustedMouse.y < masterHeight){
+            
+            maskPressed = true;
+            
+        }
+        
+    }
+    
+    
+}
+
+void Aggregator::mouseReleased(ofMouseEventArgs &args){
+    
+    for(int i = 0; i < posMouseLock.size(); i++){
+        posMouseLock[i] = false;
+    }
+    
+    maskPressed = false;
+    
+}
+
+void Aggregator::mouseMoved(ofMouseEventArgs &args){}
+void Aggregator::mouseDragged(ofMouseEventArgs & args){}
+void Aggregator::mouseScrolled(ofMouseEventArgs & args){}
+void Aggregator::mouseEntered(ofMouseEventArgs & args){}
+void Aggregator::mouseExited(ofMouseEventArgs & args){}
 
 

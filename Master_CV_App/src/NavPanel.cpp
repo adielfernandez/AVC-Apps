@@ -484,14 +484,14 @@ void NavPanel::checkForClicks(int x, int y){
                 //then set the right mode based on the button
                 if((*viewMode) <= 13){
                     cams[*viewMode] -> manipulationMode = manipulationPanel.buttons[i].clickDest;
-                     cout << "Camera Button " + ofToString(i + 1) + " Pressed" << endl;
+//                     cout << "Camera Button " + ofToString(i + 1) + " Pressed" << endl;
                 
                 } else if((*viewMode) == 14){
                     Lobby1 -> manipulationMode = manipulationPanel.buttons[i].clickDest;
-                    cout << "LOBBY 1 Button " + ofToString(i + 1) + " Pressed" << endl;
+//                    cout << "LOBBY 1 Button " + ofToString(i + 1) + " Pressed" << endl;
                 } else {
                     Lobby2 -> manipulationMode = manipulationPanel.buttons[i].clickDest;
-                    cout << "LOBBY 2 Button " + ofToString(i + 1) + " Pressed" << endl;
+//                    cout << "LOBBY 2 Button " + ofToString(i + 1) + " Pressed" << endl;
                 }
                 
                 

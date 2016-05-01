@@ -5,7 +5,7 @@
 	<Number_of_dilations>0</Number_of_dilations>
 	<Draw_threshold>0</Draw_threshold>
 	<Min_Blob_Area>15</Min_Blob_Area>
-	<Max_Blob_Area>50000</Max_Blob_Area>
+	<Max_Blob_Area>5000</Max_Blob_Area>
 	<Persistence>15</Persistence>
 	<Max_Distance>32</Max_Distance>
 	<Draw_Contours>1</Draw_Contours>

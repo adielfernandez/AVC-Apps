@@ -121,6 +121,18 @@ public:
     ofColor handleCol, grabbedCol, disableCol;
     
     
+    //mouse stuff for masking
+    int maskToolSize;
+    bool maskPressed;
+    string maskFileName;
+    ofColor maskingCol;
+    
+    //Masking stuff
+    ofPixels maskPix;
+    ofImage maskImg;
+    
+    
+    
     //-----OSC Data gathering-----
     void gatherOscStats();
 
@@ -164,6 +176,13 @@ public:
     ofxIntSlider maxDistanceSlider;
     ofxToggle drawContoursToggle;
     ofxToggle showInfoToggle;
+    
+    ofxLabel maskingLabel;
+    ofxToggle useMask;
+    ofxToggle drawOrErase;
+    ofxButton clearMask;
+    ofxButton saveMask;
+    ofxButton loadMask;
 
     ofxLabel positionsLabel;
     ofxButton trimPixels;

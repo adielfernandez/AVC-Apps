@@ -64,6 +64,7 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     manipulationMode = 0;
     
     mappingCol.set(255, 0, 255);
+    maskingCol.set(255, 200, 0);
     croppingCol.set(0, 255, 255);
     circleCol.set(mappingCol);
     circleGrab.set(255, 0, 0);
@@ -71,6 +72,7 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     
     //size of map handles
     mapPtRad = 10;
+    maskToolSize = 10;
     titleSpace = 20;
     
     //-----Camera Stream-----
@@ -198,6 +200,33 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     fboPix.allocate(scaledWidth, scaledHeight, 1);
     
     
+    //Mask
+    if(soloCam){
+        
+        maskFileName = "masks/" + name + ".png";
+        
+        if(maskImg.load(maskFileName)){
+            
+            cout << "Image loaded" << endl;
+            maskPix = maskImg.getPixels();
+        } else {
+            
+            cout << maskFileName << " not found, creating..." << endl;
+            
+            maskPix.allocate(scaledWidth, scaledHeight, 1);
+            maskPix.setColor(ofColor(0));
+            
+            maskImg.setFromPixels(maskPix);
+            maskImg.save(maskFileName);
+            
+        }
+        
+        
+    }
+    
+
+    
+    
     //-----Gui-----
     cameraGui.setup(name, soloCam);
     cameraGui.loadSettings();
@@ -300,33 +329,95 @@ void Camera::update(){
 
     } else {
     
-        circleCol = mappingCol;
-        
-        //go through the two cropping points
-        //upper left and lower right
-        if(cropStartLock){
-            cropStart.x = ofClamp(adjustedMouse.x, 0, scaledWidth);
-            cropStart.y = ofClamp(adjustedMouse.y, 0, scaledHeight);
+        //masking or cropping
+        if(soloCam){
             
-            //save a normalized version to the gui
-            cameraGui.cropStart = cropStart/ofVec2f(scaledWidth, scaledHeight);
+            //if we're inside the mask and clicking
+            //set the pixels of the mask
+            if(maskPressed && cameraGui.useMask){
+                
+                //go through all the pixels inside the cursor
+                //and set the pixel value to white.
+                //Going through the cursor pixels should be faster
+                //than going through all the pixels of the pixel object
+                for(int i = 0; i < maskToolSize * maskToolSize; i++){
+                    
+                    //XY value from the for loop iterator
+                    int x = i % maskToolSize;
+                    int y = (i - x)/maskToolSize;
+                    
+                    //then adjust to the mouse position within the pixel object
+                    //(also minus half because the cursor is centered at mouse)
+                    x += adjustedMouse.x - maskToolSize/2;
+                    y += adjustedMouse.y - maskToolSize/2;
+                    
+                    //only set pixels of the mask for cursors pixels that
+                    //are actually inside (near-border cases)
+                    if(x > 0 && y > 0 && x < maskPix.getWidth() && y < maskPix.getHeight()){
+                        
+                        int pixel = y * maskPix.getWidth() + x;
+                        
+                        int value = (cameraGui.drawOrErase ? 255 : 0);
+                        
+                        maskPix.setColor(pixel, ofColor(value));
+                    }
+                    
+                }
+                
+            }
+            
+            
+        } else {
+        
+            circleCol = mappingCol;
+            
+            //go through the two cropping points
+            //upper left and lower right
+            if(cropStartLock){
+                cropStart.x = ofClamp(adjustedMouse.x, 0, scaledWidth);
+                cropStart.y = ofClamp(adjustedMouse.y, 0, scaledHeight);
+                
+                //save a normalized version to the gui
+                cameraGui.cropStart = cropStart/ofVec2f(scaledWidth, scaledHeight);
+                
+            }
+            
+            if(cropEndLock){
+                cropEnd.x = ofClamp(adjustedMouse.x, 0, scaledWidth);
+                cropEnd.y = ofClamp(adjustedMouse.y, 0, scaledHeight);
+                
+                //save a normalized version to the gui
+                cameraGui.cropEnd = cropEnd/ofVec2f(scaledWidth, scaledHeight);
+            }
             
         }
-        
-        if(cropEndLock){
-            cropEnd.x = ofClamp(adjustedMouse.x, 0, scaledWidth);
-            cropEnd.y = ofClamp(adjustedMouse.y, 0, scaledHeight);
-            
-            //save a normalized version to the gui
-            cameraGui.cropEnd = cropEnd/ofVec2f(scaledWidth, scaledHeight);
-        }
-        
         
     }
     
     //convenience variables to hold the cropped area dimensions
     croppedWidth = cropEnd.x - cropStart.x;
     croppedHeight = cropEnd.y - cropStart.y;
+    
+    
+    
+    //clearing, saving and loading the mask
+    if(soloCam){
+        if(cameraGui.clearMask){
+            maskPix.setColor(0);
+        }
+        
+        if(cameraGui.saveMask){
+            maskImg.setFromPixels(maskImg);
+            maskImg.save(maskFileName);
+        }
+        
+        if(cameraGui.loadMask){
+            maskImg.load(maskFileName);
+            maskPix = maskImg.getPixels();
+        }
+    }
+    
+    
     
     
     //update the feed/movie
@@ -403,11 +494,22 @@ void Camera::update(){
         //get the pixels from the fbo
         fbo.readToPixels(fboPix);
         
+        fboPix.setImageType(OF_IMAGE_GRAYSCALE);
         
         //if we're a solo camera use the thread to do CV stuff
         //other wise, just crop the pixels to be sent to the aggregate
         if(soloCam){
-        
+
+            //subtract the mask before sending to the CV thread
+            //go through all the pixels and set them according to the mask
+            if(cameraGui.useMask){
+                for(int i = 0; i < scaledWidth * scaledHeight; i++){
+                    if(maskPix[i] == 255)
+                        fboPix[i] = 0;
+                }
+            }
+            
+            
             //construct a vector of ints with all the settings
             vector<int> settings;
             settings.resize(11);
@@ -432,7 +534,6 @@ void Camera::update(){
             
             //just manually fill the threadOutput pixels
             //with the crop from the fboPix
-            fboPix.setImageType(OF_IMAGE_GRAYSCALE);
             fboPix.cropTo(threadOutput, cropStart.x, cropStart.y, croppedWidth, croppedHeight);
         }
     }
@@ -709,7 +810,7 @@ void Camera::drawCroppingWindow(int x, int y, float scale){
     ofFill();
     
     //draw border around crop with tick marks
-    if(!soloCam) drawCropSquare();
+    drawCropSquare();
     
     //draw mapping points
     ofPushStyle();
@@ -752,6 +853,82 @@ void Camera::drawCroppingWindow(int x, int y, float scale){
 
 void Camera::drawMaskingWindow(int x, int y, float scale){
     
+    //WARNING: certain things can be drawn with matrix translations
+    // but others need to be drawn raw since they depend on mouse interaction
+    
+    
+    ofPushMatrix();
+    
+    ofTranslate(x, y);
+    
+    
+    //raw camera feed
+    ofSetColor(255);
+    mappedTex.draw(0, 0);
+    
+    
+    //draw mask
+    if(cameraGui.useMask){
+        maskImg.setFromPixels(maskPix);
+        
+        ofSetColor(maskingCol, 100);
+        maskImg.draw(0, 0);
+    }
+    
+    //border
+    ofNoFill();
+    ofSetLineWidth(1);
+    ofSetColor(maskingCol);
+    ofDrawRectangle(0, 0, scaledWidth, scaledHeight);
+    ofFill();
+    
+    //draw cursor if we're using the mask feature and we're inside the mask
+    if(cameraGui.useMask && adjustedMouse.x > 0 && adjustedMouse.x < scaledWidth && adjustedMouse.y > 0 && adjustedMouse.y < scaledHeight){
+        
+        ofHideCursor();
+        
+        //draw a filled rect if we're drawing a blank one with an ex if we're erasing
+        if(cameraGui.drawOrErase){
+            
+            ofFill();
+            ofSetColor(maskingCol);
+            ofDrawRectangle(adjustedMouse.x - maskToolSize/2, adjustedMouse.y - maskToolSize/2, maskToolSize, maskToolSize);
+            
+        } else {
+            
+            //Draw x from corner to corner
+            ofSetLineWidth(1);
+            ofSetColor(255, 0, 0);
+            ofDrawLine(adjustedMouse.x - maskToolSize/2, adjustedMouse.y - maskToolSize/2, adjustedMouse.x + maskToolSize/2, adjustedMouse.y + maskToolSize/2);
+            ofDrawLine(adjustedMouse.x - maskToolSize/2, adjustedMouse.y + maskToolSize/2, adjustedMouse.x + maskToolSize/2, adjustedMouse.y - maskToolSize/2);
+            
+            ofNoFill();
+            ofSetColor(255);
+            ofDrawRectangle(adjustedMouse.x - maskToolSize/2, adjustedMouse.y - maskToolSize/2, maskToolSize, maskToolSize);
+            
+        }
+        
+    } else {
+        ofShowCursor();
+    }
+    
+    
+    
+    ofPushStyle();
+    
+    
+    ofNoFill();
+    
+
+    
+    
+    
+    
+    
+    ofPopStyle();
+    
+    
+    ofPopMatrix();
 
     
     
@@ -771,7 +948,7 @@ void Camera::drawPostCvWindow(int x, int y, float scale){
 
     
     //draw texture translucent and reddish
-    ofSetColor(255, 100);
+    ofSetColor(255);
     mappedTex.draw(0, 0);
 
     
@@ -994,29 +1171,45 @@ void Camera::mousePressed(ofMouseEventArgs &args){
             
         }
         
-    } else {    //cropping
+    } else {
         
-        //check for start point first then end point later
-        //so we don't grab two points at once
-        float dist = ofDist(adjustedMouse.x, adjustedMouse.y, cropStart.x, cropStart.y);
+        //cropping
+        if(!soloCam){
         
-        if(dist < mapPtRad){
-            cropStartLock = true;
-            
-        } else {
-            cropStartLock = false;
-            
-            //if we're not in cropStart, check for cropEnd
-            
-            dist = ofDist(adjustedMouse.x, adjustedMouse.y, cropEnd.x, cropEnd.y);
+            //check for start point first then end point later
+            //so we don't grab two points at once
+            float dist = ofDist(adjustedMouse.x, adjustedMouse.y, cropStart.x, cropStart.y);
             
             if(dist < mapPtRad){
-                cropEndLock = true;
+                cropStartLock = true;
+                
             } else {
-                cropEndLock = false;
+                cropStartLock = false;
+                
+                //if we're not in cropStart, check for cropEnd
+                
+                dist = ofDist(adjustedMouse.x, adjustedMouse.y, cropEnd.x, cropEnd.y);
+                
+                if(dist < mapPtRad){
+                    cropEndLock = true;
+                } else {
+                    cropEndLock = false;
+                }
+                
+            }
+            
+            
+        //Masking
+        } else {
+            
+            if(adjustedMouse.x > 0 && adjustedMouse.x < scaledWidth && adjustedMouse.y > 0 && adjustedMouse.y < scaledHeight){
+                
+                maskPressed = true;
+                
             }
             
         }
+        
         
     }
     
@@ -1031,6 +1224,7 @@ void Camera::mouseReleased(ofMouseEventArgs &args){
     
     cropStartLock = false;
     cropEndLock = false;
+    maskPressed = false;
     
 }
 

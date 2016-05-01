@@ -1,8 +1,8 @@
 <Lobby1Aggregate>
 	<Min_Blob_Area>0</Min_Blob_Area>
 	<Max_Blob_Area>1000</Max_Blob_Area>
-	<Persistence>15</Persistence>
-	<Max_Distance>32</Max_Distance>
+	<Persistence>71</Persistence>
+	<Max_Distance>66</Max_Distance>
 	<Draw_threshold>0</Draw_threshold>
 	<Draw_Contours>1</Draw_Contours>
 	<Info>1</Info>
@@ -27,4 +27,7 @@
 	<___CONTOUR_FINDING/>
 <___FEED_POSITIONS/>
 	<Trim_Dead_Space>1</Trim_Dead_Space>
+<___MASKING/>
+	<Use_Mask>1</Use_Mask>
+	<Draw_or_Erase>1</Draw_or_Erase>
 </Lobby1Aggregate>
