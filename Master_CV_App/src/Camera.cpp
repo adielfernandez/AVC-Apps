@@ -569,6 +569,16 @@ void Camera::update(){
         
         fboPix.setImageType(OF_IMAGE_GRAYSCALE);
         
+        
+        //EXPERIMENTAL: Contrast
+        for(int i = 0; i < fboPix.getWidth() * fboPix.getHeight(); i++){
+            
+            float normPixVal = fboPix[i]/255.0f;
+            
+            fboPix[i] = ofClamp( 255 * pow((normPixVal + cameraGui.contrastPhaseSlider), cameraGui.contrastSlider), 0, 255);
+        }
+        
+        
         //if we're a solo camera use the thread to do CV stuff
         //other wise, just crop the pixels to be sent to the aggregate
         if(soloCam){
@@ -607,6 +617,9 @@ void Camera::update(){
             
             //just manually fill the threadOutput pixels
             //without the thread
+            
+
+            
             
             //Do blurring and thresholding for single cameras
             //BEFORE being sent to the aggregate (and aggregate CV thread)

@@ -53,8 +53,13 @@ public:
     ofxButton saveMask;
     ofxButton loadMask;
 
+    ofxFloatSlider contrastSlider;
+    ofxFloatSlider contrastPhaseSlider;
+
+    
     ofxLabel croppingLabel;
     ofxButton resetCrop;
+    
     
     ofxLabel mappingLabel;
     ofxButton resetMap;

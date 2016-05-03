@@ -17,6 +17,8 @@ void CamGui::setup(string name, bool solo){
     gui.setup(guiName, guiName + ".xml", 0, 0);
     
     gui.add(manipulationLabel.setup("   IMAGE DISTORTION", ""));
+    gui.add(contrastSlider.setup("Contrast Exponent", 1.0, 1.0, 8.0));
+    gui.add(contrastPhaseSlider.setup("Contrast Phase", 0.0, 0.0, 1.0));
     gui.add(blurAmountSlider.setup("Blur", 1, 0, 40));
     gui.add(thresholdSlider.setup("Threshold", 0, 0, 255));
     gui.add(drawThresholdToggle.setup("Draw threshold", false));
@@ -49,7 +51,9 @@ void CamGui::setup(string name, bool solo){
         
     } else {
         
-        gui.add(useThreshold.setup("Pre-Thread Thresh?", false));
+        gui.add(useThreshold.setup("Pre-Thread Thresh", false));
+
+        
         gui.add(croppingLabel.setup("   CROPPING", ""));
         gui.add(resetCrop.setup("Reset Cropping Points"));
         gui.add(cropStart.setup("Crop Start (norm)", ofVec2f(0, 0), ofVec2f(0, 0), ofVec2f(1.0, 1.0)));
