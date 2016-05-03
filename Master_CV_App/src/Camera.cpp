@@ -187,6 +187,8 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     rawTex.allocate(feedWidth, feedHeight, GL_LUMINANCE);
     mappedTex.allocate(scaledWidth, scaledHeight, GL_LUMINANCE);
     
+    blurredPix.allocate(scaledWidth, scaledHeight, 1);
+    threshPix.allocate(scaledWidth, scaledHeight, 1);
     
     threadOutput.allocate(scaledWidth, scaledHeight, 1);
     threadOutputImg.allocate(scaledWidth, scaledHeight, OF_IMAGE_GRAYSCALE);
@@ -267,6 +269,76 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
 
 
 void Camera::update(){
+    
+    
+    //resets the mapping points to the default
+    if(cameraGui.resetMap){
+        
+        //change the local map point vector
+        for(int i = 0; i < imageMapPts.size(); i++){
+            
+            int x = (i % 3) * feedWidth/2;
+            int y = (i - i % 3)/3 * feedHeight/2;
+            
+            imageMapPts[i].set( x, y );
+            
+        }
+        
+        //and reset the gui values as well
+        cameraGui.mapPt0 = imageMapPts[0];
+        cameraGui.mapPt1 = imageMapPts[1];
+        cameraGui.mapPt2 = imageMapPts[2];
+        cameraGui.mapPt3 = imageMapPts[3];
+        cameraGui.mapPt4 = imageMapPts[4];
+        cameraGui.mapPt5 = imageMapPts[5];
+        cameraGui.mapPt6 = imageMapPts[6];
+        cameraGui.mapPt7 = imageMapPts[7];
+        cameraGui.mapPt8 = imageMapPts[8];
+    
+    }
+    
+    
+    //Sets the map points to a 180 degree rotation
+    if(cameraGui.rotate180){
+        
+        //change the local map point vector
+        for(int i = 0; i < imageMapPts.size(); i++){
+            
+            int x = feedWidth - (i % 3) * feedWidth/2;
+            int y = feedHeight - (i - i % 3)/3 * feedHeight/2;
+            
+            imageMapPts[i].set( x, y );
+            
+        }
+        
+        //and reset the gui values as well
+        cameraGui.mapPt0 = imageMapPts[0];
+        cameraGui.mapPt1 = imageMapPts[1];
+        cameraGui.mapPt2 = imageMapPts[2];
+        cameraGui.mapPt3 = imageMapPts[3];
+        cameraGui.mapPt4 = imageMapPts[4];
+        cameraGui.mapPt5 = imageMapPts[5];
+        cameraGui.mapPt6 = imageMapPts[6];
+        cameraGui.mapPt7 = imageMapPts[7];
+        cameraGui.mapPt8 = imageMapPts[8];
+        
+    }
+    
+    
+    if(!soloCam && cameraGui.resetCrop){
+        
+        //reset the crop points
+        cropStart.set(0, 0);
+        cropEnd.set(scaledWidth, scaledHeight);
+        
+        //set the gui to the new (normalized) crop points
+        cameraGui.cropStart = cropStart/ofVec2f(scaledWidth, scaledHeight);
+        cameraGui.cropEnd = cropEnd/ofVec2f(scaledWidth, scaledHeight);
+        
+    }
+    
+    
+    
     
     //update the mapping points with changes from the GUI
     imageMapPts[0].set(cameraGui.mapPt0 -> x, cameraGui.mapPt0 -> y);
@@ -459,6 +531,7 @@ void Camera::update(){
         
         //clear out the old mesh and remap the texture
         //to the control points we've set
+        //(see setup() for order explanation)
         mappedMesh.clearTexCoords();
         mappedMesh.addTexCoord(imageMapPts[4]);
         mappedMesh.addTexCoord(imageMapPts[0]);
@@ -533,8 +606,21 @@ void Camera::update(){
         } else {
             
             //just manually fill the threadOutput pixels
-            //with the crop from the fboPix
-            fboPix.cropTo(threadOutput, cropStart.x, cropStart.y, croppedWidth, croppedHeight);
+            //without the thread
+            
+            //Do blurring and thresholding for single cameras
+            //BEFORE being sent to the aggregate (and aggregate CV thread)
+            ofxCv::GaussianBlur(fboPix, blurredPix, cameraGui.blurAmountSlider);
+            
+            if(cameraGui.useThreshold){
+                ofxCv::threshold(blurredPix, threshPix, cameraGui.thresholdSlider);
+                threshPix.cropTo(threadOutput, cropStart.x, cropStart.y, croppedWidth, croppedHeight);
+            } else {
+                blurredPix.cropTo(threadOutput, cropStart.x, cropStart.y, croppedWidth, croppedHeight);
+            }
+            
+            
+            
         }
     }
     
@@ -545,6 +631,13 @@ void Camera::update(){
     if(soloCam) imageProcessor.update();
     
 
+    
+    //add the threadOutput to an image for drawing later
+    threadOutputImg.setFromPixels(threadOutput);
+    
+    
+    
+    
     
     if((*viewMode) == thisView){
         ofRegisterMouseEvents(this);
@@ -953,21 +1046,21 @@ void Camera::drawPostCvWindow(int x, int y, float scale){
 
     
     if(soloCam){
-        //draw the cropped texture
+        //draw the cropped raw texture
         ofSetColor(255);
         drawCroppedTex(cropStart);
 
-        if(cameraGui.drawThresholdToggle){
-            threadOutputImg.setFromPixels(threadOutput);
-            threadOutputImg.draw(cropStart);
-        }
 
     } else {
-        
+    
         ofSetColor(255);
-        threadOutputImg.setFromPixels(threadOutput);
         threadOutputImg.draw(cropStart);
         
+    }
+    
+
+    if(cameraGui.drawThresholdToggle){
+        threadOutputImg.draw(cropStart);
     }
     
     
@@ -978,8 +1071,22 @@ void Camera::drawPostCvWindow(int x, int y, float scale){
     ofDrawRectangle(0, 0, mappedTex.getWidth(), mappedTex.getHeight());
     ofFill();
     
+    
+    //draw an X if we haven't received a frame in a while
+    if(ofGetElapsedTimeMillis() - lastFrameTime > 100){
+        
+        ofSetColor(255, 0, 0);
+        ofSetLineWidth(2);
+        ofDrawLine(0, 0, mappedTex.getWidth(), mappedTex.getHeight());
+        ofDrawLine(mappedTex.getWidth(), 0, 0, mappedTex.getHeight());
+        
+    }
+    
+    
     //draw border around crop with tick marks
     if(!soloCam) drawCropSquare();
+    
+    
     
     if(cameraGui.drawContoursToggle){
         

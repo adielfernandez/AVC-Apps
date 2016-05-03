@@ -196,6 +196,7 @@ public:
     
     //for drawing the image to screen
     ofImage threadOutputImg;
+    ofPixels threshPix, blurredPix;
     
     //takes in the mapped pixels
     //outputs threshold and contours

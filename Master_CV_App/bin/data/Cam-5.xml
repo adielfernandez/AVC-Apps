@@ -1,19 +1,20 @@
 <Cam-5>
-	<Threshold>67</Threshold>
-	<Blur>7</Blur>
-	<Number_of_erosions>0</Number_of_erosions>
-	<Number_of_dilations>0</Number_of_dilations>
+	<___IMAGE_DISTORTION/>
+	<Blur>9</Blur>
+	<Threshold>93</Threshold>
 	<Draw_threshold>0</Draw_threshold>
-	<Point_0>42, 14</Point_0>
-	<Point_1>320, 10</Point_1>
-	<Point_2>609, 29</Point_2>
-	<Point_3>10, 322</Point_3>
-	<Crop_Start__norm_>0.1625, 0.101562</Crop_Start__norm_>
-	<Crop_End__norm_>0.834375, 0.964844</Crop_End__norm_>
-<Cam-5/>
-<Point_4>343, 272</Point_4>
-	<Point_5>638, 251</Point_5>
-	<Point_6>50, 491</Point_6>
-	<Point_7>324, 512</Point_7>
-	<Point_8>619, 475</Point_8>
+	<Pre-Thread_Thresh?>1</Pre-Thread_Thresh?>
+	<___CROPPING/>
+	<Crop_Start__norm_>0, 0</Crop_Start__norm_>
+	<Crop_End__norm_>1, 1</Crop_End__norm_>
+	<___MAPPING/>
+	<Point_0>36, 30</Point_0>
+	<Point_1>325, 0</Point_1>
+	<Point_2>614, 16</Point_2>
+	<Point_3>0, 272</Point_3>
+	<Point_4>326, 268</Point_4>
+	<Point_5>640, 265</Point_5>
+	<Point_6>0, 512</Point_6>
+	<Point_7>327, 512</Point_7>
+	<Point_8>640, 512</Point_8>
 </Cam-5>

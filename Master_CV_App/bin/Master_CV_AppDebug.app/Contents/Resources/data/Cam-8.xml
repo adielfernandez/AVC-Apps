@@ -27,4 +27,8 @@
 <___IMAGE_DISTORTION/>
 	<___BG_SUBTRACTION/>
 	<___CONTOUR_FINDING/>
+<___MASKING/>
+	<Use_Mask>1</Use_Mask>
+	<Draw_or_Erase>1</Draw_or_Erase>
+	<___MAPPING/>
 </Cam-8>

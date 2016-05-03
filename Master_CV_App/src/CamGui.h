@@ -36,6 +36,7 @@ public:
     ofxToggle useBgDiff;
     ofxIntSlider thresholdSlider;
     ofxToggle drawThresholdToggle;
+    ofxToggle useThreshold;
     
     ofxLabel contoursLabel;
     ofxIntSlider minBlobAreaSlider;
@@ -51,7 +52,13 @@ public:
     ofxButton clearMask;
     ofxButton saveMask;
     ofxButton loadMask;
+
+    ofxLabel croppingLabel;
+    ofxButton resetCrop;
     
+    ofxLabel mappingLabel;
+    ofxButton resetMap;
+    ofxButton rotate180;
     ofxVec2Slider mapPt0;
     ofxVec2Slider mapPt1;
     ofxVec2Slider mapPt2;

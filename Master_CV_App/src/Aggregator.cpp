@@ -549,7 +549,7 @@ void Aggregator::drawRaw(int x, int y){
     
     for(int i = 0; i < numCams; i++){
         
-        ofSetColor(255, 255);
+        ofSetColor(255, 180);
         
         if(numCams == 4 && i == 1){
 
@@ -560,13 +560,13 @@ void Aggregator::drawRaw(int x, int y){
             ofTranslate(0, -cams[indices[i]] -> croppedHeight);
             
             
-            cams[indices[i]] -> drawCroppedTex(ofVec2f(0, 0));
+            cams[indices[i]] -> threadOutputImg.draw(0, 0);
             
             ofPopMatrix();
             
         } else {
             //draw normally
-            cams[indices[i]] -> drawCroppedTex(positions[i]);
+            cams[indices[i]] -> threadOutputImg.draw(positions[i]);
         }
         
         ofSetColor(255);
