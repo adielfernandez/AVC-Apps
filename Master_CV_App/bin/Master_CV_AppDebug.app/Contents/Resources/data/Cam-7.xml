@@ -31,4 +31,6 @@
 	<Use_Mask>1</Use_Mask>
 	<Draw_or_Erase>1</Draw_or_Erase>
 	<___MAPPING/>
+<Contrast_Exponent>1</Contrast_Exponent>
+	<Contrast_Phase>0</Contrast_Phase>
 </Cam-7>

@@ -618,12 +618,16 @@ void Camera::update(){
             //just manually fill the threadOutput pixels
             //without the thread
             
-
-            
             
             //Do blurring and thresholding for single cameras
             //BEFORE being sent to the aggregate (and aggregate CV thread)
-            ofxCv::GaussianBlur(fboPix, blurredPix, cameraGui.blurAmountSlider);
+            if(cameraGui.blurAmountSlider > 0){
+                ofxCv::GaussianBlur(fboPix, blurredPix, cameraGui.blurAmountSlider);
+            } else {
+                
+                blurredPix = fboPix;
+                
+            }
             
             if(cameraGui.useThreshold){
                 ofxCv::threshold(blurredPix, threshPix, cameraGui.thresholdSlider);
@@ -1124,8 +1128,10 @@ void Camera::drawPostCvWindow(int x, int y, float scale){
             
             ofSetColor(0, 100, 255);
             ofDrawBitmapString(msg, 0, 0);
+            
+            ofPopMatrix();
+            
         }
-        ofPopMatrix();
         
     }
     

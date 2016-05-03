@@ -736,9 +736,9 @@ void Aggregator::drawCV(int x, int y){
                 ofSetColor(0, 100, 255);
                 ofDrawBitmapString(msg, 0, 0);
             }
+            ofPopMatrix();
             
         }
-        ofPopMatrix();
         
     }
     

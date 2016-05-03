@@ -18,7 +18,7 @@ void CamGui::setup(string name, bool solo){
     
     gui.add(manipulationLabel.setup("   IMAGE DISTORTION", ""));
     gui.add(contrastSlider.setup("Contrast Exponent", 1.0, 1.0, 8.0));
-    gui.add(contrastPhaseSlider.setup("Contrast Phase", 0.0, 0.0, 1.0));
+    gui.add(contrastPhaseSlider.setup("Contrast Phase", 0.0, 0.0, 0.4));
     gui.add(blurAmountSlider.setup("Blur", 1, 0, 40));
     gui.add(thresholdSlider.setup("Threshold", 0, 0, 255));
     gui.add(drawThresholdToggle.setup("Draw threshold", false));

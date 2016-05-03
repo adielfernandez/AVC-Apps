@@ -1,6 +1,6 @@
 <Cam-2>
 	<___IMAGE_DISTORTION/>
-	<Blur>7</Blur>
+	<Blur>2</Blur>
 	<Threshold>67</Threshold>
 	<Draw_threshold>0</Draw_threshold>
 	<Pre-Thread_Thresh>0</Pre-Thread_Thresh>
@@ -17,4 +17,7 @@
 	<Point_6>0, 469</Point_6>
 	<Point_7>324, 512</Point_7>
 	<Point_8>640, 486</Point_8>
+<Cam-2/>
+	<Contrast_Exponent>6.285</Contrast_Exponent>
+	<Contrast_Phase>0.07</Contrast_Phase>
 </Cam-2>
