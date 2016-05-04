@@ -6,17 +6,17 @@
 	<Draw_threshold>0</Draw_threshold>
 	<Draw_Contours>1</Draw_Contours>
 	<Info>1</Info>
-	<Cam1_Pos>57, 49</Cam1_Pos>
-	<Cam2_Pos>362, 51</Cam2_Pos>
-	<Cam3_Pos>663, 40</Cam3_Pos>
-	<Cam4_Pos>55, 227</Cam4_Pos>
-	<Cam5_Pos>363, 231</Cam5_Pos>
-	<Cam6_Pos>664, 231</Cam6_Pos>
+	<Cam1_Pos>2, 9</Cam1_Pos>
+	<Cam2_Pos>307, 11</Cam2_Pos>
+	<Cam3_Pos>608, 0</Cam3_Pos>
+	<Cam4_Pos>0, 187</Cam4_Pos>
+	<Cam5_Pos>308, 191</Cam5_Pos>
+	<Cam6_Pos>609, 191</Cam6_Pos>
 <Lobby1Aggregate/>
 <Threshold>146</Threshold>
-	<Blur>0</Blur>
+	<Blur>8</Blur>
 	<Number_of_erosions>0</Number_of_erosions>
-	<Number_of_dilations>3</Number_of_dilations>
+	<Number_of_dilations>1</Number_of_dilations>
 <Draw_blurred>0</Draw_blurred>
 <Background_Differencing/>
 	<Frames_to_learn_BG>400</Frames_to_learn_BG>
@@ -30,6 +30,6 @@
 <___MASKING/>
 	<Use_Mask>1</Use_Mask>
 	<Draw_or_Erase>1</Draw_or_Erase>
-<Contrast_Exponent>1</Contrast_Exponent>
-	<Contrast_Phase>0</Contrast_Phase>
+<Contrast_Exponent>4.325</Contrast_Exponent>
+	<Contrast_Phase>0.04</Contrast_Phase>
 </Lobby1Aggregate>

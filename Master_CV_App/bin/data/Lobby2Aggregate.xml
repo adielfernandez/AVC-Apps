@@ -12,9 +12,9 @@
 	<Cam4_Pos>0, 236</Cam4_Pos>
 <Lobby2Aggregate/>
 <Threshold>56</Threshold>
-	<Blur>17</Blur>
+	<Blur>24</Blur>
 	<Number_of_erosions>0</Number_of_erosions>
-	<Number_of_dilations>3</Number_of_dilations>
+	<Number_of_dilations>4</Number_of_dilations>
 <Draw_blurred>0</Draw_blurred>
 <Background_Differencing/>
 	<Frames_to_learn_BG>100</Frames_to_learn_BG>

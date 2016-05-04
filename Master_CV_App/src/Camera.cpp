@@ -425,7 +425,7 @@ void Camera::update(){
                     
                     //only set pixels of the mask for cursors pixels that
                     //are actually inside (near-border cases)
-                    if(x > 0 && y > 0 && x < maskPix.getWidth() && y < maskPix.getHeight()){
+                    if(x >= 0 && y >= 0 && x <= maskPix.getWidth() && y <= maskPix.getHeight()){
                         
                         int pixel = y * maskPix.getWidth() + x;
                         

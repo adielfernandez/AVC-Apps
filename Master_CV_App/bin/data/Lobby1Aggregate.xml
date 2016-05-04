@@ -31,5 +31,5 @@
 	<Use_Mask>1</Use_Mask>
 	<Draw_or_Erase>1</Draw_or_Erase>
 <Contrast_Exponent>4.325</Contrast_Exponent>
-	<Contrast_Phase>0</Contrast_Phase>
+	<Contrast_Phase>0.04</Contrast_Phase>
 </Lobby1Aggregate>
