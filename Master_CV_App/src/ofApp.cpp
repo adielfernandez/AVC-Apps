@@ -54,7 +54,7 @@ void ofApp::setup(){
     
     
     titleFont.load("fonts/Aller_Rg.ttf", 40, true);
-    
+    mediumFont.load("fonts/Aller_Rg.ttf", 18, true);
     smallerFont.load("fonts/Aller_Rg.ttf", 14, true);
     
     
@@ -123,7 +123,7 @@ void ofApp::setup(){
 //    names[13] = "Cam-14";
 //    addresses[13] = "192.168.1.6";
     
-    //AVC Test Setup
+    //TERRELL PLACE IP Setup
     names[0] = "Cam-1";
     addresses[0] = "192.168.187.47";
     
@@ -186,7 +186,7 @@ void ofApp::setup(){
     useLiveFeed = true;
     
     //set up actual feeds
-    int stagger = 200;
+    int stagger = 250;
     
     //set up the cameras
     for(int i = 0; i < numFeeds; i++){
@@ -196,7 +196,7 @@ void ofApp::setup(){
         
         //do these first
         cor -> setMovieFile(movieFiles[i]);
-        cor -> setFont(&smallerFont);
+        cor -> setFont(&mediumFont);
         
         //params: the view of this camera, the view control variable,
         //the position of the main content area
@@ -231,6 +231,8 @@ void ofApp::setup(){
     Lobby2Aggregate.setup("Lobby2Aggregate", 4, cameras, bScaleDown);
     Lobby2Aggregate.setupViewControl(15, &viewMode, mainContentPos);
     
+    Lobby1Aggregate.font = &mediumFont;
+    Lobby2Aggregate.font = &mediumFont;
     
     //-----Data-----
     
@@ -307,7 +309,7 @@ void ofApp::setup(){
     if(!useLiveFeed){
         
         ofVec2f p;
-        p.set(panel.pos.x + 10, panel.pos.y - playback.bgHeight - 10);
+        p.set(mainContentPos.x, panel.pos.y - playback.bgHeight - 10);
         
         playback.setup(p, cameras, &smallerFont);
         

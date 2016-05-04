@@ -2,13 +2,13 @@
 	<___IMAGE_DISTORTION/>
 	<Contrast_Exponent>5.935</Contrast_Exponent>
 	<Contrast_Phase>0.084</Contrast_Phase>
-	<Blur>3</Blur>
+	<Blur>0</Blur>
 	<Threshold>0</Threshold>
 	<Draw_threshold>0</Draw_threshold>
 	<Pre-Thread_Thresh>0</Pre-Thread_Thresh>
 	<___CROPPING/>
 	<Crop_Start__norm_>0, 0</Crop_Start__norm_>
-	<Crop_End__norm_>1, 1</Crop_End__norm_>
+	<Crop_End__norm_>1, 0.863281</Crop_End__norm_>
 	<___MAPPING/>
 	<Point_0>0, 0</Point_0>
 	<Point_1>320, 0</Point_1>

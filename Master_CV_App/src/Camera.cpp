@@ -35,6 +35,8 @@ void Camera::setupFeed(){
     gst.setPipeline("rtspsrc location=rtsp://admin:admin@" + IP + ":554/cam/realmonitor?channel=1&subtype=1 latency=0 ! rtpjpegdepay ! jpegdec !  queue ! decodebin ! videoconvert", OF_PIXELS_MONO, true, feedWidth, feedHeight);
     
     gst.startPipeline();
+    
+    
     gst.play();
     
 }
@@ -211,6 +213,7 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
             
             cout << "Image loaded" << endl;
             maskPix = maskImg.getPixels();
+            
         } else {
             
             cout << maskFileName << " not found, creating..." << endl;
@@ -241,7 +244,6 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     lastFrameTime = 0;
     connectionTime = 0;
     timeBeforeReset = 5000;
-    
     
     
     //start the image processing thread
@@ -496,11 +498,16 @@ void Camera::update(){
     if(useLiveFeed){
         
         if(started){
+
+//            cout << name << ": updating feed" << endl;
             gst.update();
         }
         
         if(!started && !connectionStale && ofGetElapsedTimeMillis() > staggerTime){
             started = true;
+            
+//            cout << name << ": starting feed" << endl;
+            
             setupFeed();
         }
 
@@ -515,6 +522,8 @@ void Camera::update(){
     
     //get image from gst pipeline
     if(movie.isFrameNew() || gst.isFrameNew()){
+        
+//        cout << name << ": new frame" << endl;
         
         numFramesRec++;
         
@@ -567,9 +576,8 @@ void Camera::update(){
         //get the pixels from the fbo
         fbo.readToPixels(fboPix);
         
+        
         fboPix.setImageType(OF_IMAGE_GRAYSCALE);
-        
-        
 
         
         
@@ -579,10 +587,20 @@ void Camera::update(){
 
             //subtract the mask before sending to the CV thread
             //go through all the pixels and set them according to the mask
+            //subtract 4 RGB & A pixels for every mask pixel
             if(cameraGui.useMask){
-                for(int i = 0; i < scaledWidth * scaledHeight; i++){
-                    if(maskPix[i] == 255)
+                
+//                cout << name + ": num channels = " << fboPix.getNumChannels() << endl;
+                
+                for(int i = 0; i < fboPix.getWidth() * fboPix.getHeight(); i++){
+                    if(maskPix[i] == 255){
                         fboPix[i] = 0;
+
+//                        fboPix[i * 3] = 0;                    
+//                        fboPix[i * 3 + 1] = 0;
+//                        fboPix[i * 3 + 2] = 0;
+//                        fboPix[i * 3 + 3] = 0;
+                    }
                 }
             }
             
@@ -814,8 +832,14 @@ void Camera::drawMain(){
 
     
 
-    
-    
+
+    //warning for camera cropping
+    if(!soloCam && manipulationMode == 1){
+        
+        ofSetColor(255, 0, 0);
+        font -> drawString("Make sure Aggregate BG Diff is OFF before cropping!", adjustedOrigin.x, adjustedOrigin.y + scaledHeight + 50 + font -> stringHeight("A"));
+        
+    }
     
 
     
@@ -1103,6 +1127,9 @@ void Camera::drawPostCvWindow(int x, int y, float scale){
             ofTranslate(center.x, center.y);
             int label = contours.getLabel(i);
             ofVec2f velocity = toOf(contours.getVelocity(i));
+            
+            ofSetColor(0, 255, 0);
+            ofDrawRectangle(-3, -3, 6, 6);
             
             string msg = ofToString(label);
             

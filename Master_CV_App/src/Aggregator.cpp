@@ -128,18 +128,7 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
     gui.add(saveMask.setup("Save Mask"));
     gui.add(loadMask.setup("Load Mask"));
     
-    gui.setHeaderBackgroundColor(ofColor(255));
-    //sets gui title only to black
-    gui.setTextColor(ofColor(0));
-    
-    maskingLabel.setBackgroundColor(ofColor(255));
-    bgDiffLabel.setBackgroundColor(ofColor(255));
-    manipulationLabel.setBackgroundColor(ofColor(255));
-    contoursLabel.setBackgroundColor(ofColor(255));
-    positionsLabel.setBackgroundColor(ofColor(255));
-    
-    //this sets the default color to black for all labels
-    contoursLabel.setDefaultTextColor(ofColor(0));
+
 
     gui.add(positionsLabel.setup("   FEED POSITIONS", ""));
     gui.add(trimPixels.setup("Trim Dead Space", false));
@@ -156,6 +145,18 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
         
     loadSettings();
     
+    gui.setHeaderBackgroundColor(ofColor(255));
+    //sets gui title only to black
+    gui.setTextColor(ofColor(0));
+    
+    maskingLabel.setBackgroundColor(ofColor(255));
+    bgDiffLabel.setBackgroundColor(ofColor(255));
+    manipulationLabel.setBackgroundColor(ofColor(255));
+    contoursLabel.setBackgroundColor(ofColor(255));
+    positionsLabel.setBackgroundColor(ofColor(255));
+    
+    //this sets the default color to black for all labels
+    contoursLabel.setDefaultTextColor(ofColor(0));
     
     aggregateProcessor.setup(&threadOutputPix, &contours);
 
@@ -428,14 +429,20 @@ void Aggregator::update(){
     if(ofGetElapsedTimeMillis() - lastAnalyzeTime > delayTime){
         
         
-        masterPix.setImageType(OF_IMAGE_GRAYSCALE);
+//        masterPix.setImageType(OF_IMAGE_GRAYSCALE);
         
         //subtract the mask before sending to the CV thread
         //go through all the pixels and set them according to the mask
         if(useMask){
-            for(int i = 0; i < masterWidth * masterHeight; i++){
-                if(maskPix[i] == 255)
+            
+            for(int i = 0; i < masterPix.getWidth() * masterPix.getHeight(); i++){
+                if(maskPix[i] == 255){
                     masterPix[i] = 0;
+//                    masterPix[i * 3] = 0;
+//                    masterPix[i * 3 + 1] = 0;
+//                    masterPix[i * 3 + 2] = 0;
+//                    masterPix[i * 3 + 3] = 0;
+                }
             }
         }
         
@@ -734,7 +741,11 @@ void Aggregator::drawCV(int x, int y){
             int label = contours.getLabel(i);
             ofVec2f velocity = toOf(contours.getVelocity(i));
             
+            ofSetColor(0, 255, 0);
+            ofDrawRectangle(-3, -3, 6, 6);
+            
             string msg = ofToString(label);
+            
             
             if(showInfoToggle){
                 ofSetColor(0, 100, 255);
@@ -758,18 +769,28 @@ void Aggregator::drawCV(int x, int y){
     ofDrawBitmapString("Last Data from Thread: " + ofToString(ofGetElapsedTimeMillis() - aggregateProcessor.lastDataSendTime) + " \tms ago", 800, 45);
     
     if(useBgDiff){
+
+        string bgString;
+        
         if(waitingToBgDiff){
             ofSetColor(255, 0, 0);
-            ofDrawBitmapString("Background Differencing Inactive. System not ready", adjustedOrigin.x, adjustedOrigin.y + masterHeight + 15);
+            bgString = "Background Differencing Inactive. System not ready";
         } else {
             ofSetColor(0, 255, 0);
-            ofDrawBitmapString("Background Differencing Active", adjustedOrigin.x, adjustedOrigin.y + masterHeight + 15);
+            bgString = "Background Differencing Active";
         }
+        
+        font -> drawString(bgString, adjustedOrigin.x, adjustedOrigin.y + masterHeight + 15 + font -> stringHeight("A"));
+        
+        
+        
     }
     
     if(disablePositioning){
+        
         ofSetColor(255, 0, 0);
-        ofDrawBitmapString("Disable BG differencing to adjust positions and trim dead space", adjustedOrigin.x, adjustedOrigin.y + masterHeight + 30);
+        font -> drawString("Disable BG differencing to adjust positions and trim dead space", adjustedOrigin.x, adjustedOrigin.y + masterHeight + 25 + font -> stringHeight("A") * 2);
+        
     }
     
     

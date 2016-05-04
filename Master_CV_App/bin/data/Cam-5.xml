@@ -1,6 +1,6 @@
 <Cam-5>
 	<___IMAGE_DISTORTION/>
-	<Blur>2</Blur>
+	<Blur>0</Blur>
 	<Threshold>93</Threshold>
 	<Draw_threshold>0</Draw_threshold>
 	<Pre-Thread_Thresh>0</Pre-Thread_Thresh>

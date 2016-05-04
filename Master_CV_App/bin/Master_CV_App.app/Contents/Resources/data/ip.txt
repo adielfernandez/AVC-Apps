@@ -4,8 +4,8 @@
 # Line 10: Audio System IP address
 # Line 11: Audio System Receive Port
 # Line 12: Heartbeat IP
-# Line 13: Heartbeat receive port
-192.168.32.246
+# Line 13: Heartbeat receive port (Vincent: 192.168.32.246)
+192.168.187.245
 12345
 localhost
 12345

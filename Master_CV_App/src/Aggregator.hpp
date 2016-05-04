@@ -64,6 +64,8 @@ public:
     int feedWidth, feedHeight;
     int scaledWidth, scaledHeight;
     ofColor backgroundInCol, backgroundOutCol;
+    ofTrueTypeFont *font;
+    
     
     //Where to get the feeds
     vector<shared_ptr<Camera>> cams;

@@ -1,5 +1,5 @@
 <Cam-9>
-	<Threshold>22</Threshold>
+	<Threshold>47</Threshold>
 	<Blur>3</Blur>
 	<Number_of_erosions>0</Number_of_erosions>
 	<Number_of_dilations>0</Number_of_dilations>

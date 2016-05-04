@@ -59,6 +59,7 @@ class ofApp : public ofBaseApp{
     //-----UI-----
     int viewMode;
     ofTrueTypeFont titleFont;
+    ofTrueTypeFont mediumFont;
     ofTrueTypeFont smallerFont;
     
     int feedWidth, feedHeight;

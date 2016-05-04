@@ -35,7 +35,7 @@ void CamGui::setup(string name, bool solo){
         
         gui.add(contoursLabel.setup("   CONTOUR FINDING", ""));
         gui.add(minBlobAreaSlider.setup("Min Blob Area", 0, 0, 1000));
-        gui.add(maxBlobAreaSlider.setup("Max Blob Area", 1000, 0, 5000));
+        gui.add(maxBlobAreaSlider.setup("Max Blob Area", 1000, 0, 50000));
         gui.add(persistenceSlider.setup("Persistence", 15, 0, 100));
         gui.add(maxDistanceSlider.setup("Max Distance", 32, 0, 100));
         gui.add(drawContoursToggle.setup("Draw Contours", true));

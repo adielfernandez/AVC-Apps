@@ -11,8 +11,8 @@
 	<Cam3_Pos>544, 76</Cam3_Pos>
 	<Cam4_Pos>0, 236</Cam4_Pos>
 <Lobby2Aggregate/>
-<Threshold>56</Threshold>
-	<Blur>24</Blur>
+<Threshold>14</Threshold>
+	<Blur>3</Blur>
 	<Number_of_erosions>0</Number_of_erosions>
 	<Number_of_dilations>4</Number_of_dilations>
 <Draw_blurred>0</Draw_blurred>

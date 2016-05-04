@@ -115,6 +115,7 @@ void ThreadedCV::threadedFunction(){
             contrastShift = settings[12]/1000.0f;
             
 
+            threadPixels.setImageType(OF_IMAGE_GRAYSCALE);
             
             //EXPERIMENTAL: Contrast
             for(int i = 0; i < threadPixels.getWidth() * threadPixels.getHeight(); i++){

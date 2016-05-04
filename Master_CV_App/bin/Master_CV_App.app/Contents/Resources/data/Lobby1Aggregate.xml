@@ -1,30 +1,35 @@
 <Lobby1Aggregate>
-	<Min_Blob_Area>0</Min_Blob_Area>
-	<Max_Blob_Area>1000</Max_Blob_Area>
-	<Persistence>15</Persistence>
-	<Max_Distance>32</Max_Distance>
+	<Min_Blob_Area>40</Min_Blob_Area>
+	<Max_Blob_Area>4275</Max_Blob_Area>
+	<Persistence>71</Persistence>
+	<Max_Distance>66</Max_Distance>
 	<Draw_threshold>0</Draw_threshold>
 	<Draw_Contours>1</Draw_Contours>
 	<Info>1</Info>
-	<Cam1_Pos>0, 14</Cam1_Pos>
-	<Cam2_Pos>220, 12</Cam2_Pos>
-	<Cam3_Pos>418, 0</Cam3_Pos>
-	<Cam4_Pos>1, 192</Cam4_Pos>
-	<Cam5_Pos>221, 195</Cam5_Pos>
-	<Cam6_Pos>424, 196</Cam6_Pos>
+	<Cam1_Pos>2, 9</Cam1_Pos>
+	<Cam2_Pos>307, 11</Cam2_Pos>
+	<Cam3_Pos>608, 0</Cam3_Pos>
+	<Cam4_Pos>0, 187</Cam4_Pos>
+	<Cam5_Pos>308, 191</Cam5_Pos>
+	<Cam6_Pos>609, 191</Cam6_Pos>
 <Lobby1Aggregate/>
-<Threshold>181</Threshold>
-	<Blur>18</Blur>
+<Threshold>81</Threshold>
+	<Blur>10</Blur>
 	<Number_of_erosions>0</Number_of_erosions>
-	<Number_of_dilations>4</Number_of_dilations>
+	<Number_of_dilations>1</Number_of_dilations>
 <Draw_blurred>0</Draw_blurred>
 <Background_Differencing/>
-	<Frames_to_learn_BG>400</Frames_to_learn_BG>
-	<Use_BG_Diff>0</Use_BG_Diff>
+	<Frames_to_learn_BG>655</Frames_to_learn_BG>
+	<Use_BG_Diff>1</Use_BG_Diff>
 	<Contour_Finding/>
 <___IMAGE_MANIPULATION/>
 	<___BG_SUBTRACTION/>
 	<___CONTOUR_FINDING/>
 <___FEED_POSITIONS/>
 	<Trim_Dead_Space>1</Trim_Dead_Space>
+<___MASKING/>
+	<Use_Mask>1</Use_Mask>
+	<Draw_or_Erase>1</Draw_or_Erase>
+<Contrast_Exponent>5.935</Contrast_Exponent>
+	<Contrast_Phase>0.044</Contrast_Phase>
 </Lobby1Aggregate>

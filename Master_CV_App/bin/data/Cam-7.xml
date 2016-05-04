@@ -1,5 +1,5 @@
 <Cam-7>
-	<Threshold>33</Threshold>
+	<Threshold>47</Threshold>
 	<Blur>5</Blur>
 	<Number_of_erosions>0</Number_of_erosions>
 	<Number_of_dilations>0</Number_of_dilations>
@@ -19,7 +19,7 @@
 	<Point_5>322, 512</Point_5>
 	<Point_6>0, 10</Point_6>
 	<Point_7>0, 247</Point_7>
-	<Point_8>0, 482</Point_8>
+	<Point_8>0, 512</Point_8>
 <Background_Differencing/>
 	<Frames_to_learn_BG>220</Frames_to_learn_BG>
 	<Use_BG_Diff>0</Use_BG_Diff>
@@ -29,7 +29,7 @@
 	<___CONTOUR_FINDING/>
 <___MASKING/>
 	<Use_Mask>1</Use_Mask>
-	<Draw_or_Erase>1</Draw_or_Erase>
+	<Draw_or_Erase>0</Draw_or_Erase>
 	<___MAPPING/>
 <Contrast_Exponent>4.64</Contrast_Exponent>
 	<Contrast_Phase>0.046</Contrast_Phase>
