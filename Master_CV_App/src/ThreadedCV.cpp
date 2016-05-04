@@ -111,8 +111,20 @@ void ThreadedCV::threadedFunction(){
             maxBlobArea = settings[8];
             persistence = settings[9];
             maxBlobDist = settings[10];
+            contrastExp = settings[11]/1000.0f;
+            contrastShift = settings[12]/1000.0f;
             
 
+            
+            //EXPERIMENTAL: Contrast
+            for(int i = 0; i < threadPixels.getWidth() * threadPixels.getHeight(); i++){
+                
+                float normPixVal = threadPixels[i]/255.0f;
+                
+                threadPixels[i] = ofClamp( 255 * pow((normPixVal + contrastShift), contrastExp), 0, 255);
+            }
+            
+            
             //blur it
             ofxCv::GaussianBlur(threadPixels, blurredPix, blurAmt);
             

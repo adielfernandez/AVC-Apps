@@ -3,7 +3,7 @@
 	<Blur>4</Blur>
 	<Number_of_erosions>0</Number_of_erosions>
 	<Number_of_dilations>0</Number_of_dilations>
-	<Draw_threshold>0</Draw_threshold>
+	<Draw_threshold>1</Draw_threshold>
 	<Min_Blob_Area>15</Min_Blob_Area>
 	<Max_Blob_Area>5000</Max_Blob_Area>
 	<Persistence>15</Persistence>
@@ -31,6 +31,6 @@
 	<Use_Mask>1</Use_Mask>
 	<Draw_or_Erase>1</Draw_or_Erase>
 	<___MAPPING/>
-<Contrast_Exponent>1</Contrast_Exponent>
-	<Contrast_Phase>0</Contrast_Phase>
+<Contrast_Exponent>3.905</Contrast_Exponent>
+	<Contrast_Phase>0.066</Contrast_Phase>
 </Cam-8>

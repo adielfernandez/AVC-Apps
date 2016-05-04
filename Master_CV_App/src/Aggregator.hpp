@@ -183,6 +183,9 @@ public:
     ofxButton clearMask;
     ofxButton saveMask;
     ofxButton loadMask;
+    
+    ofxFloatSlider contrastSlider;
+    ofxFloatSlider contrastPhaseSlider;
 
     ofxLabel positionsLabel;
     ofxButton trimPixels;

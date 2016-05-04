@@ -570,13 +570,7 @@ void Camera::update(){
         fboPix.setImageType(OF_IMAGE_GRAYSCALE);
         
         
-        //EXPERIMENTAL: Contrast
-        for(int i = 0; i < fboPix.getWidth() * fboPix.getHeight(); i++){
-            
-            float normPixVal = fboPix[i]/255.0f;
-            
-            fboPix[i] = ofClamp( 255 * pow((normPixVal + cameraGui.contrastPhaseSlider), cameraGui.contrastSlider), 0, 255);
-        }
+
         
         
         //if we're a solo camera use the thread to do CV stuff
@@ -595,7 +589,7 @@ void Camera::update(){
             
             //construct a vector of ints with all the settings
             vector<int> settings;
-            settings.resize(11);
+            settings.resize(13);
             
             settings[0] = cameraGui.blurAmountSlider;
             settings[1] = cameraGui.numErosionsSlider;
@@ -609,6 +603,9 @@ void Camera::update(){
             settings[8] = cameraGui.maxBlobAreaSlider;
             settings[9] = cameraGui.persistenceSlider;
             settings[10] = cameraGui.maxDistanceSlider;
+            settings[11] = (int)(cameraGui.contrastSlider * 1000);        //vector holds ints so mult by 1000
+            settings[12] = (int)(cameraGui.contrastPhaseSlider * 1000);   //then divide by 1000 in the thread
+            
 
             //pass the fbo pixels to the processing thread
             imageProcessor.analyze(fboPix, settings);
@@ -1022,20 +1019,7 @@ void Camera::drawMaskingWindow(int x, int y, float scale){
         ofShowCursor();
     }
     
-    
-    
-    ofPushStyle();
-    
-    
-    ofNoFill();
-    
 
-    
-    
-    
-    
-    
-    ofPopStyle();
     
     
     ofPopMatrix();
@@ -1132,6 +1116,8 @@ void Camera::drawPostCvWindow(int x, int y, float scale){
             ofPopMatrix();
             
         }
+        
+        ofPopMatrix();
         
     }
     

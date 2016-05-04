@@ -100,6 +100,8 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
     gui.setup(guiName, guiName + ".xml", 0, 0);
     
     gui.add(manipulationLabel.setup("   IMAGE MANIPULATION", ""));
+    gui.add(contrastSlider.setup("Contrast Exponent", 1.0, 1.0, 8.0));
+    gui.add(contrastPhaseSlider.setup("Contrast Phase", 0.0, 0.0, 0.4));
     gui.add(blurAmountSlider.setup("Blur", 1, 0, 50));
     gui.add(numErosionsSlider.setup("Number of erosions", 0, 0, 10));
     gui.add(numDilationsSlider.setup("Number of dilations", 0, 0, 10));
@@ -453,7 +455,7 @@ void Aggregator::update(){
         
         //construct a vector of ints with all the settings
         vector<int> settings;
-        settings.resize(11);
+        settings.resize(13);
         
         settings[0] = blurAmountSlider;
         settings[1] = numErosionsSlider;
@@ -467,6 +469,8 @@ void Aggregator::update(){
         settings[8] = maxBlobAreaSlider;
         settings[9] = persistenceSlider;
         settings[10] = maxDistanceSlider;
+        settings[11] = (int)(contrastSlider * 1000);        //vector holds ints so mult by 1000
+        settings[12] = (int)(contrastPhaseSlider * 1000);   //then divide by 1000 in the thread
         
         aggregateProcessor.analyze(masterPix, settings);
         
@@ -740,10 +744,14 @@ void Aggregator::drawCV(int x, int y){
             
         }
         
+        ofPopMatrix();
+        
     }
     
     
     ofPopMatrix();
+    
+    
     
     ofSetColor(255);
     ofDrawBitmapString("CV Thread ID: " + ofToString(aggregateProcessor.getThreadId()), 800, 30);

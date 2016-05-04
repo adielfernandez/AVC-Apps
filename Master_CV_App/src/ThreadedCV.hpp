@@ -87,6 +87,10 @@ private:
     int cropStartY;
     int cropEndX;
     int cropEndY;
+    float contrastExp;
+    float contrastShift;
+    
+    
     
     ofxCv::RunningBackground background;
     
