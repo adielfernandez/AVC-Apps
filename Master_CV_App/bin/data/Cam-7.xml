@@ -4,7 +4,7 @@
 	<Number_of_erosions>0</Number_of_erosions>
 	<Number_of_dilations>0</Number_of_dilations>
 	<Draw_threshold>0</Draw_threshold>
-	<Min_Blob_Area>55</Min_Blob_Area>
+	<Min_Blob_Area>80</Min_Blob_Area>
 	<Max_Blob_Area>5000</Max_Blob_Area>
 	<Persistence>15</Persistence>
 	<Max_Distance>32</Max_Distance>
@@ -21,8 +21,8 @@
 	<Point_7>0, 247</Point_7>
 	<Point_8>0, 512</Point_8>
 <Background_Differencing/>
-	<Frames_to_learn_BG>220</Frames_to_learn_BG>
-	<Use_BG_Diff>0</Use_BG_Diff>
+	<Frames_to_learn_BG>170</Frames_to_learn_BG>
+	<Use_BG_Diff>1</Use_BG_Diff>
 	<Contour_Finding/>
 <___IMAGE_DISTORTION/>
 	<___BG_SUBTRACTION/>

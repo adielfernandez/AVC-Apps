@@ -205,6 +205,10 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     
     
     //Mask
+    maskChanged = true;
+    maskBoundStart.set(0,0);
+    maskBoundEnd.set(fboPix.getWidth(), fboPix.getHeight());
+    
     if(soloCam){
         
         maskFileName = "masks/" + name + ".png";
@@ -244,7 +248,9 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     lastFrameTime = 0;
     connectionTime = 0;
     timeBeforeReset = 5000;
-    
+    cameraFPS = 0;
+    lastCamFPS = 0;
+    avgCamFPS = 0;
     
     //start the image processing thread
     if(soloCam) imageProcessor.setup(&threadOutput, &contours);
@@ -437,6 +443,8 @@ void Camera::update(){
                     }
                     
                 }
+             
+                maskChanged = true;
                 
             }
             
@@ -478,6 +486,8 @@ void Camera::update(){
     if(soloCam){
         if(cameraGui.clearMask){
             maskPix.setColor(0);
+            maskBoundStart.set(0, 0);
+            maskBoundEnd.set(0, 0);
         }
         
         if(cameraGui.saveMask){
@@ -488,6 +498,7 @@ void Camera::update(){
         if(cameraGui.loadMask){
             maskImg.load(maskFileName);
             maskPix = maskImg.getPixels();
+            maskChanged = true;
         }
     }
     
@@ -527,9 +538,10 @@ void Camera::update(){
         
         numFramesRec++;
         
+        lastCamFPS = cameraFPS;
         cameraFPS = (int)(1/(ofGetElapsedTimef() - (float)lastFrameTime/1000.0f));
         lastFrameTime = ofGetElapsedTimeMillis();
-        
+        avgCamFPS = (lastCamFPS + cameraFPS)/2;
         
         //get texture from feed
         if(useLiveFeed){
@@ -590,17 +602,57 @@ void Camera::update(){
             //subtract 4 RGB & A pixels for every mask pixel
             if(cameraGui.useMask){
                 
-//                cout << name + ": num channels = " << fboPix.getNumChannels() << endl;
-                
-                for(int i = 0; i < fboPix.getWidth() * fboPix.getHeight(); i++){
-                    if(maskPix[i] == 255){
-                        fboPix[i] = 0;
+                //if the mask has changed we need to go through and find the X and Y bounds
+                if(maskChanged){
+                    
+                    //set the bounds to be way off so we can correct them
+                    maskBoundEnd.set(0, 0);
+                    maskBoundStart.set(1000000, 1000000);
+                    
+                    for(int i = 0; i < fboPix.getWidth() * fboPix.getHeight(); i++){
+                    
+                        
+                        if(maskPix[i] == 255){
 
-//                        fboPix[i * 3] = 0;                    
-//                        fboPix[i * 3 + 1] = 0;
-//                        fboPix[i * 3 + 2] = 0;
-//                        fboPix[i * 3 + 3] = 0;
+                            //get the X & Y from the index
+                            int x = i % fboPix.getWidth();
+                            int y = (i - x)/fboPix.getWidth();
+                        
+                            //if the mask is new, go through it and find the
+                            //left, right, top and bottom bounds
+                            
+                            if(x < maskBoundStart.x) maskBoundStart.x = x;
+                            if(y < maskBoundStart.y) maskBoundStart.y = y;
+                            
+                            if(x > maskBoundEnd.x) maskBoundEnd.x = x;
+                            if(y > maskBoundEnd.y) maskBoundEnd.y = y;
+                            
+                            //also mask the image while we're here
+                            fboPix[i] = 0;
+
+                        }
+                    
                     }
+                    
+                    maskChanged = false;
+                    
+                } else {
+                    
+                    
+                    //go through the image and mask out but
+                    //only go through the optimized region
+                    for(int y = maskBoundStart.y; y < maskBoundEnd.y; y++){
+                        for(int x = maskBoundStart.x; x < maskBoundEnd.x; x++){
+                        
+                            int index = y * fboPix.getWidth() + x;
+                            
+                            if(maskPix[index] == 255) fboPix[index] = 0;
+                            
+                        }
+                    }
+                    
+                    
+                    
                 }
             }
             
@@ -723,7 +775,7 @@ void Camera::drawMain(){
     
     
     ofSetColor(255);
-    ofDrawBitmapString( ofToString(name) + " Feed FPS: " + ofToString(cameraFPS), 15, 60);
+    ofDrawBitmapString( ofToString(name) + " Feed FPS: " + ofToString(avgCamFPS), 15, 60);
     
 
     
@@ -837,7 +889,7 @@ void Camera::drawMain(){
     if(!soloCam && manipulationMode == 1){
         
         ofSetColor(255, 0, 0);
-        font -> drawString("Make sure Aggregate BG Diff is OFF before cropping!", adjustedOrigin.x, adjustedOrigin.y + scaledHeight + 50 + font -> stringHeight("A"));
+        font -> drawString("Make sure Aggregate BG Diff is OFF before cropping!", adjustedOrigin.x, adjustedOrigin.y + scaledHeight + 70 + font -> stringHeight("A"));
         
     }
     
@@ -972,7 +1024,8 @@ void Camera::drawCroppingWindow(int x, int y, float scale){
     ofDrawBitmapString("Crop End", cropEnd.x - mapPtRad - 70, cropEnd.y - mapPtRad);
 
     
-    
+    ofSetColor(200);
+    ofDrawBitmapString("W: " + ofToString(croppedWidth) + "\nH: " + ofToString(croppedHeight) , 0, scaledHeight + 10);
     
     ofPopStyle();
     
@@ -1004,6 +1057,14 @@ void Camera::drawMaskingWindow(int x, int y, float scale){
         
         ofSetColor(maskingCol, 100);
         maskImg.draw(0, 0);
+        
+        ofNoFill();
+        ofSetLineWidth(1);
+        ofSetColor(maskingCol);
+        ofDrawRectangle(maskBoundStart.x, maskBoundStart.y, maskBoundEnd.x - maskBoundStart.x, maskBoundEnd.y - maskBoundStart.y);
+        ofFill();
+        
+        
     }
     
     //border
@@ -1344,6 +1405,7 @@ void Camera::mousePressed(ofMouseEventArgs &args){
             if(adjustedMouse.x > 0 && adjustedMouse.x < scaledWidth && adjustedMouse.y > 0 && adjustedMouse.y < scaledHeight){
                 
                 maskPressed = true;
+                
                 
             }
             

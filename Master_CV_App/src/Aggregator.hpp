@@ -129,10 +129,13 @@ public:
     string maskFileName;
     ofColor maskingCol;
     
+    
+    
     //Masking stuff
     ofPixels maskPix;
     ofImage maskImg;
-    
+    bool maskChanged;
+    ofVec2f maskBoundStart, maskBoundEnd;
     
     
     //-----OSC Data gathering-----

@@ -39,7 +39,7 @@ void Osc::setupGui(){
     
     baseGui.add(oscLabel.setup("OSC DATA", ""));
     baseGui.add(sendOsc.setup("Send OSC", true));
-    baseGui.add(oscSendRate.setup("Millis bet. sends", 500, 20, 2000));
+    baseGui.add(oscSendRate.setup("Millis bet. sends", 500, 20, 500));
     
     baseGui.add(sendCorridor1.setup("Send Corridor 1 Data", true));
     baseGui.add(sendCorridor2.setup("Send Corridor 2 Data", true));

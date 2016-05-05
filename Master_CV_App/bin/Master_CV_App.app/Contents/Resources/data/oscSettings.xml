@@ -12,7 +12,7 @@
 <oscSettings>
 		<OSC_DATA/>
 		<Send_OSC>1</Send_OSC>
-		<Millis_bet__sends>20</Millis_bet__sends>
+		<Millis_bet__sends>39</Millis_bet__sends>
 		<Send_Corridor_1_Data>1</Send_Corridor_1_Data>
 		<Send_Corridor_2_Data>1</Send_Corridor_2_Data>
 		<Send_Corridor_3_Data>1</Send_Corridor_3_Data>

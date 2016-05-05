@@ -5,7 +5,7 @@
 	<Draw_threshold>0</Draw_threshold>
 	<Pre-Thread_Thresh>0</Pre-Thread_Thresh>
 	<___CROPPING/>
-	<Crop_Start__norm_>0, 0</Crop_Start__norm_>
+	<Crop_Start__norm_>0, 0.0390625</Crop_Start__norm_>
 	<Crop_End__norm_>1, 1</Crop_End__norm_>
 	<___MAPPING/>
 	<Point_0>0, 0</Point_0>

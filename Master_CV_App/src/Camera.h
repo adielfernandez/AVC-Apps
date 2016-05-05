@@ -133,6 +133,8 @@ public:
     unsigned long long numFramesRec;
     unsigned long long connectionTime;
     int cameraFPS;
+    int lastCamFPS;
+    int avgCamFPS;
     
     int feedWidth, feedHeight;
     int scaledWidth, scaledHeight;
@@ -187,6 +189,8 @@ public:
     //Masking stuff
     ofPixels maskPix;
     ofImage maskImg;
+    bool maskChanged;
+    ofVec2f maskBoundStart, maskBoundEnd;
 
     //Skewed/keystoned mesh
     ofMesh mappedMesh;

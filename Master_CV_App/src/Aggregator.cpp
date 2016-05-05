@@ -110,12 +110,12 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
     
     gui.add(bgDiffLabel.setup("   BG SUBTRACTION", ""));
     gui.add(useBgDiff.setup("Use BG Diff", false));
-    gui.add(learningTime.setup("Frames to learn BG", 100, 0, 1000));
+    gui.add(learningTime.setup("Frames to learn BG", 100, 0, 2000));
     gui.add(resetBG.setup("Reset Background"));
     
     gui.add(contoursLabel.setup("   CONTOUR FINDING", ""));
     gui.add(minBlobAreaSlider.setup("Min Blob Area", 0, 0, 500));
-    gui.add(maxBlobAreaSlider.setup("Max Blob Area", 1000, 0, 5000));
+    gui.add(maxBlobAreaSlider.setup("Max Blob Area", 1000, 0, 20000));
     gui.add(persistenceSlider.setup("Persistence", 15, 0, 100));
     gui.add(maxDistanceSlider.setup("Max Distance", 32, 0, 100));
     gui.add(drawContoursToggle.setup("Draw Contours", true));
@@ -188,6 +188,10 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
     
     maskingCol.set(255, 200, 0);
     maskToolSize = 10;
+    
+    maskChanged = true;
+    maskBoundStart.set(0,0);
+    maskBoundEnd.set(masterWidth, masterHeight);
 }
 
 
@@ -276,6 +280,11 @@ void Aggregator::update(){
                 
             }
             
+            
+            maskChanged = true;
+            
+            cout << "Mask Changed" << endl;
+            
         }
 
         
@@ -285,6 +294,8 @@ void Aggregator::update(){
     
     if(clearMask){
         maskPix.setColor(0);
+        maskBoundStart.set(0, 0);
+        maskBoundEnd.set(0, 0);
     }
     
     if(saveMask){
@@ -295,6 +306,7 @@ void Aggregator::update(){
     if(loadMask){
         maskImg.load(maskFileName);
         maskPix = maskImg.getPixels();
+        maskChanged = true;
     }
     
     
@@ -435,15 +447,62 @@ void Aggregator::update(){
         //go through all the pixels and set them according to the mask
         if(useMask){
             
-            for(int i = 0; i < masterPix.getWidth() * masterPix.getHeight(); i++){
-                if(maskPix[i] == 255){
-                    masterPix[i] = 0;
-//                    masterPix[i * 3] = 0;
-//                    masterPix[i * 3 + 1] = 0;
-//                    masterPix[i * 3 + 2] = 0;
-//                    masterPix[i * 3 + 3] = 0;
+            //if the mask has changed we need to go through and find the X and Y bounds
+            if(maskChanged){
+                
+
+                //set the bounds to be way off so we can correct them
+                maskBoundEnd.set(0, 0);
+                maskBoundStart.set(1000000, 1000000);
+                
+                for(int i = 0; i < masterPix.getWidth() * masterPix.getHeight(); i++){
+                    
+                    
+                    if(maskPix[i] == 255){
+                        
+                        //get the X & Y from the index
+                        int x = i % masterPix.getWidth();
+                        int y = (i - x)/masterPix.getWidth();
+                        
+                        //if the mask is new, go through it and find the
+                        //left, right, top and bottom bounds
+                        
+                        if(x < maskBoundStart.x) maskBoundStart.x = x;
+                        if(y < maskBoundStart.y) maskBoundStart.y = y;
+                        
+                        if(x > maskBoundEnd.x) maskBoundEnd.x = x;
+                        if(y > maskBoundEnd.y) maskBoundEnd.y = y;
+                        
+                        //also mask the image while we're here
+                        masterPix[i] = 0;
+                        
+                    }
+                    
                 }
+                
+                maskChanged = false;
+                
+                cout << "Start: " << maskBoundStart << " End: " << maskBoundEnd << endl;
+                
+            } else {
+                
+                
+                //go through the image and mask out but
+                //only go through the optimized region
+                for(int y = maskBoundStart.y; y < maskBoundEnd.y; y++){
+                    for(int x = maskBoundStart.x; x < maskBoundEnd.x; x++){
+                        
+                        int index = y * masterPix.getWidth() + x;
+                        
+                        if(maskPix[index] == 255) masterPix[index] = 0;
+                        
+                    }
+                }
+                
+                
+                
             }
+
         }
         
         
@@ -536,6 +595,47 @@ void Aggregator::drawMain(){
     
     drawGui(15, adjustedOrigin.y);
     
+    //Blob data
+    string blobData = "";
+    
+    blobData += "Num Blobs: " + ofToString(contours.size());
+    blobData += "\nAvg. Pos X (norm): " + ofToString(avgPos.x);
+    blobData += "\nAvg. Pos Y (norm): " + ofToString(avgPos.y);
+    blobData += "\nAvg. Heading X (norm): " + ofToString(avgDir.x);
+    blobData += "\nAvg. Heading Y (norm): " + ofToString(avgDir.y);
+    blobData += "\nAvg. Speed (raw): " + ofToString(avgSpeed);
+    
+    ofSetColor(255);
+    ofDrawBitmapString(blobData, adjustedOrigin.x, adjustedOrigin.y + masterHeight + 15);
+    
+    
+    
+    
+    if(useBgDiff){
+        
+        string bgString;
+        
+        if(waitingToBgDiff){
+            ofSetColor(255, 0, 0);
+            bgString = "Background Differencing Inactive. System not ready";
+        } else {
+            ofSetColor(0, 255, 0);
+            bgString = "Background Differencing Active";
+        }
+        
+        font -> drawString(bgString, adjustedOrigin.x, adjustedOrigin.y + masterHeight + 115 + font -> stringHeight("A"));
+        
+        
+        
+    }
+    
+    if(disablePositioning){
+        
+        ofSetColor(255, 0, 0);
+        font -> drawString("Disable BG differencing to adjust positions and trim dead space", adjustedOrigin.x, adjustedOrigin.y + masterHeight + 125 + font -> stringHeight("A") * 2);
+        
+    }
+    
     
     
 }
@@ -589,19 +689,7 @@ void Aggregator::drawRaw(int x, int y){
     ofDrawBitmapString("W: " + ofToString(masterWidth) + "\nH: " + ofToString(masterHeight) , masterWidth + 5, masterHeight + 15);
     
     
-    //Blob data
-    
-    string blobData = "";
-    
-    blobData += "Num Blobs: " + ofToString(contours.size());
-    blobData += "\nAvg. Pos X (norm): " + ofToString(avgPos.x);
-    blobData += "\nAvg. Pos Y (norm): " + ofToString(avgPos.y);
-    blobData += "\nAvg. Heading X (norm): " + ofToString(avgDir.x);
-    blobData += "\nAvg. Heading Y (norm): " + ofToString(avgDir.y);
-    blobData += "\nAvg. Speed (raw): " + ofToString(avgSpeed);
-    
-    ofSetColor(255);
-    ofDrawBitmapString(blobData, masterWidth + 20, 10);
+
     
     
     ofPopMatrix();
@@ -683,6 +771,14 @@ void Aggregator::drawCV(int x, int y){
             ofSetColor(maskingCol, 100);
             maskImg.draw(0, 0);
             
+            //draw border around mask bounds
+            ofNoFill();
+            ofSetLineWidth(1);
+            ofSetColor(maskingCol);
+            ofDrawRectangle(maskBoundStart.x, maskBoundStart.y, maskBoundEnd.x - maskBoundStart.x, maskBoundEnd.y - maskBoundStart.y);
+            ofFill();
+            
+            
             //draw cursor if we're using the mask feature and we're inside the mask
             if(adjustedMouse.x > 0 && adjustedMouse.x < masterWidth && adjustedMouse.y > 0 && adjustedMouse.y < masterHeight){
                 
@@ -722,6 +818,7 @@ void Aggregator::drawCV(int x, int y){
         ofSetLineWidth(2.0);
         ofDrawRectangle(0, 0, masterWidth, masterHeight);
         ofFill();
+
         
     }
     
@@ -768,30 +865,7 @@ void Aggregator::drawCV(int x, int y){
     ofDrawBitmapString("CV Thread ID: " + ofToString(aggregateProcessor.getThreadId()), 800, 30);
     ofDrawBitmapString("Last Data from Thread: " + ofToString(ofGetElapsedTimeMillis() - aggregateProcessor.lastDataSendTime) + " \tms ago", 800, 45);
     
-    if(useBgDiff){
 
-        string bgString;
-        
-        if(waitingToBgDiff){
-            ofSetColor(255, 0, 0);
-            bgString = "Background Differencing Inactive. System not ready";
-        } else {
-            ofSetColor(0, 255, 0);
-            bgString = "Background Differencing Active";
-        }
-        
-        font -> drawString(bgString, adjustedOrigin.x, adjustedOrigin.y + masterHeight + 15 + font -> stringHeight("A"));
-        
-        
-        
-    }
-    
-    if(disablePositioning){
-        
-        ofSetColor(255, 0, 0);
-        font -> drawString("Disable BG differencing to adjust positions and trim dead space", adjustedOrigin.x, adjustedOrigin.y + masterHeight + 25 + font -> stringHeight("A") * 2);
-        
-    }
     
     
     

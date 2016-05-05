@@ -138,6 +138,7 @@ void ThreadedCV::threadedFunction(){
                 if(needsAutoReset || resetBG){
                     
                     background.reset();
+                    background.setDifferenceMode(ofxCv::RunningBackground::BRIGHTER);
                     needsAutoReset = false;
                     
                 }
