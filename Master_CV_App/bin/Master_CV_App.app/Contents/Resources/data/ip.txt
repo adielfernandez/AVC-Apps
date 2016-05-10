@@ -23,7 +23,7 @@ localhost
 12345
 
 ##### Audio System IP address #####
-localhost
+192.168.32.191
 
 ##### Audio System Receive Port #####
 12345
