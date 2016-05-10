@@ -80,8 +80,9 @@ void Osc::setupGui(){
     baseGui.add(sendHeartbeat.setup("Send Heartbeat", true));
     baseGui.add(oscSendRate.setup("Millis bet. sends", 500, 20, 500));
     baseGui.add(sendAllOsc.setup("Send OSC", true));
-    
-    receiversLabel.setDefaultTextColor(ofColor(255));
+
+    oscLabel.setBackgroundColor(ofColor(255));
+    receiversLabel.setBackgroundColor(ofColor(255));
     
 }
 
