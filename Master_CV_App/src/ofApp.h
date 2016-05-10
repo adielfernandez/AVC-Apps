@@ -47,6 +47,7 @@ class ofApp : public ofBaseApp{
     const int numFeeds = 14;
     vector<shared_ptr<Camera>> cameras;
     
+    //different views within the app
     const int numScreens = 18;
     
     

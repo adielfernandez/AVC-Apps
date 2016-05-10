@@ -19,7 +19,7 @@
 	<Number_of_dilations>4</Number_of_dilations>
 <Draw_blurred>0</Draw_blurred>
 <Background_Differencing/>
-	<Frames_to_learn_BG>100</Frames_to_learn_BG>
+	<Frames_to_learn_BG>230</Frames_to_learn_BG>
 	<Use_BG_Diff>1</Use_BG_Diff>
 	<Contour_Finding/>
 <___IMAGE_MANIPULATION/>

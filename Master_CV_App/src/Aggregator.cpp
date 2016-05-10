@@ -482,7 +482,7 @@ void Aggregator::update(){
                 
                 maskChanged = false;
                 
-                cout << "Start: " << maskBoundStart << " End: " << maskBoundEnd << endl;
+//                cout << "Start: " << maskBoundStart << " End: " << maskBoundEnd << endl;
                 
             } else {
                 
@@ -775,7 +775,7 @@ void Aggregator::drawCV(int x, int y){
             ofNoFill();
             ofSetLineWidth(1);
             ofSetColor(maskingCol);
-            ofDrawRectangle(maskBoundStart.x, maskBoundStart.y, maskBoundEnd.x - maskBoundStart.x, maskBoundEnd.y - maskBoundStart.y);
+            ofDrawRectangle(maskBoundStart.x, maskBoundStart.y, maskBoundEnd.x - maskBoundStart.x + 1, maskBoundEnd.y - maskBoundStart.y + 1);
             ofFill();
             
             

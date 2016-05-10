@@ -1,13 +1,35 @@
-# Set the IP addresses to receive OSC Data. 
-# Line 8: PGS IP address
-# Line 9: PGS Recieve Port
-# Line 10: Audio System IP address
-# Line 11: Audio System Receive Port
-# Line 12: Heartbeat IP
-# Line 13: Heartbeat receive port (Vincent: 192.168.32.246)
-192.168.187.253
+##### PGS1 IP address #####
+10.1.4.124
+
+##### PGS1 Recieve Port #####
 12345
+
+##### PGS2 IP address #####
 localhost
+
+##### PGS2 Recieve Port #####
 12345
+
+##### Previz IP address #####
 localhost
+
+##### Previz Recieve Port #####
+12345
+
+##### PrevizDev IP address #####
+localhost
+
+##### PrevizDev Recieve Port #####
+12345
+
+##### Audio System IP address #####
+localhost
+
+##### Audio System Receive Port #####
+12345
+
+##### Heartbeat IP #####
+localhost
+
+##### Heartbeat receive port #####
 12345

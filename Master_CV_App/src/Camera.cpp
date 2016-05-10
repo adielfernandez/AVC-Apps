@@ -1061,7 +1061,7 @@ void Camera::drawMaskingWindow(int x, int y, float scale){
         ofNoFill();
         ofSetLineWidth(1);
         ofSetColor(maskingCol);
-        ofDrawRectangle(maskBoundStart.x, maskBoundStart.y, maskBoundEnd.x - maskBoundStart.x, maskBoundEnd.y - maskBoundStart.y);
+        ofDrawRectangle(maskBoundStart.x, maskBoundStart.y, maskBoundEnd.x - maskBoundStart.x + 1, maskBoundEnd.y - maskBoundStart.y + 1);
         ofFill();
         
         

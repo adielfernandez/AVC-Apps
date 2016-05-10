@@ -19,6 +19,9 @@
 		<Send_Corridor_4_Data>1</Send_Corridor_4_Data>
 		<Send_Corridor_5_Data>1</Send_Corridor_5_Data>
 		<Send_Corridor_6_Data>1</Send_Corridor_6_Data>
-		<Send_Audio_Data>0</Send_Audio_Data>
+		<Send_Audio_Data>1</Send_Audio_Data>
+	<Send_to_PGS-1>1</Send_to_PGS-1>
+		<Send_to_PGS-2>1</Send_to_PGS-2>
+		<Send_to_Previz>1</Send_to_Previz>
 	</oscSettings>
 </group>

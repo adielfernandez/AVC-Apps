@@ -177,13 +177,13 @@ void ofApp::setup(){
     
     for(int i = 0; i < 14; i++){
         
-        movieFiles[i] = "movies/lobby_1_sim/Cam_" + ofToString(i + 1) + ".mov";
+        movieFiles[i] = "videos/Cam_" + ofToString(i + 1) + ".mov";
         
     }
     
     
     //master control of live vs video
-    useLiveFeed = true;
+    useLiveFeed = false;
     
     //set up actual feeds
     int stagger = 250;
@@ -239,8 +239,8 @@ void ofApp::setup(){
     //get the IP from file
     ofBuffer buffer = ofBufferFromFile("ip.txt");
     
-    string pgsIP, audioIP, heartbeatIP;
-    int pgsPort, audioPort, heartbeatPort;
+    string pgs1IP, pgs2IP, previzIP, previzDevIP, audioIP, heartbeatIP;
+    int pgs1Port, pgs2Port, previzPort, previzDevPort, audioPort, heartbeatPort;
 
     cout << "Getting OSC Configuration from File" << endl;
     
@@ -252,17 +252,29 @@ void ofApp::setup(){
             
             string line = *it;
             
-            if(lineNum == 7){
-                pgsIP = line;
-            } else if(lineNum == 8){
-                pgsPort = ofToInt(line);
-            } else if(lineNum == 9){
-                audioIP = line;
+            if(lineNum == 1){
+                pgs1IP = line;
+            } else if(lineNum == 4){
+                pgs1Port = ofToInt(line);
+            } else if(lineNum == 7){
+                pgs2IP = line;
             } else if(lineNum == 10){
+                pgs2Port = ofToInt(line);
+            } else if(lineNum == 13){
+                previzIP = line;
+            } else if(lineNum == 16){
+                previzPort = ofToInt(line);
+            } else if(lineNum == 19){
+                previzDevIP = line;
+            } else if(lineNum == 22){
+                previzDevPort = ofToInt(line);
+            } else if(lineNum == 25){
+                audioIP = line;
+            } else if(lineNum == 28){
                 audioPort = ofToInt(line);
-            } else if(lineNum == 11){
+            } else if(lineNum == 31){
                 heartbeatIP = line;
-            } else if(lineNum == 12){
+            } else if(lineNum == 34){
                 heartbeatPort = ofToInt(line);
             }
             
@@ -271,8 +283,14 @@ void ofApp::setup(){
         
     }
     
-    cout << "PGS IP: " << pgsIP << endl;
-    cout << "PGS Port: " << pgsPort << endl;
+    cout << "PGS1 IP: " << pgs1IP << endl;
+    cout << "PGS1 Port: " << pgs1Port << endl;
+    cout << "PGS2 IP: " << pgs2IP << endl;
+    cout << "PGS2 Port: " << pgs2Port << endl;
+    cout << "Previz IP: " << previzIP << endl;
+    cout << "Previz Port: " << previzPort << endl;
+    cout << "PrevizDev IP: " << previzDevIP << endl;
+    cout << "PrevizDev Port: " << previzDevPort << endl;
     cout << "Audio IP: " << audioIP << endl;
     cout << "Audio Port: " << audioPort << endl;
     cout << "Heartbeat IP: " << heartbeatIP << endl;
@@ -280,7 +298,10 @@ void ofApp::setup(){
     
     
     
-    oscHandler.setupPGS(pgsIP, pgsPort);
+    oscHandler.setupPGS1(pgs1IP, pgs1Port);
+    oscHandler.setupPGS2(pgs2IP, pgs2Port);
+    oscHandler.setupPreviz(previzIP, previzPort);
+    oscHandler.setupPrevizDev(previzDevIP, previzDevPort);
     oscHandler.setupAudio(audioIP, audioPort);
     oscHandler.setupHeartbeat(heartbeatIP, heartbeatPort);
     
@@ -625,10 +646,13 @@ void ofApp::draw(){
         //draw OSC data to screen
         string oscDataFormat;
         
-        oscDataFormat += "OSC Data to PGS\n";
+        oscDataFormat += "OSC DATA\n";
         oscDataFormat += "---------------\n";
-        oscDataFormat += "Sending to \"" + oscHandler.pgsIP + "\"\n";
-        oscDataFormat += "on port 12345\n";
+        oscDataFormat += "PGS-1: " + oscHandler.pgs1IP + " on port: " + ofToString(oscHandler.pgs1Port) + "\n";
+        oscDataFormat += "PGS-2: " + oscHandler.pgs2IP + " on port: " + ofToString(oscHandler.pgs2Port) + "\n";
+        oscDataFormat += "Previz: " + oscHandler.previzIP + " on port: " + ofToString(oscHandler.previzPort) + "\n";
+        oscDataFormat += "PrevizDev: " + oscHandler.previzDevIP + " on port: " + ofToString(oscHandler.previzDevPort) + "\n";
+        oscDataFormat += "Heartbeat: " + oscHandler.heartbeatIP + " on port: " + ofToString(oscHandler.heartbeatPort) + "\n";
         oscDataFormat += "\n";
         oscDataFormat += "DATA FORMAT\n";
         oscDataFormat += "---------------\n";
@@ -666,7 +690,7 @@ void ofApp::draw(){
         
         
         int oscBoxWidth = 450;
-        int oscBoxHeight = 550;
+        int oscBoxHeight = 600;
         int oscGap = 20;
         int textX = 15;
         int textY = 25;
@@ -758,7 +782,7 @@ void ofApp::draw(){
     
     //--------------------OSC DATA--------------------
     
-    if(oscHandler.sendOsc && oscHandler.oscSendRate > 0 && (playback.isPlaying || useLiveFeed)){
+    if(oscHandler.sendAllOsc && oscHandler.oscSendRate > 0 && (playback.isPlaying || useLiveFeed)){
         
 
         if(ofGetElapsedTimeMillis() - lastSendTime > oscHandler.oscSendRate){
@@ -807,9 +831,9 @@ void ofApp::draw(){
             
             
             
-            //=====================
-            //-----DATA TO PGS-----
-            //=====================
+            //======================
+            //-----DATA TO PGSs-----
+            //======================
             
             //we need to go through all the corridors and pull together
             //the data then send it at the very end.
@@ -872,7 +896,10 @@ void ofApp::draw(){
 
             
             //Now send it all at once
-            oscHandler.pgsSender.sendBundle(allSystemData);
+            if(oscHandler.sendPgs1) oscHandler.pgs1Sender.sendBundle(allSystemData);
+            if(oscHandler.sendPgs2) oscHandler.pgs2Sender.sendBundle(allSystemData);
+            if(oscHandler.sendPreviz) oscHandler.previzSender.sendBundle(allSystemData);
+            if(oscHandler.sendPrevizDev) oscHandler.previzDevSender.sendBundle(allSystemData);
             
             
             lastSendTime = ofGetElapsedTimeMillis();

@@ -26,7 +26,7 @@
 <___FEED_POSITIONS/>
 <___MASKING/>
 	<Use_Mask>1</Use_Mask>
-	<Draw_or_Erase>1</Draw_or_Erase>
+	<Draw_or_Erase>0</Draw_or_Erase>
 <Contrast_Exponent>6.32</Contrast_Exponent>
 	<Contrast_Phase>0.032</Contrast_Phase>
 </Lobby2Aggregate>
