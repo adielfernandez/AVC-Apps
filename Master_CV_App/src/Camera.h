@@ -221,6 +221,7 @@ public:
     ofVec2f avgPos;
     ofVec2f avgVel;
     float avgSpeed;
+    float density;
     
     //osc bundles to prepare
     ofxOscMessage corridorStats;

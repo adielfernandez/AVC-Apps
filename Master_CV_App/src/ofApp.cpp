@@ -141,7 +141,7 @@ void ofApp::setup(){
     
     
     //master control of live vs video
-    useLiveFeed = true;
+    useLiveFeed = false;
     
     //set up actual feeds
     int stagger = 250;
@@ -678,11 +678,11 @@ void ofApp::draw(){
         audioDataFormat += "---------------\n";
         audioDataFormat += "Bundle:\n";
         audioDataFormat += "--Message:\n";
-        audioDataFormat += "    Address: /Corridor_1\n";
+        audioDataFormat += "    Address: /Corridor 1\n";
         audioDataFormat += "    Float Arg: DENSITY\n";
         audioDataFormat += "    Float Arg: SPEED\n";
         audioDataFormat += "--Message:\n";
-        audioDataFormat += "    Address: /Corridor_2\n";
+        audioDataFormat += "    Address: /Corridor 2\n";
         audioDataFormat += "    Float Arg: DENSITY\n";
         audioDataFormat += "    Float Arg: SPEED\n";
         audioDataFormat += "Etc. for other corridors\n";
@@ -693,7 +693,7 @@ void ofApp::draw(){
         audioDataFormat += "\n";
         audioDataFormat += "\n";
         audioDataFormat += "DENSITY value is number\n";
-        audioDataFormat += "of blobs per camera.\n";
+        audioDataFormat += "of blobs per corridor.\n";
         audioDataFormat += "\n";
         audioDataFormat += "\n";
         audioDataFormat += "--------NOTES--------\n";
@@ -768,18 +768,18 @@ void ofApp::draw(){
                     //Lobby 1
                     if(i == 0){
                         
-                        m.addFloatArg(Lobby1Aggregate.contours.size());
+                        m.addFloatArg(Lobby1Aggregate.density);
                         m.addFloatArg(Lobby1Aggregate.avgSpeed);
                         
                     } else if(i >= 1 && i <= 4){
                         
                         //corridors 2, 3, 4, 5 are:
                         //cameras 6, 7, 8, 9 (zero-indexed)
-                        m.addFloatArg(cameras[i + 5] -> contours.size());
+                        m.addFloatArg(cameras[i + 5] -> density);
                         m.addFloatArg(cameras[i + 5] -> avgSpeed);
                         
                     } else {
-                        m.addFloatArg(Lobby2Aggregate.contours.size());
+                        m.addFloatArg(Lobby2Aggregate.density);
                         m.addFloatArg(Lobby2Aggregate.avgSpeed);
                     }
                     

@@ -1266,6 +1266,7 @@ void Camera::gatherOscStats(){
     avgVel.set(0);
     avgPos.set(0);
     avgSpeed = 0;
+    density = 0;
     
     corridorBundle.clear();
     corridorStartFlag.clear();
@@ -1319,10 +1320,17 @@ void Camera::gatherOscStats(){
     }
     
     //average out all the data for this corridor
-    avgSpeed = avgSpeed/float(contours.size());
-    avgVel = avgVel/float(contours.size());
+    if(contours.size() > 0){
+        avgSpeed = avgSpeed/float(contours.size());
+        avgVel = avgVel/float(contours.size());
+        avgPos = avgPos/float(contours.size());
+    } else {
+        avgSpeed = 0;
+        avgVel.set(0);
+        avgPos.set(0);
+    }
+    density = contours.size();
     avgDir = avgVel.getNormalized();
-    avgPos = avgPos/float(contours.size());
     
 
     
