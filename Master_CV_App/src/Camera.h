@@ -49,6 +49,8 @@ public:
     void setMovieFile(string file);
     void setFont(ofTrueTypeFont *_font);
     
+    void saveAllSettings();
+    
     void setupFeed();
     void closeFeed();
     void update();

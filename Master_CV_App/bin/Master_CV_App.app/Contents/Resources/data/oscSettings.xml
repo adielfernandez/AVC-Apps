@@ -23,5 +23,8 @@
 	<Send_to_PGS-1>1</Send_to_PGS-1>
 		<Send_to_PGS-2>1</Send_to_PGS-2>
 		<Send_to_Previz>1</Send_to_Previz>
+	<Send_to___/>
+		<Send_to_PrevizDev>1</Send_to_PrevizDev>
+		<Send_Heartbeat>1</Send_Heartbeat>
 	</oscSettings>
 </group>

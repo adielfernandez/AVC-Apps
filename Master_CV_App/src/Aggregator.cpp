@@ -172,7 +172,7 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
     
     if(maskImg.load(maskFileName)){
         
-        cout << "Image loaded" << endl;
+        cout << name << " mask loaded" << endl;
         maskPix = maskImg.getPixels();
     } else {
         
@@ -891,6 +891,18 @@ void Aggregator::saveSettings(){
     
 }
 
+void Aggregator::saveAllSettings(){
+    
+    //just the gui settings
+    saveSettings();
+
+    //now the mask
+    maskImg.setFromPixels(maskImg);
+    maskImg.save(maskFileName);
+
+    
+    
+}
 
 
 void Aggregator::gatherOscStats(){

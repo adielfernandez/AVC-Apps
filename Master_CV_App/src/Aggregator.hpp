@@ -46,6 +46,7 @@ public:
     void drawCV(int x, int y);
     void drawMain();
 
+    void saveAllSettings();
     
     //view control
     int *viewMode;

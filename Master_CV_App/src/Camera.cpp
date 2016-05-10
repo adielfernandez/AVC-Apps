@@ -215,7 +215,7 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
         
         if(maskImg.load(maskFileName)){
             
-            cout << "Image loaded" << endl;
+            cout << name << " mask loaded" << endl;
             maskPix = maskImg.getPixels();
             
         } else {
@@ -1342,6 +1342,23 @@ void Camera::gatherOscStats(){
     
     
 }
+
+
+void Camera::saveAllSettings(){
+    
+    
+    cameraGui.saveSettings();
+    
+    if(soloCam){
+
+        maskImg.setFromPixels(maskImg);
+        maskImg.save(maskFileName);
+
+    }
+    
+    
+}
+
 
 
 

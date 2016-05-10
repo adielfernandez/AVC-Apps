@@ -70,6 +70,10 @@ class ofApp : public ofBaseApp{
     
     NavPanel panel;
     
+    unsigned long long saveTime;
+    bool saveTrigger;
+    
+    
     //positions for aesthetics
     ofVec2f mainContentPos, secondaryContentPos;
     

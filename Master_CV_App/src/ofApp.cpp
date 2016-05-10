@@ -80,48 +80,6 @@ void ofApp::setup(){
     vector<string> names;
     names.resize(14);
     
-    //All cameras set to single feed
-//    names[0] = "Cam-1";
-//    addresses[0] = "192.168.1.6";
-//    
-//    names[1] = "Cam-2";
-//    addresses[1] = "192.168.1.6";
-//    
-//    names[2] = "Cam-3";
-//    addresses[2] = "192.168.1.6";
-//    
-//    names[3] = "Cam-4";
-//    addresses[3] = "192.168.1.6";
-//    
-//    names[4] = "Cam-5";
-//    addresses[4] = "192.168.1.6";
-//    
-//    names[5] = "Cam-6";
-//    addresses[5] = "192.168.1.6";
-//    
-//    names[6] = "Cam-7";
-//    addresses[6] = "192.168.1.6";
-//    
-//    names[7] = "Cam-8";
-//    addresses[7] = "192.168.1.6";
-//    
-//    names[8] = "Cam-9";
-//    addresses[8] = "192.168.1.6";
-//    
-//    names[9] = "Cam-10";
-//    addresses[9] = "192.168.1.6";
-//    
-//    names[10] = "Cam-11";
-//    addresses[10] = "192.168.1.6";
-//    
-//    names[11] = "Cam-12";
-//    addresses[11] = "192.168.1.6";
-//    
-//    names[12] = "Cam-13";
-//    addresses[12] = "192.168.1.6";
-//    
-//    names[13] = "Cam-14";
-//    addresses[13] = "192.168.1.6";
     
     //TERRELL PLACE IP Setup
     names[0] = "Cam-1";
@@ -183,7 +141,7 @@ void ofApp::setup(){
     
     
     //master control of live vs video
-    useLiveFeed = false;
+    useLiveFeed = true;
     
     //set up actual feeds
     int stagger = 250;
@@ -217,7 +175,11 @@ void ofApp::setup(){
         cor -> staggerTime = stagger * i;
 
         //then set up everything else
-        cor -> setup(addresses[i], names[i], bScaleDown, useLiveFeed);
+        //single cam at AVC
+        cor -> setup("192.168.187.36", names[i], bScaleDown, useLiveFeed);
+
+        //proper addresses at TERRELL PLACE
+//        cor -> setup(addresses[i], names[i], bScaleDown, useLiveFeed);
         
         cameras.push_back(cor);
         
@@ -944,6 +906,55 @@ void ofApp::draw(){
     
     
     
+    //draw save feedback
+    if(saveTrigger){
+        
+        float duration = 50;
+        float fadeOut = 900;
+        string saveString = "Settings Saved";
+        float saveMargin = 15;
+        float boxHeight = titleFont.stringHeight(saveString) + saveMargin * 2;
+        float descenderTweak = 6; //descenders in the font don't play right with spacing
+        ofColor start(0, 120, 255, 0);
+        ofColor end(0, 120, 255, 100);
+        ofColor boxCol;
+        ofColor textCol(255, 0);
+        
+        if(ofGetElapsedTimeMillis() - saveTime < duration){
+
+            
+            float pct = ofMap(ofGetElapsedTimeMillis(), saveTime, saveTime + duration, 0.0, 1.0);
+            boxCol = start.getLerped(end, pct);
+            textCol = ofColor(255, 0).getLerped(ofColor(255, 255), pct);
+            
+            ofSetColor(boxCol);
+            ofDrawRectangle(0, ofGetHeight()/2 - boxHeight/2, ofGetWidth(), boxHeight);
+            
+            ofSetColor(textCol);
+            titleFont.drawString(saveString, ofGetWidth()/2 - titleFont.stringWidth(saveString)/2, ofGetHeight()/2 + titleFont.stringHeight(saveString)/2 - descenderTweak);
+
+            
+        } else if(ofGetElapsedTimeMillis() - saveTime < duration + fadeOut) {
+            
+            float pct = ofMap(ofGetElapsedTimeMillis(), saveTime + duration, saveTime + duration + fadeOut, 0.0, 1.0);
+            
+            boxCol = end.getLerped(start, pct);
+            textCol = ofColor(255, 255).getLerped(ofColor(255, 0), pct);
+            
+            ofSetColor(boxCol);
+            ofDrawRectangle(0, ofGetHeight()/2 - boxHeight/2, ofGetWidth(), boxHeight);
+            
+            ofSetColor(textCol);
+            titleFont.drawString(saveString, ofGetWidth()/2 - titleFont.stringWidth(saveString)/2, ofGetHeight()/2 + titleFont.stringHeight(saveString)/2 - descenderTweak);
+            
+        } else{
+            saveTrigger = false;
+        }
+        
+        
+    }
+
+    
     
 }
 
@@ -967,14 +978,15 @@ void ofApp::keyPressed(int key){
     if(key == 's'){
         
         for(int i = 0; i < cameras.size(); i++){
-            cameras[i] -> cameraGui.saveSettings();
+            cameras[i] -> saveAllSettings();
         }
         
         oscHandler.saveSettings();
-        Lobby1Aggregate.saveSettings();
-        Lobby2Aggregate.saveSettings();
+        Lobby1Aggregate.saveAllSettings();
+        Lobby2Aggregate.saveAllSettings();
         
-        
+        saveTrigger = true;
+        saveTime = ofGetElapsedTimeMillis();
         cout << "Cameras, Aggregates and OSC settings saved" << endl;
     }
     
