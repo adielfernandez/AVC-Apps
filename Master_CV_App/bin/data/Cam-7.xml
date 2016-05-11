@@ -33,4 +33,7 @@
 	<___MAPPING/>
 <Contrast_Exponent>4.64</Contrast_Exponent>
 	<Contrast_Phase>0.046</Contrast_Phase>
+<Use_Blob_Filter>1</Use_Blob_Filter>
+	<Draw_Filtered_Blobs>1</Draw_Filtered_Blobs>
+	<Filter_Radius>56</Filter_Radius>
 </Cam-7>

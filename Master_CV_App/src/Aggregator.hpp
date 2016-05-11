@@ -19,6 +19,7 @@
 #include "Camera.h"
 #include "ofxOsc.h"
 #include "ThreadedCV.hpp"
+#include "BlobFilter.hpp"
 
 #pragma once
 
@@ -102,6 +103,8 @@ public:
     
     ofxCv::ContourFinder contours;
     
+    //processed blob
+    BlobFilter filteredContours;
     
     //threaded CV processor
     ThreadedCV aggregateProcessor;
@@ -183,6 +186,9 @@ public:
     ofxIntSlider maxDistanceSlider;
     ofxToggle drawContoursToggle;
     ofxToggle showInfoToggle;
+    ofxToggle useBlobFilter;
+    ofxToggle drawFilteredBlobs;
+    ofxIntSlider filterRadiusSlider;
     
     ofxLabel maskingLabel;
     ofxToggle useMask;

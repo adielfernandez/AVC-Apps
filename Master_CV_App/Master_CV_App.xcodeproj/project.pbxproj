@@ -39,6 +39,7 @@
 		8929C79F1CA5AC570024DA93 /* Button.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8929C79D1CA5AC570024DA93 /* Button.cpp */; };
 		8929C7A21CA5C0CD0024DA93 /* NavPanel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8929C7A01CA5C0CD0024DA93 /* NavPanel.cpp */; };
 		8929C7A51CA5D7F40024DA93 /* SubPanel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8929C7A31CA5D7F40024DA93 /* SubPanel.cpp */; };
+		89C98A0D1CE27BB6009638F5 /* BlobFilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 89C98A0B1CE27BB6009638F5 /* BlobFilter.cpp */; };
 		89E059411CBEEA12002C0B87 /* ThreadedCV.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 89E0593F1CBEEA12002C0B87 /* ThreadedCV.cpp */; };
 		89E6E37E1CAC58F6005630C1 /* PlaybackBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 89E6E37C1CAC58F6005630C1 /* PlaybackBar.cpp */; };
 		8F5205AEF8861EF234F0651A /* ofxOscSender.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 81967292BFC87A0144BD32C6 /* ofxOscSender.cpp */; };
@@ -234,6 +235,8 @@
 		8929C7A31CA5D7F40024DA93 /* SubPanel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SubPanel.cpp; sourceTree = "<group>"; };
 		8929C7A41CA5D7F40024DA93 /* SubPanel.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SubPanel.hpp; sourceTree = "<group>"; };
 		89449E3044D456F7DE7BEA14 /* ofxPanel.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxPanel.h; path = ../../../addons/ofxGui/src/ofxPanel.h; sourceTree = SOURCE_ROOT; };
+		89C98A0B1CE27BB6009638F5 /* BlobFilter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BlobFilter.cpp; sourceTree = "<group>"; };
+		89C98A0C1CE27BB6009638F5 /* BlobFilter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BlobFilter.hpp; sourceTree = "<group>"; };
 		89E0593F1CBEEA12002C0B87 /* ThreadedCV.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ThreadedCV.cpp; sourceTree = "<group>"; };
 		89E059401CBEEA12002C0B87 /* ThreadedCV.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ThreadedCV.hpp; sourceTree = "<group>"; };
 		89E6E37C1CAC58F6005630C1 /* PlaybackBar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlaybackBar.cpp; sourceTree = "<group>"; };
@@ -1051,6 +1054,8 @@
 				8929C7821CA1EA540024DA93 /* Camera.cpp */,
 				89E059401CBEEA12002C0B87 /* ThreadedCV.hpp */,
 				89E0593F1CBEEA12002C0B87 /* ThreadedCV.cpp */,
+				89C98A0C1CE27BB6009638F5 /* BlobFilter.hpp */,
+				89C98A0B1CE27BB6009638F5 /* BlobFilter.cpp */,
 				8929C7851CA1EA540024DA93 /* CamGui.h */,
 				8929C7841CA1EA540024DA93 /* CamGui.cpp */,
 				8912C3771CAEEDE6006D8BE4 /* Aggregator.hpp */,
@@ -1235,6 +1240,7 @@
 				E4B69E210A3A1BDC003C02F2 /* ofApp.cpp in Sources */,
 				8929C79F1CA5AC570024DA93 /* Button.cpp in Sources */,
 				B6840996567E78436F7ECFAB /* ETF.cpp in Sources */,
+				89C98A0D1CE27BB6009638F5 /* BlobFilter.cpp in Sources */,
 				F76B4A79BD8DE4854141CB47 /* fdog.cpp in Sources */,
 				EBCDE831EFAE08274E799C97 /* Calibration.cpp in Sources */,
 				6AABAB39E82AF5CFEA23A205 /* ContourFinder.cpp in Sources */,

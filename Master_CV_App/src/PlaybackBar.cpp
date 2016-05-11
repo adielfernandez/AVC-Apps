@@ -26,7 +26,7 @@ void PlaybackBar::setup(ofVec2f _pos, const vector<shared_ptr<Camera>> _cams, of
     
     pos = _pos;
     
-    bgWidth = 600;
+    bgWidth = 700;
     
     lineMargin = 10;
     
@@ -107,6 +107,13 @@ void PlaybackBar::draw(){
     string title = "Playback Control";
     font -> drawString(title, pos.x + 5, pos.y + font -> stringHeight(title) + 3);
     
+    
+    //Completion Pct
+    ofSetColor(255);
+    string completion = ofToString(100 * moviePct) + "%";
+    font -> drawString(completion, pos.x + 200, pos.y + font -> stringHeight(title) + 3);
+    
+    
     //play button
     ofSetColor(playButtonCol);
     ofDrawRectangle(playPos, playButtonWidth, playButtonHeight);
@@ -150,6 +157,10 @@ void PlaybackBar::setAllPause(bool pause){
     for(int i = 0; i < cams.size(); i++){
         
         cams[i] -> movie.setPaused(pause);
+        
+        if(!pause){
+            cams[i] -> movie.setSpeed(0.5f);
+        }
         
     }
     
