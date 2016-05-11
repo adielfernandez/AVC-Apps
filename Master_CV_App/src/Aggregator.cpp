@@ -120,6 +120,9 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
     gui.add(maxDistanceSlider.setup("Max Distance", 32, 0, 100));
     gui.add(drawContoursToggle.setup("Draw Contours", true));
     gui.add(showInfoToggle.setup("Info", false));
+    gui.add(useBlobFilter.setup("Use Blob Filter", false));
+    gui.add(filterRadiusSlider.setup("Filter Radius", 20, 1, 150));
+    
     
     gui.add(maskingLabel.setup("   MASKING", ""));
     gui.add(useMask.setup("Use Mask", false));
@@ -158,7 +161,7 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
     //this sets the default color to black for all labels
     contoursLabel.setDefaultTextColor(ofColor(0));
     
-    aggregateProcessor.setup(&threadOutputPix, &contours);
+
 
     //background colors (red means thread has crashed)
     backgroundInCol.set(80);
@@ -192,6 +195,14 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
     maskChanged = true;
     maskBoundStart.set(0,0);
     maskBoundEnd.set(masterWidth, masterHeight);
+    
+    
+    //Setup the aggregate
+    aggregateProcessor.setup(&threadOutputPix, &contours);
+    
+    //Setup the blob processor
+    filteredContours.setup(&contours);
+    
 }
 
 
@@ -550,6 +561,14 @@ void Aggregator::update(){
     //update the thread more to receive its data asap
     aggregateProcessor.update();
     
+    
+    
+    //update the blob filter
+    filteredContours.update(filterRadiusSlider);
+    
+    
+    
+    
     //don't actually start the background until a few seconds in
     //when settings are loaded and cameras have started
     if(ofGetElapsedTimeMillis() < 4000){
@@ -558,9 +577,6 @@ void Aggregator::update(){
         waitingToBgDiff = false;
     }
 
-    
-    
-    
     
     //if we're in the right view listen to the mouse
     if((*viewMode) == thisView){
@@ -826,33 +842,42 @@ void Aggregator::drawCV(int x, int y){
     if(drawContoursToggle){
         
         ofSetColor(255, 0, 0);
-        ofPushMatrix();
         ofSetLineWidth(1);
         
         contours.draw();
         
-        for(int i = 0; i < contours.size(); i++) {
-            ofPoint center = toOf(contours.getCenter(i));
-            ofPushMatrix();
-            ofTranslate(center.x, center.y);
-            int label = contours.getLabel(i);
-            ofVec2f velocity = toOf(contours.getVelocity(i));
-            
-            ofSetColor(0, 255, 0);
-            ofDrawRectangle(-3, -3, 6, 6);
-            
-            string msg = ofToString(label);
-            
-            
-            if(showInfoToggle){
-                ofSetColor(0, 100, 255);
-                ofDrawBitmapString(msg, 0, 0);
-            }
-            ofPopMatrix();
-            
-        }
+//        //draw processed blobs or original blobs
+//        if(useBlobFilter){
         
-        ofPopMatrix();
+            
+            filteredContours.draw();
+            
+            
+//        } else {
+        
+        
+            for(int i = 0; i < contours.size(); i++) {
+                ofPoint center = toOf(contours.getCenter(i));
+                ofPushMatrix();
+                ofTranslate(center.x, center.y);
+                int label = contours.getLabel(i);
+                ofVec2f velocity = toOf(contours.getVelocity(i));
+                
+                ofSetColor(0, 255, 0);
+                ofDrawRectangle(-3, -3, 6, 6);
+                
+                string msg = ofToString(label);
+                
+                
+                if(showInfoToggle){
+                    ofSetColor(0, 100, 255);
+                    ofDrawBitmapString(msg, 0, 0);
+                }
+                ofPopMatrix();
+                
+            }
+//        }
+
         
     }
     

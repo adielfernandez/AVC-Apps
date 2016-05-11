@@ -19,6 +19,17 @@
 
 #pragma once
 
+struct ProcessedBlob{
+    
+    int ID;
+    ofVec2f center, vel;
+    
+    vector<ofVec2f> subBlobs;
+    
+};
+
+
+
 class BlobFilter{
     
 public:
@@ -26,7 +37,8 @@ public:
     BlobFilter();
     
     void setup(ofxCv::ContourFinder *_rawContours);
-    void process();
+    void update(int rad);
+    void draw();
     
     //mirror te ofxCv::ContourFinder style
     int size();
@@ -37,10 +49,7 @@ public:
     ofxCv::ContourFinder *rawContours;
     
     //vectors to hold processed blobs
-    vector<int> labels;
-    vector<ofVec2f> centers;
-    vector<ofVec2f> velocities;
-    vector<vector<ofVec2f>> componentBlobs;
+    vector<ProcessedBlob> processedBlobs;
     
     float personRadius;
     

@@ -26,7 +26,10 @@ void BlobFilter::setup(ofxCv::ContourFinder *_rawContours){
     
 }
 
-void BlobFilter::process(){
+void BlobFilter::update(int rad){
+    
+    personRadius = rad;
+    
     
     /*
      * Filtering workflow:
@@ -43,12 +46,9 @@ void BlobFilter::process(){
      */
     
     
+    //prepare to be filled again
+    processedBlobs.clear();
     
-    //clear out the local data and prepare to fill it
-    //with new processed blob data
-    labels.clear();
-    centers.clear();
-    velocities.clear();
     
     //this vector will store the indices of blobs inside the contour finder that
     //have been processed.
@@ -91,12 +91,17 @@ void BlobFilter::process(){
             foundBlobs.push_back(i);
             numSubBlobs++;
             
+            cout << "Found a main blob" << endl;
             
-            //get ready to find subBlobs, this will be set to true
-            //if a new sub blob is found, keeping it in the do/while loop
-            bool bNewSubBlob = false;
+            
+            //get ready to find subBlobs...
+            //this will be set to true if a new sub blob is found,
+            //keeping it in the do/while loop
+            bool bNewSubBlob;
             
             do{
+
+                bNewSubBlob = false;
                 
                 //go through all blobs...
                 for(int j = 0; j < rawContours -> size(); j++){
@@ -118,12 +123,15 @@ void BlobFilter::process(){
                             //if so, add it to foundBlobs
                             foundBlobs.push_back(j);
                             numSubBlobs++;
+                            cout << "Found a sub blob" << endl;
                             
                             //indicate that we've found a new subBlob
                             bNewSubBlob = true;
                             
                         }
+                        
                     }
+                    
                 }
                 
                 //If we've found any new subBlobs, we need to go through
@@ -133,15 +141,44 @@ void BlobFilter::process(){
             //at this point we've gathered all the blobs that are close to i
             //(and the subBlobs that are close to those) so group them together
             int lowestID = 10000000;
+            ofVec2f avgVel(0);
+            ofVec2f avgPos(0);
+            
+            vector<ofVec2f> thisSubBlob;
             
             //Go through all the indices in the foundBlobs, starting at newBlobStart
             for(int b = newBlobStart; b < newBlobStart + numSubBlobs; b++){
             
                 //-----label-----
                 //Grab the lowest one (oldest)
+                if(rawContours -> getLabel(foundBlobs[b]) < lowestID)
+                    lowestID = rawContours -> getLabel(foundBlobs[b]);
                 
+                //-----Position-----
+                ofVec2f thisPos = toOf(rawContours -> getCenter(foundBlobs[b]));
+                avgPos += thisPos;
                 
+                //-----velocity-----
+                avgVel += toOf(rawContours -> getVelocity(foundBlobs[b]));
+             
+                //-----sub blob positions-----
+                //(for drawing later)
+                thisSubBlob.push_back(thisPos);
             }
+            
+            //Finish averaging
+            avgPos /= (float)numSubBlobs;
+            avgVel /= (float)numSubBlobs;
+            
+            //create a ProcessedBlob and push it into the vector
+            ProcessedBlob p;
+            
+            p.ID = lowestID;
+            p.center = avgPos;
+            p.vel = avgVel;
+            p.subBlobs = thisSubBlob;
+            
+            processedBlobs.push_back(p);
             
             
             //Keep track of where the next processed blob will start
@@ -156,50 +193,58 @@ void BlobFilter::process(){
     } //main rawContours for loop
 
 
-
-    
-    
-    
-    
-    
-    
     
     
 }
 
+
+void BlobFilter::draw(){
+
+    for(int i = 0; i < processedBlobs.size(); i++){
+
+        //draw centroid
+        ofSetColor(0, 0, 255);
+        ofDrawCircle(processedBlobs[i].center.x, processedBlobs[i].center.y, 6);
+        
+        //draw sub blobs
+        auto subBlobs = processedBlobs[i].subBlobs;
+        
+        for(int j = 0; j < subBlobs.size(); j++){
+            
+            //radius
+            ofSetColor(255, 200, 0);
+            ofNoFill();
+            ofDrawCircle(subBlobs[j].x, subBlobs[j].y, personRadius);
+            
+            //center
+            ofFill();
+            ofDrawCircle(subBlobs[j].x, subBlobs[j].y, 3);
+            
+            
+        }
+        
+        
+        
+    }
+
+}
+
+
 int BlobFilter::size(){
     
-    int num = 0;
-    
-    //they should be the same, but just in case only send the smallest of them
-    //so there are no bad access errors when we loop through them later
-    num = MIN(labels.size(), centers.size());
-    num = MIN(num, velocities.size());
-    
-    return num;
+    return processedBlobs.size();
     
 }
 
 ofPoint BlobFilter::getCenter(int i){
     
-    if(i > 0 && i < centers.size()){
-        return centers[i];
-    } else {
-        return ofPoint(0, 0);
-    }
+    return processedBlobs[i].center;
     
 }
 
 ofVec2f BlobFilter::getVelocity(int i){
     
-    
-    if(i > 0 && i < velocities.size()){
-        return velocities[i];
-    } else {
-        return ofVec2f(0, 0);
-    }
-    
-    
+    return processedBlobs[i].vel;
     
 }
 
