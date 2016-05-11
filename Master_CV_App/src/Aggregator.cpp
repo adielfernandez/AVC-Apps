@@ -121,6 +121,7 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
     gui.add(drawContoursToggle.setup("Draw Contours", true));
     gui.add(showInfoToggle.setup("Info", false));
     gui.add(useBlobFilter.setup("Use Blob Filter", false));
+    gui.add(drawFilteredBlobs.setup("Draw Filtered Blobs", true));
     gui.add(filterRadiusSlider.setup("Filter Radius", 20, 1, 150));
     
     
@@ -564,7 +565,7 @@ void Aggregator::update(){
     
     
     //update the blob filter
-    filteredContours.update(filterRadiusSlider);
+    if(useBlobFilter) filteredContours.update(filterRadiusSlider);
     
     
     
@@ -612,19 +613,24 @@ void Aggregator::drawMain(){
     drawGui(15, adjustedOrigin.y);
     
     //Blob data
-    string blobData = "";
+    string blobData = "Num Blobs: " + ofToString(contours.size()) + "\n";
     
-    blobData += "Num Blobs: " + ofToString(contours.size());
-    blobData += "\nAvg. Pos X (norm): " + ofToString(avgPos.x);
-    blobData += "\nAvg. Pos Y (norm): " + ofToString(avgPos.y);
-    blobData += "\nAvg. Heading X (norm): " + ofToString(avgDir.x);
-    blobData += "\nAvg. Heading Y (norm): " + ofToString(avgDir.y);
-    blobData += "\nAvg. Speed (raw): " + ofToString(avgSpeed);
+    for(int i = 0; i < contours.size(); i++){
+        blobData += ofToString(contours.getLabel(i)) + " - X: " + ofToString(contours.getCenter(i).x) + ", Y: " + ofToString(contours.getCenter(i).y) + "\n";
+    }
     
     ofSetColor(255);
     ofDrawBitmapString(blobData, adjustedOrigin.x, adjustedOrigin.y + masterHeight + 15);
     
+    //PROCESSED Blob data
+    string processedBlobData = "PROCESSED Blobs: " + ofToString(filteredContours.size()) + "\n";
     
+    for(int i = 0; i < filteredContours.size(); i++){
+        processedBlobData += ofToString(filteredContours.getLabel(i)) + " - X: " + ofToString(filteredContours.getCenter(i).x) + ", Y: " + ofToString(filteredContours.getCenter(i).y) + "\n";
+    }
+    
+    ofSetColor(255);
+    ofDrawBitmapString(processedBlobData, adjustedOrigin.x + 300, adjustedOrigin.y + masterHeight + 15);
     
     
     if(useBgDiff){
@@ -838,22 +844,15 @@ void Aggregator::drawCV(int x, int y){
         
     }
     
-    
+    //draw original blob data
     if(drawContoursToggle){
         
         ofSetColor(255, 0, 0);
         ofSetLineWidth(1);
         
         contours.draw();
-        
-//        //draw processed blobs or original blobs
-//        if(useBlobFilter){
-        
-            
-            filteredContours.draw();
-            
-            
-//        } else {
+
+        if(showInfoToggle){
         
         
             for(int i = 0; i < contours.size(); i++) {
@@ -871,15 +870,22 @@ void Aggregator::drawCV(int x, int y){
                 
                 if(showInfoToggle){
                     ofSetColor(0, 100, 255);
-                    ofDrawBitmapString(msg, 0, 0);
+                    ofDrawBitmapString(msg, 5, -5);
                 }
                 ofPopMatrix();
                 
             }
-//        }
+        }
 
         
     }
+    
+    
+    //draw processed blobs
+    if(drawFilteredBlobs && useBlobFilter){
+        filteredContours.draw();
+    }
+    
     
     
     ofPopMatrix();
@@ -891,7 +897,13 @@ void Aggregator::drawCV(int x, int y){
     ofDrawBitmapString("Last Data from Thread: " + ofToString(ofGetElapsedTimeMillis() - aggregateProcessor.lastDataSendTime) + " \tms ago", 800, 45);
     
 
-    
+    if(ofGetMouseX() > adjustedOrigin.x && ofGetMouseX() < adjustedOrigin.x + masterWidth && ofGetMouseY() > adjustedOrigin.y && ofGetMouseY() < adjustedOrigin.y + masterHeight){
+        
+        string m = ofToString(adjustedMouse);
+        ofSetColor(255, 0, 255);
+        ofDrawBitmapString(m, ofGetMouseX() + 8, ofGetMouseY() - 8);
+        
+    }
     
     
 }
@@ -958,14 +970,44 @@ void Aggregator::gatherOscStats(){
     
     blobsBundle.addMessage(corridorStartFlag);
     
+    
     //go through the blobs and start collecting data
-    for(int i = 0; i < contours.size(); i++){
+    
+    int numberOfContours;
+    
+    if(useBlobFilter){
+        numberOfContours = filteredContours.size();
+    } else {
+        numberOfContours = contours.size();
+    }
+    
+    
+    for(int i = 0; i < numberOfContours; i++){
         
-        //get data from contour
-        int label = contours.getLabel(i);
-        ofPoint center = toOf(contours.getCenter(i));
-        ofPoint centerNormalized = center/ofVec2f(masterWidth, masterHeight);
-        ofVec2f velocity = toOf(contours.getVelocity(i));
+        //prepare data containers
+        int label;
+        ofPoint center;
+        ofPoint centerNormalized;
+        ofVec2f velocity;
+        
+        //get the right data
+        if(useBlobFilter){
+            
+            //get data from the BlobFilter
+            label = filteredContours.getLabel(i);
+            center = filteredContours.getCenter(i);
+            velocity = filteredContours.getVelocity(i);
+            
+        } else {
+
+            //get data from ContourFinder
+            label = contours.getLabel(i);
+            center = toOf(contours.getCenter(i));
+            velocity = toOf(contours.getVelocity(i));
+            
+        }
+        
+        centerNormalized = center/ofVec2f(masterWidth, masterHeight);
         
         //add it to our averages
         avgVel += velocity;
@@ -989,16 +1031,18 @@ void Aggregator::gatherOscStats(){
     
     //average out all the data for this corridor
     //average out all the data for this corridor
-    if(contours.size() > 0){
-        avgSpeed = avgSpeed/float(contours.size());
-        avgVel = avgVel/float(contours.size());
-        avgPos = avgPos/float(contours.size());
+    if(numberOfContours > 0){
+        avgSpeed = avgSpeed/float(numberOfContours);
+        avgVel = avgVel/float(numberOfContours);
+        avgPos = avgPos/float(numberOfContours);
     } else {
         avgSpeed = 0;
         avgVel.set(0);
         avgPos.set(0);
     }
-    density = contours.size()/(float)numCams;
+    
+    
+    density = numberOfContours/(float)numCams;
     avgDir = avgVel.getNormalized();
     
     
@@ -1006,7 +1050,7 @@ void Aggregator::gatherOscStats(){
     
     //prepare the corridor stats (also the blobs end delimiter) message
     corridorStats.setAddress("/corridor_" + ofToString(oneOrSix) + "/stats");
-    corridorStats.addIntArg(contours.size());
+    corridorStats.addIntArg(numberOfContours);
     corridorStats.addFloatArg(avgPos.x);
     corridorStats.addFloatArg(avgPos.y);
     corridorStats.addFloatArg(avgDir.x);

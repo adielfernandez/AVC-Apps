@@ -91,7 +91,7 @@ void BlobFilter::update(int rad){
             foundBlobs.push_back(i);
             numSubBlobs++;
             
-            cout << "Found a main blob" << endl;
+//            cout << "Found a main blob - Pos: " << rawContours -> getCenter(i) <<  endl;
             
             
             //get ready to find subBlobs...
@@ -112,7 +112,7 @@ void BlobFilter::update(int rad){
                         //if we're inside here, j is a new index
                         //that hasn't been dealt with before
                         
-                        //check it agains the last one we found
+                        //check it against the last one we found
                         int lastFound = foundBlobs[foundBlobs.size() - 1];
                         
                         float distSq = ofDistSquared(rawContours -> getCenter(lastFound).x, rawContours -> getCenter(lastFound).y, rawContours -> getCenter(j).x, rawContours -> getCenter(j).y);
@@ -123,7 +123,7 @@ void BlobFilter::update(int rad){
                             //if so, add it to foundBlobs
                             foundBlobs.push_back(j);
                             numSubBlobs++;
-                            cout << "Found a sub blob" << endl;
+//                            cout << "Found a sub blob - Pos: " << rawContours -> getCenter(j) << endl;
                             
                             //indicate that we've found a new subBlob
                             bNewSubBlob = true;
@@ -151,7 +151,7 @@ void BlobFilter::update(int rad){
             
                 //-----label-----
                 //Grab the lowest one (oldest)
-                if(rawContours -> getLabel(foundBlobs[b]) < lowestID)
+                if(lowestID > rawContours -> getLabel(foundBlobs[b]))
                     lowestID = rawContours -> getLabel(foundBlobs[b]);
                 
                 //-----Position-----
@@ -174,7 +174,12 @@ void BlobFilter::update(int rad){
             ProcessedBlob p;
             
             p.ID = lowestID;
+            
             p.center = avgPos;
+//            cout << "newBlobStart = " << newBlobStart << ", numSubBlobs = " << numSubBlobs << endl;
+//            cout << "Adding " << p.center << " to processedBlobs\n" << endl;
+            
+            
             p.vel = avgVel;
             p.subBlobs = thisSubBlob;
             
@@ -182,7 +187,7 @@ void BlobFilter::update(int rad){
             
             
             //Keep track of where the next processed blob will start
-            newBlobStart = numSubBlobs;
+            newBlobStart += numSubBlobs;
             
             
             
@@ -192,7 +197,7 @@ void BlobFilter::update(int rad){
         
     } //main rawContours for loop
 
-
+    cout << " " << endl;
     
     
 }
@@ -202,23 +207,31 @@ void BlobFilter::draw(){
 
     for(int i = 0; i < processedBlobs.size(); i++){
 
-        //draw centroid
-        ofSetColor(0, 0, 255);
+        //draw centroid in yellow
+        ofSetColor(255, 200, 0, 255);
         ofDrawCircle(processedBlobs[i].center.x, processedBlobs[i].center.y, 6);
         
-        //draw sub blobs
+        //draw sub blobs 
         auto subBlobs = processedBlobs[i].subBlobs;
         
         for(int j = 0; j < subBlobs.size(); j++){
             
             //radius
-            ofSetColor(255, 200, 0);
+            ofSetColor(0, 200, 255, 180);
             ofNoFill();
+            ofSetLineWidth(1.0);
             ofDrawCircle(subBlobs[j].x, subBlobs[j].y, personRadius);
             
             //center
             ofFill();
             ofDrawCircle(subBlobs[j].x, subBlobs[j].y, 3);
+            
+            //draw lines between them
+            if(j > 0){
+                ofSetColor(0, 200 * 0.8, 255 * 0.8);
+                ofSetLineWidth(2.0);
+                ofDrawLine(subBlobs[j - 1].x, subBlobs[j - 1].y, subBlobs[j].x, subBlobs[j].y);
+            }
             
             
         }
@@ -233,6 +246,12 @@ void BlobFilter::draw(){
 int BlobFilter::size(){
     
     return processedBlobs.size();
+    
+}
+
+int BlobFilter::getLabel(int i){
+    
+    return processedBlobs[i].ID;
     
 }
 

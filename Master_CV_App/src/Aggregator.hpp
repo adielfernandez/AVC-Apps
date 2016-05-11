@@ -187,6 +187,7 @@ public:
     ofxToggle drawContoursToggle;
     ofxToggle showInfoToggle;
     ofxToggle useBlobFilter;
+    ofxToggle drawFilteredBlobs;
     ofxIntSlider filterRadiusSlider;
     
     ofxLabel maskingLabel;

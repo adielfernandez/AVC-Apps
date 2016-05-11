@@ -40,6 +40,9 @@ void CamGui::setup(string name, bool solo){
         gui.add(maxDistanceSlider.setup("Max Distance", 32, 0, 100));
         gui.add(drawContoursToggle.setup("Draw Contours", true));
         gui.add(showInfoToggle.setup("Info", false));
+        gui.add(useBlobFilter.setup("Use Blob Filter", false));
+        gui.add(drawFilteredBlobs.setup("Draw Filtered Blobs", true));
+        gui.add(filterRadiusSlider.setup("Filter Radius", 20, 1, 150));
         
         gui.add(maskingLabel.setup("   MASKING", ""));
         gui.add(useMask.setup("Use Mask", true));

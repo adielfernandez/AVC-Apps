@@ -23,6 +23,7 @@
 #include "ofxCv.h"
 #include "ofxOpencv.h"
 #include "ThreadedCV.hpp"
+#include "BlobFilter.hpp"
 
 #pragma once
 
@@ -212,6 +213,10 @@ public:
     //image processing thread
     ofPixels threadOutput;
     ofxCv::ContourFinder contours;
+    
+    
+    //processed blob
+    BlobFilter filteredContours;
 
     //-----OSC Data gathering-----
     void gatherOscStats();

@@ -44,6 +44,7 @@ public:
     int size();
     ofPoint getCenter(int i);
     ofVec2f getVelocity(int i);
+    int getLabel(int i);
     
     
     ofxCv::ContourFinder *rawContours;
