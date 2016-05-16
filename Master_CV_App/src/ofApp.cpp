@@ -141,7 +141,7 @@ void ofApp::setup(){
     
     
     //master control of live vs video
-    useLiveFeed = false;
+    useLiveFeed = true;
     
     //set up actual feeds
     int stagger = 250;
@@ -176,10 +176,10 @@ void ofApp::setup(){
 
         //then set up everything else
         //single cam at AVC
-        cor -> setup("192.168.187.36", names[i], bScaleDown, useLiveFeed);
+//        cor -> setup("192.168.187.36", names[i], bScaleDown, useLiveFeed);
 
         //proper addresses at TERRELL PLACE
-//        cor -> setup(addresses[i], names[i], bScaleDown, useLiveFeed);
+        cor -> setup(addresses[i], names[i], bScaleDown, useLiveFeed);
         
         cameras.push_back(cor);
         

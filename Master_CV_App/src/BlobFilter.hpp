@@ -23,6 +23,7 @@ struct ProcessedBlob{
     
     int ID;
     ofVec2f center, vel;
+    bool still = false;
     
     vector<ofVec2f> subBlobs;
     
@@ -40,7 +41,7 @@ public:
     void update(int rad);
     void draw();
     
-    //mirror te ofxCv::ContourFinder style
+    //mirror the ofxCv::ContourFinder style
     int size();
     ofPoint getCenter(int i);
     ofVec2f getVelocity(int i);
@@ -51,6 +52,7 @@ public:
     
     //vectors to hold processed blobs
     vector<ProcessedBlob> processedBlobs;
+    
     
     float personRadius;
     

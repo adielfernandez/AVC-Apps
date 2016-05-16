@@ -13,14 +13,14 @@
 	<Cam5_Pos>308, 201.143</Cam5_Pos>
 	<Cam6_Pos>609, 201.143</Cam6_Pos>
 <Lobby1Aggregate/>
-<Threshold>102</Threshold>
+<Threshold>109</Threshold>
 	<Blur>13</Blur>
 	<Number_of_erosions>0</Number_of_erosions>
 	<Number_of_dilations>4</Number_of_dilations>
 <Draw_blurred>0</Draw_blurred>
 <Background_Differencing/>
-	<Frames_to_learn_BG>230</Frames_to_learn_BG>
-	<Use_BG_Diff>0</Use_BG_Diff>
+	<Frames_to_learn_BG>90</Frames_to_learn_BG>
+	<Use_BG_Diff>1</Use_BG_Diff>
 	<Contour_Finding/>
 <___IMAGE_MANIPULATION/>
 	<___BG_SUBTRACTION/>

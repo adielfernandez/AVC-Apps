@@ -5,7 +5,7 @@
 12345
 
 ##### PGS2 IP address #####
-localhost
+192.168.187.124
 
 ##### PGS2 Recieve Port #####
 12345
@@ -17,7 +17,7 @@ localhost
 12345
 
 ##### PrevizDev IP address #####
-localhost
+192.168.187.208
 
 ##### PrevizDev Recieve Port #####
 12345

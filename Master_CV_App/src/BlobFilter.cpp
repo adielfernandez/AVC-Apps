@@ -197,7 +197,19 @@ void BlobFilter::update(int rad){
         
     } //main rawContours for loop
 
-    cout << " " << endl;
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
 }

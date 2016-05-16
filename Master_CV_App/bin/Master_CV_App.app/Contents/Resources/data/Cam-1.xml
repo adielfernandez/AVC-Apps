@@ -8,7 +8,7 @@
 	<Pre-Thread_Thresh>0</Pre-Thread_Thresh>
 	<___CROPPING/>
 	<Crop_Start__norm_>0, 0</Crop_Start__norm_>
-	<Crop_End__norm_>1, 0.863281</Crop_End__norm_>
+	<Crop_End__norm_>1, 0.816406</Crop_End__norm_>
 	<___MAPPING/>
 	<Point_0>0, 0</Point_0>
 	<Point_1>320, 0</Point_1>
