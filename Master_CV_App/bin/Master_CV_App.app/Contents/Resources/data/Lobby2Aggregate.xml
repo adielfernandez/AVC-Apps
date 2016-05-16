@@ -32,4 +32,6 @@
 <Use_Blob_Filter>1</Use_Blob_Filter>
 	<Filter_Radius>62</Filter_Radius>
 <Draw_Filtered_Blobs>1</Draw_Filtered_Blobs>
+<Filter_Still_Time>2000</Filter_Still_Time>
+	<Filter_Speed_Thresh>2</Filter_Speed_Thresh>
 </Lobby2Aggregate>

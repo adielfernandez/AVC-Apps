@@ -135,7 +135,7 @@ void ofApp::setup(){
     
     for(int i = 0; i < 14; i++){
         
-        movieFiles[i] = "videos/Cam_" + ofToString(i + 1) + ".mov";
+        movieFiles[i] = "videos/Elburz_walk/Cam_" + ofToString(i + 1) + ".mov";
         
     }
     
@@ -636,6 +636,7 @@ void ofApp::draw(){
         oscDataFormat += "            Float Arg: blob position in Y\n";
         oscDataFormat += "            Float Arg: avg velocity position in X\n";
         oscDataFormat += "            Float Arg: avg velocity position in Y\n";
+        oscDataFormat += "            Bool Arg: is blob standing still\n";
         oscDataFormat += "\n";
         oscDataFormat += "        Corridor Message:\n";
         oscDataFormat += "            Address: /corridor_[num]/stats\n";

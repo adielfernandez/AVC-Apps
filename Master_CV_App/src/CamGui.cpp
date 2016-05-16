@@ -43,6 +43,8 @@ void CamGui::setup(string name, bool solo){
         gui.add(useBlobFilter.setup("Use Blob Filter", false));
         gui.add(drawFilteredBlobs.setup("Draw Filtered Blobs", true));
         gui.add(filterRadiusSlider.setup("Filter Radius", 20, 1, 150));
+        gui.add(stillTimeSlider.setup("Filter Still Time", 2000, 0, 10000));
+        gui.add(speedThresholdSlider.setup("Filter Speed Thresh", 2.0, 0.0, 8.0));
         
         gui.add(maskingLabel.setup("   MASKING", ""));
         gui.add(useMask.setup("Use Mask", true));

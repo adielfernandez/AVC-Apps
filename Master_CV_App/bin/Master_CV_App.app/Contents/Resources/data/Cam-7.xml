@@ -36,4 +36,6 @@
 <Use_Blob_Filter>1</Use_Blob_Filter>
 	<Draw_Filtered_Blobs>1</Draw_Filtered_Blobs>
 	<Filter_Radius>56</Filter_Radius>
+<Filter_Still_Time>2000</Filter_Still_Time>
+	<Filter_Speed_Thresh>2</Filter_Speed_Thresh>
 </Cam-7>

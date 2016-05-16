@@ -20,7 +20,7 @@
 <Draw_blurred>0</Draw_blurred>
 <Background_Differencing/>
 	<Frames_to_learn_BG>90</Frames_to_learn_BG>
-	<Use_BG_Diff>1</Use_BG_Diff>
+	<Use_BG_Diff>0</Use_BG_Diff>
 	<Contour_Finding/>
 <___IMAGE_MANIPULATION/>
 	<___BG_SUBTRACTION/>
@@ -35,4 +35,6 @@
 <Use_Blob_Filter>1</Use_Blob_Filter>
 	<Filter_Radius>43</Filter_Radius>
 <Draw_Filtered_Blobs>1</Draw_Filtered_Blobs>
+<Filter_Still_Time>2000</Filter_Still_Time>
+	<Filter_Speed_Thresh>2</Filter_Speed_Thresh>
 </Lobby1Aggregate>
