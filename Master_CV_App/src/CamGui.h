@@ -48,6 +48,8 @@ public:
     ofxToggle useBlobFilter;
     ofxToggle drawFilteredBlobs;
     ofxIntSlider filterRadiusSlider;
+    ofxIntSlider stillTimeSlider;
+    ofxFloatSlider speedThresholdSlider;
     
     ofxLabel maskingLabel;
     ofxToggle useMask;

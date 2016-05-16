@@ -684,7 +684,8 @@ void Camera::update(){
             imageProcessor.analyze(fboPix, settings);
             
             //update the blob filter
-            if(cameraGui.useBlobFilter) filteredContours.update(cameraGui.filterRadiusSlider);
+            if(cameraGui.useBlobFilter)
+                filteredContours.update(cameraGui.filterRadiusSlider, cameraGui.stillTimeSlider, cameraGui.speedThresholdSlider);
             
             
         } else {
@@ -1324,6 +1325,7 @@ void Camera::gatherOscStats(){
         ofPoint center;
         ofPoint centerNormalized;
         ofVec2f velocity;
+        bool still;
         
         //get the right data
         if(cameraGui.useBlobFilter){
@@ -1332,6 +1334,7 @@ void Camera::gatherOscStats(){
             label = filteredContours.getLabel(i);
             center = filteredContours.getCenter(i);
             velocity = filteredContours.getVelocity(i);
+            still = filteredContours.getStill(i);
             
         } else {
             
@@ -1339,6 +1342,7 @@ void Camera::gatherOscStats(){
             label = contours.getLabel(i);
             center = toOf(contours.getCenter(i));
             velocity = toOf(contours.getVelocity(i));
+            still = false;
             
         }
         
@@ -1360,6 +1364,7 @@ void Camera::gatherOscStats(){
         m.addFloatArg(centerNormalized.y);
         m.addFloatArg(velocity.x);
         m.addFloatArg(velocity.x);
+        m.addBoolArg(still);
         
         blobsBundle.addMessage(m);
         

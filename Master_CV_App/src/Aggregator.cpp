@@ -123,6 +123,8 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
     gui.add(useBlobFilter.setup("Use Blob Filter", false));
     gui.add(drawFilteredBlobs.setup("Draw Filtered Blobs", true));
     gui.add(filterRadiusSlider.setup("Filter Radius", 20, 1, 150));
+    gui.add(stillTimeSlider.setup("Filter Still Time", 2000, 0, 10000));
+    gui.add(speedThresholdSlider.setup("Filter Speed Thresh", 2.0, 0.0, 8.0));
     
     
     gui.add(maskingLabel.setup("   MASKING", ""));
@@ -565,7 +567,7 @@ void Aggregator::update(){
     
     
     //update the blob filter
-    if(useBlobFilter) filteredContours.update(filterRadiusSlider);
+    if(useBlobFilter) filteredContours.update(filterRadiusSlider, stillTimeSlider, speedThresholdSlider);
     
     
     
@@ -621,6 +623,18 @@ void Aggregator::drawMain(){
     
     ofSetColor(255);
     ofDrawBitmapString(blobData, adjustedOrigin.x, adjustedOrigin.y + masterHeight + 15);
+
+    
+    //PROCESSED Blob data
+    string tempBlobData = "tempBlobs: " + ofToString(filteredContours.tempBlobs.size()) + "\n";
+    
+    for(int i = 0; i < filteredContours.tempBlobs.size(); i++){
+        tempBlobData += ofToString(filteredContours.tempBlobs[i].ID) + " - X: " + ofToString(filteredContours.tempBlobs[i].center.x) + ", Y: " + ofToString(filteredContours.tempBlobs[i].center.y) + "\n";
+    }
+    
+    ofSetColor(255);
+    ofDrawBitmapString(tempBlobData, adjustedOrigin.x + 300, adjustedOrigin.y + masterHeight + 15);
+    
     
     //PROCESSED Blob data
     string processedBlobData = "PROCESSED Blobs: " + ofToString(filteredContours.size()) + "\n";
@@ -630,7 +644,7 @@ void Aggregator::drawMain(){
     }
     
     ofSetColor(255);
-    ofDrawBitmapString(processedBlobData, adjustedOrigin.x + 300, adjustedOrigin.y + masterHeight + 15);
+    ofDrawBitmapString(processedBlobData, adjustedOrigin.x + 600, adjustedOrigin.y + masterHeight + 15);
     
     
     if(useBgDiff){
@@ -989,6 +1003,7 @@ void Aggregator::gatherOscStats(){
         ofPoint center;
         ofPoint centerNormalized;
         ofVec2f velocity;
+        bool still;
         
         //get the right data
         if(useBlobFilter){
@@ -997,6 +1012,7 @@ void Aggregator::gatherOscStats(){
             label = filteredContours.getLabel(i);
             center = filteredContours.getCenter(i);
             velocity = filteredContours.getVelocity(i);
+            still = filteredContours.getStill(i);
             
         } else {
 
@@ -1004,6 +1020,7 @@ void Aggregator::gatherOscStats(){
             label = contours.getLabel(i);
             center = toOf(contours.getCenter(i));
             velocity = toOf(contours.getVelocity(i));
+            still = false;
             
         }
         
@@ -1024,6 +1041,7 @@ void Aggregator::gatherOscStats(){
         m.addFloatArg(centerNormalized.y);
         m.addFloatArg(velocity.x);
         m.addFloatArg(velocity.x);
+        m.addBoolArg(still);
         
         blobsBundle.addMessage(m);
         

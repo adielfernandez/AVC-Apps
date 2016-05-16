@@ -23,13 +23,16 @@ void BlobFilter::setup(ofxCv::ContourFinder *_rawContours){
     rawContours = _rawContours;
     
     personRadius = 20;
+    stillTimeout = 2000;
+    
     
 }
 
-void BlobFilter::update(int rad){
+void BlobFilter::update(int _personRadius, int _stillTimeout, float _speedThresh){
     
-    personRadius = rad;
-    
+    personRadius = _personRadius;
+    stillTimeout = _stillTimeout;
+    speedThresh = _speedThresh;
     
     /*
      * Filtering workflow:
@@ -47,7 +50,10 @@ void BlobFilter::update(int rad){
     
     
     //prepare to be filled again
-    processedBlobs.clear();
+//    processedBlobs.clear();
+    
+    //temporary blob vector to hold new blobs before merging with the processedBlobs
+    tempBlobs.clear();
     
     
     //this vector will store the indices of blobs inside the contour finder that
@@ -70,7 +76,7 @@ void BlobFilter::update(int rad){
     int newBlobStart = 0;
     
     
-    //go through the contours and start looking for blobgs
+    //go through the contours and start looking for blobs
     
     for(int i = 0; i < rawContours -> size(); i++){
         
@@ -182,8 +188,7 @@ void BlobFilter::update(int rad){
             
             p.vel = avgVel;
             p.subBlobs = thisSubBlob;
-            
-            processedBlobs.push_back(p);
+            tempBlobs.push_back(p);
             
             
             //Keep track of where the next processed blob will start
@@ -199,14 +204,106 @@ void BlobFilter::update(int rad){
 
 
     
+    //now go through the new blobs and compare them with the master blobs
+    //If:
+    //temp has ID that master doesnt, add it
+    //master has ID that temp doesnt, delete it
+    //if they both share a ID, update the position, velocity
+    
+    //check if processedBlobs has an ID that temp doesnt
+    //do deletions first to avoid bad access errors
+    for(vector<ProcessedBlob>::iterator it = processedBlobs.begin(); it != processedBlobs.end();){
+        
+        bool found = false;
+        
+        for(int i = 0; i < tempBlobs.size(); i++){
+         
+            if(tempBlobs[i].ID == (*it).ID){
+                //we've found a match, erase it and break out of the tempBlobs loop
+                found  = true;
+            }
+            
+        }
+
+        //if we've checked ALL the tempBlobs and the processedBlob isn't
+        //found anywhere in the new tempBlobs vector delete it
+        if(!found){
+            
+            it = processedBlobs.erase(it);
+        
+        } else {
+            
+            //if we did find a match we'll update/add it later just move on for now
+            ++it;
+            
+        }
+        
+    }
     
     
     
-    
-    
-    
-    
-    
+    //now do the adding and updating
+    for(int i = 0; i < tempBlobs.size(); i++){
+        
+        //go through all the processedBlobs and see if this ID is in there
+        bool newBlob = true;
+        
+        //this will hold the index of the processedBlob that shares this ID so we can update it
+        int whichOne = -1;
+        
+        for(int j = 0; j < processedBlobs.size(); j++){
+            
+            if(tempBlobs[i].ID == processedBlobs[j].ID){
+                //this is a new blob
+                newBlob = false;
+                whichOne = j;
+
+            }
+            
+        }
+        
+        //if it's a new blob we'll update it, if it's not new we'll add it whole
+        if(newBlob){
+            ProcessedBlob pB;
+            
+            pB.ID = tempBlobs[i].ID;
+            pB.center = tempBlobs[i].center;
+            pB.vel = tempBlobs[i].vel;
+            pB.subBlobs = tempBlobs[i].subBlobs;
+            pB.lastMoveTime = ofGetElapsedTimeMillis();
+            
+            
+            processedBlobs.push_back(pB);
+
+        } else {
+            
+            //update center, velocity, subBlobs and check if the still bool needs to flip
+            processedBlobs[whichOne].center = tempBlobs[i].center;
+            processedBlobs[whichOne].vel = tempBlobs[i].vel;
+            processedBlobs[whichOne].subBlobs = tempBlobs[i].subBlobs;
+            
+            //if we're not moving
+            if(processedBlobs[whichOne].vel.lengthSquared() < speedThresh * speedThresh){
+
+                //check the time and see if we need to time out
+                if(ofGetElapsedTimeMillis() - processedBlobs[whichOne].lastMoveTime > stillTimeout){
+                    processedBlobs[whichOne].still = true;
+                }
+
+
+            } else {
+
+                //if we're not still
+                processedBlobs[whichOne].still = false;
+
+                //update the lastMoveTime so it stops once we've stopped moving
+                processedBlobs[whichOne].lastMoveTime = ofGetElapsedTimeMillis();
+                
+            }
+
+        }
+        
+    }
     
     
     
@@ -218,10 +315,6 @@ void BlobFilter::update(int rad){
 void BlobFilter::draw(){
 
     for(int i = 0; i < processedBlobs.size(); i++){
-
-        //draw centroid in yellow
-        ofSetColor(255, 200, 0, 255);
-        ofDrawCircle(processedBlobs[i].center.x, processedBlobs[i].center.y, 6);
         
         //draw sub blobs 
         auto subBlobs = processedBlobs[i].subBlobs;
@@ -248,7 +341,15 @@ void BlobFilter::draw(){
             
         }
         
+        //draw centroid in yellow if moving, red if still
+        if(processedBlobs[i].still){
+            ofSetColor(255, 0, 0, 255);
+        } else {
+            ofSetColor(255, 200, 0, 255);
+        }
         
+        
+        ofDrawCircle(processedBlobs[i].center.x, processedBlobs[i].center.y, 6);
         
     }
 
@@ -279,7 +380,11 @@ ofVec2f BlobFilter::getVelocity(int i){
     
 }
 
-
+bool BlobFilter::getStill(int i){
+    
+    return processedBlobs[i].still;
+    
+}
 
 
 
