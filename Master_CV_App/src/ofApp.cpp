@@ -135,7 +135,7 @@ void ofApp::setup(){
     
     for(int i = 0; i < 14; i++){
         
-        movieFiles[i] = "videos/Elburz_walk/Cam_" + ofToString(i + 1) + ".mov";
+        movieFiles[i] = "videos/Cam_" + ofToString(i + 1) + ".mov";
         
     }
     
@@ -271,14 +271,34 @@ void ofApp::setup(){
     
     oscHandler.loadSettings();
 
-    //for visualizing message sending
-    lastSendTime = 0;
-    sendAlertTrans = 0;
-    sendTrans = 0;
+    //-----for visualizing message sending-----
+    lastPGSSendTime = 0;
+    lastAudioSendTime = 0;
+
+    pgsSent = false;
+    audioSent = false;
     
     
+    oscBoxWidth = 450;
+    oscBoxHeight = 600;
+    oscVizOrigin.set(leftMargin, topMargin + oscBoxHeight);
+
+    oscVizHeight = 80;
+    oscVizWidth = oscBoxWidth;
     
+    pgsViz.allocate(oscVizWidth, oscVizHeight);
+    pgsViz.begin();
+    ofClear(0, 0, 0);
+    ofSetColor(0);
+    ofDrawRectangle(0, 0, oscVizWidth, oscVizHeight);
+    pgsViz.end();
     
+    audioViz.allocate(oscVizWidth, oscVizHeight);
+    audioViz.begin();
+    ofClear(0, 0, 0);
+    ofSetColor(0);
+    ofDrawRectangle(0, 0, oscVizWidth, oscVizHeight);
+    audioViz.end();
     
     
     
@@ -399,18 +419,7 @@ void ofApp::update(){
     
 
     
-    //OSC
-
-    //Indicator box
-    //trans of the red rect frame
-    if(sendAlertTrans > 0){
-        sendAlertTrans *= 0.92;
-    }
     
-    //trans of the white rect itself
-    if(sendTrans > 0){
-        sendTrans *= 0.96;
-    }
 
     
     
@@ -651,12 +660,9 @@ void ofApp::draw(){
         oscDataFormat += "    Corridor 3 Bundle (same format)\n";
         oscDataFormat += "    Etc. for other corridors\n";
         
-        
-        int oscBoxWidth = 450;
-        int oscBoxHeight = 600;
-        int oscGap = 20;
         int textX = 15;
         int textY = 25;
+
         
         //draw transparent box
         ofSetColor(0, 200);
@@ -706,6 +712,8 @@ void ofApp::draw(){
         audioDataFormat += "Y direction is to/away from the LED wall\n";
         audioDataFormat += "0 is at the wall, 1 far from the wall.\n";
         
+        int oscGap = 20;
+        
         //draw transparent box
         ofSetColor(0, 200);
         ofDrawRectangle(leftMargin + oscBoxWidth + oscGap, topMargin, oscBoxWidth, oscBoxHeight);
@@ -715,29 +723,112 @@ void ofApp::draw(){
         ofDrawBitmapString(audioDataFormat, leftMargin + oscBoxWidth + oscGap + textX, topMargin + textY);
         
         
-        //-----OSC Indicator Box-----
-        float rectWidth = 140;
-        float rectHeight = 40;
-        float spacing = 10;
+        //-----OSC Visualizer Boxes-----
         
-        ofVec2f boxPos;
-        boxPos.set(ofGetWidth() - rectWidth - spacing, panel.pos.y - rectHeight - spacing);
-        
-        ofPushStyle();
-        ofSetColor(255, sendTrans);
-        ofFill();
-        ofDrawRectangle(boxPos, rectWidth, rectHeight);
-        
-        ofNoFill();
-        ofSetColor(255, 0, 0, sendAlertTrans);
-        ofSetLineWidth(5);
-        ofDrawRectangle(boxPos, rectWidth, rectHeight);
-        
-        ofSetColor(0, sendTrans);
-        ofDrawBitmapString("MESSAGE SENT", boxPos.x + 20, boxPos.y + rectHeight/2 + 3);
-        ofPopStyle();
+        //PGS box
 
         
+        //cursor will scroll across both Fbos and drop a tick mark every time an OSC trigger is received
+        float pgsCursorX, audioCursorX;
+        
+        
+        
+        //-----PGS viz drawing-----
+        
+        //how long it takes visualizer cursor to reach the end
+        float vizDuration = 2.0f;
+        
+        pgsCursorX = ofMap(fmod(ofGetElapsedTimef(), vizDuration), 0.0f, vizDuration, 0, oscVizWidth);
+        
+        pgsViz.begin();
+        
+        //drop a line where the cursor is when an osc message is sent
+        if(pgsSent){
+            
+            ofSetColor(170, 0, 0);
+            ofSetLineWidth(1);
+            ofDrawLine(pgsCursorX, 0, pgsCursorX, oscVizHeight);
+            
+            pgsSent = false;
+        }
+        
+        //clear the fbo when the the cursor gets to the end
+        if(pgsCursorX > 0.95 * oscVizWidth){
+            ofSetColor(0);
+            ofDrawRectangle(0, 0, oscVizWidth, oscVizHeight);
+        }
+        
+        pgsViz.end();
+        
+
+        
+        float oscVizSpacerY = 30;
+        
+        ofSetColor(255);
+        pgsViz.draw(oscVizOrigin.x, oscVizOrigin.y + oscVizSpacerY);
+        ofSetColor(255);
+        ofDrawBitmapString("Outgoing PGS Data", oscVizOrigin.x + 5, oscVizOrigin.y + oscVizSpacerY + 12);
+        
+        //draw white border
+        ofNoFill();
+        ofSetLineWidth(1);
+        ofSetColor(255);
+        ofDrawRectangle(oscVizOrigin.x, oscVizOrigin.y + oscVizSpacerY, oscVizWidth, oscVizHeight);
+        ofFill();
+        
+        //draw the cursor
+        if(oscHandler.sendAllOsc){
+            ofSetColor(255, 0, 0);
+            ofSetLineWidth(3);
+            ofDrawLine(oscVizOrigin.x + pgsCursorX, oscVizOrigin.y + oscVizSpacerY, oscVizOrigin.x + pgsCursorX, oscVizOrigin.y + oscVizSpacerY + oscVizHeight);
+        }
+        
+        //-----Audio viz drawing-----
+        float betweenSpace = oscGap;
+        float audioVizX = oscVizOrigin.x + oscVizWidth + betweenSpace;
+        
+        audioCursorX = ofMap(fmod(ofGetElapsedTimef(), vizDuration), 0.0f, vizDuration, 0, oscVizWidth);
+        
+        
+        audioViz.begin();
+        
+        //drop a line where the cursor is when an osc message is sent
+        if(audioSent){
+            
+            ofSetColor(170, 0, 0);
+            ofSetLineWidth(1);
+            ofDrawLine(audioCursorX, 0, audioCursorX, oscVizHeight);
+            
+            audioSent = false;
+        }
+        
+        //clear the fbo when the the cursor gets to the end
+        if(audioCursorX > 0.95 * oscVizWidth){
+            ofSetColor(0);
+            ofDrawRectangle(0, 0, oscVizWidth, oscVizHeight);
+        }
+        
+        audioViz.end();
+        
+        
+        ofSetColor(255);
+        audioViz.draw(audioVizX, oscVizOrigin.y + oscVizSpacerY);
+        ofSetColor(255);
+        ofDrawBitmapString("Outgoing Audio Data", audioVizX + 5, oscVizOrigin.y + oscVizSpacerY + 12);
+        
+        //draw white border
+        ofNoFill();
+        ofSetLineWidth(1);
+        ofSetColor(255);
+        ofDrawRectangle(audioVizX, oscVizOrigin.y + oscVizSpacerY, oscVizWidth, oscVizHeight);
+        ofFill();
+        
+        //draw the cursor
+        if(oscHandler.sendAllOsc){
+            ofSetColor(255, 0, 0);
+            ofSetLineWidth(3);
+            ofDrawLine(audioVizX + audioCursorX, oscVizOrigin.y + oscVizSpacerY, audioVizX + audioCursorX, oscVizOrigin.y + oscVizSpacerY + oscVizHeight);
+        }
     }
     
     
@@ -745,58 +836,98 @@ void ofApp::draw(){
     
     //--------------------OSC DATA--------------------
     
-    if(oscHandler.sendAllOsc && oscHandler.oscSendRate > 0 && (playback.isPlaying || useLiveFeed)){
+    //send OSC at all?
+    if(oscHandler.sendAllOsc && (playback.isPlaying || useLiveFeed)){
         
+        
+        //==============================
+        //-----DATA TO AUDIO SYSTEM-----
+        //==============================
 
-        if(ofGetElapsedTimeMillis() - lastSendTime > oscHandler.oscSendRate){
-            
-            //==============================
-            //-----DATA TO AUDIO SYSTEM-----
-            //==============================
+        if(oscHandler.sendAudioOsc && ofGetElapsedTimeMillis() - lastAudioSendTime > oscHandler.audioSendRate){
             
             
-            if(oscHandler.sendAudioOsc){
+
+            //ROUGH pixels to ft conversion
+            //ft/pixel = (corridor width in feet)/(feed width in pixels)
+            //different in each corridor
+            
+            float conversionFactor;
+            
+            
+            ofxOscBundle audioBundle;
+            
+            int numCorridors = 6;
+            
+            for(int i = 0; i < numCorridors; i++){
                 
-                ofxOscBundle audioBundle;
+                //the message for this corridor
+                ofxOscMessage m;
+                m.setAddress("/Corridor " + ofToString(i + 1));
                 
-                int numCorridors = 6;
+                //conversion factor for scaling from pixels to "feet" (ish)
+                //for the speed value to audio
+                switch (i) {
+                    case 0:
+                        conversionFactor = 71.0 * Lobby1Aggregate.masterWidth;
+                        break;
+                    case 1:
+                        conversionFactor = 12.0 * scaledWidth;
+                        break;
+                    case 2:
+                        conversionFactor = 16.0 * scaledWidth;
+                        break;
+                    case 3:
+                        conversionFactor = 17.0 * scaledWidth;
+                        break;
+                    case 4:
+                        conversionFactor = 12.0 * scaledWidth;
+                        break;
+                    case 5:
+                        conversionFactor = 39.0 * Lobby2Aggregate.masterWidth;
+                        break;
+                }
                 
-                for(int i = 0; i < numCorridors; i++){
+                //Lobby 1
+                if(i == 0){
                     
-                    ofxOscMessage m;
-                    m.setAddress("/Corridor " + ofToString(i + 1));
+                    m.addFloatArg(Lobby1Aggregate.density);
+                    m.addFloatArg(Lobby1Aggregate.avgSpeed * conversionFactor);
                     
-                    //Lobby 1
-                    if(i == 0){
-                        
-                        m.addFloatArg(Lobby1Aggregate.density);
-                        m.addFloatArg(Lobby1Aggregate.avgSpeed);
-                        
-                    } else if(i >= 1 && i <= 4){
-                        
-                        //corridors 2, 3, 4, 5 are:
-                        //cameras 6, 7, 8, 9 (zero-indexed)
-                        m.addFloatArg(cameras[i + 5] -> density);
-                        m.addFloatArg(cameras[i + 5] -> avgSpeed);
-                        
-                    } else {
-                        m.addFloatArg(Lobby2Aggregate.density);
-                        m.addFloatArg(Lobby2Aggregate.avgSpeed);
-                    }
+                } else if(i >= 1 && i <= 4){
                     
-                    audioBundle.addMessage(m);
+                    //corridors 2, 3, 4, 5 are:
+                    //cameras 6, 7, 8, 9 (zero-indexed)
+                    m.addFloatArg(cameras[i + 5] -> density);
+                    m.addFloatArg(cameras[i + 5] -> avgSpeed * conversionFactor);
+                    
+                } else {
+                    
+                    m.addFloatArg(Lobby2Aggregate.density);
+                    m.addFloatArg(Lobby2Aggregate.avgSpeed * conversionFactor);
                     
                 }
                 
-                oscHandler.audioSender.sendBundle(audioBundle);
-
+                audioBundle.addMessage(m);
+                
             }
             
+            oscHandler.audioSender.sendBundle(audioBundle);
+         
+            lastAudioSendTime = ofGetElapsedTimeMillis();
+            audioSent = true;
             
+        }
+        
+        
+        
+        
+        //======================
+        //-----DATA TO PGSs-----
+        //======================
+        
+        if(ofGetElapsedTimeMillis() - lastPGSSendTime > oscHandler.pgsSendRate){
             
-            //======================
-            //-----DATA TO PGSs-----
-            //======================
             
             //we need to go through all the corridors and pull together
             //the data then send it at the very end.
@@ -811,12 +942,12 @@ void ofApp::draw(){
             vector<ofxOscBundle> corridorBundles;
             //SIX messages, one for each corridor
             vector<ofxOscMessage> corridorMessages;
-
+            
             //SIX bundles for each vector of blobs
             vector<ofxOscBundle> blobBundles;
-
-
-
+            
+            
+            
             //averaged data
             int totalNumBlobs;
             
@@ -827,14 +958,6 @@ void ofApp::draw(){
             totalNumBlobs += cameras[9] -> contours.size();
             totalNumBlobs += Lobby2Aggregate.contours.size();
             
-//            cout << "\n\nNumber of blobs per corridor\n\n" << endl;
-//            cout << Lobby1Aggregate.contours.size() << endl;
-//            cout << cameras[6] -> contours.size() << endl;
-//            cout << cameras[7] -> contours.size() << endl;
-//            cout << cameras[8] -> contours.size() << endl;
-//            cout << cameras[9] -> contours.size() << endl;
-//            cout << Lobby2Aggregate.contours.size() << endl;
-//            cout << "totalNumBlobs: " << totalNumBlobs << endl;
             
             
             allSystemData.clear();
@@ -856,7 +979,7 @@ void ofApp::draw(){
             if(oscHandler.sendCorridor4) allSystemData.addBundle(cameras[8] -> corridorBundle);
             if(oscHandler.sendCorridor5) allSystemData.addBundle(cameras[9] -> corridorBundle);
             if(oscHandler.sendCorridor6) allSystemData.addBundle(Lobby2Aggregate.corridorBundle);
-
+            
             
             //Now send it all at once
             if(oscHandler.sendPgs1) oscHandler.pgs1Sender.sendBundle(allSystemData);
@@ -865,14 +988,16 @@ void ofApp::draw(){
             if(oscHandler.sendPrevizDev) oscHandler.previzDevSender.sendBundle(allSystemData);
             
             
-            lastSendTime = ofGetElapsedTimeMillis();
-            
-            sendAlertTrans = 255;
-            sendTrans = 255;
+            lastPGSSendTime = ofGetElapsedTimeMillis();
+            pgsSent = true;
             
         }
         
+        
     }
+    
+    
+    
 
     
 

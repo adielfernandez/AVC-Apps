@@ -63,26 +63,31 @@ void Osc::setupGui(){
     
     baseGui.add(oscLabel.setup("OSC DATA", ""));
 
-    
-    baseGui.add(sendCorridor1.setup("Send Corridor 1 Data", true));
-    baseGui.add(sendCorridor2.setup("Send Corridor 2 Data", true));
-    baseGui.add(sendCorridor3.setup("Send Corridor 3 Data", true));
-    baseGui.add(sendCorridor4.setup("Send Corridor 4 Data", true));
-    baseGui.add(sendCorridor5.setup("Send Corridor 5 Data", true));
-    baseGui.add(sendCorridor6.setup("Send Corridor 6 Data", true));
+    baseGui.add(corridorLabel.setup("Corridors to include", ""));
+    baseGui.add(sendCorridor1.setup("Lobby 1 Data", true));
+    baseGui.add(sendCorridor2.setup("Corridor 2 Data", true));
+    baseGui.add(sendCorridor3.setup("Corridor 3 Data", true));
+    baseGui.add(sendCorridor4.setup("Corridor 4 Data", true));
+    baseGui.add(sendCorridor5.setup("Corridor 5 Data", true));
+    baseGui.add(sendCorridor6.setup("Lobby 2 Data", true));
     
     baseGui.add(receiversLabel.setup("Send to...", ""));
     baseGui.add(sendPgs1.setup("Send to PGS-1", true));
     baseGui.add(sendPgs2.setup("Send to PGS-2", true));
     baseGui.add(sendPreviz.setup("Send to Previz", true));
     baseGui.add(sendPrevizDev.setup("Send to PrevizDev", true));
+    baseGui.add(pgsSendRate.setup("PGS Rate (in ms)", 40, 20, 500));
+
     baseGui.add(sendAudioOsc.setup("Send Audio Data", true));
-    baseGui.add(sendHeartbeat.setup("Send Heartbeat", true));
-    baseGui.add(oscSendRate.setup("Millis bet. sends", 500, 20, 500));
+    baseGui.add(audioSendRate.setup("Audio Rate (in ms)", 250, 20, 500));
+    
+    baseGui.add(masterToggleLabel.setup("Master OSC Toggle", ""));
     baseGui.add(sendAllOsc.setup("Send OSC", true));
 
     oscLabel.setBackgroundColor(ofColor(255));
     receiversLabel.setBackgroundColor(ofColor(255));
+    corridorLabel.setBackgroundColor(ofColor(255));
+    masterToggleLabel.setBackgroundColor(ofColor(255));
     
 }
 

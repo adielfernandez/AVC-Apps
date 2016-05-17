@@ -59,6 +59,8 @@ public:
     ofxPanel baseGui;
     
     ofxLabel oscLabel;
+    ofxLabel corridorLabel;
+    ofxLabel masterToggleLabel;
     ofxToggle sendAllOsc;
     ofxToggle sendCorridor1;
     ofxToggle sendCorridor2;
@@ -74,7 +76,9 @@ public:
     ofxToggle sendPrevizDev;
     ofxToggle sendAudioOsc;
     ofxToggle sendHeartbeat;
-    ofxIntSlider oscSendRate;
+    
+    ofxIntSlider pgsSendRate;
+    ofxIntSlider audioSendRate;
     
     string fileName;
     

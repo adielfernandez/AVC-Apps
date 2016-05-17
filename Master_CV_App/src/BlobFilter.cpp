@@ -351,6 +351,15 @@ void BlobFilter::draw(){
         
         ofDrawCircle(processedBlobs[i].center.x, processedBlobs[i].center.y, 6);
         
+        
+        //draw their info
+        string info;
+        info += "ID: " + ofToString(processedBlobs[i].ID) + "\n";
+        info += "Vel: " + ofToString(processedBlobs[i].vel) + "\n";
+        
+        ofSetColor(255);
+        ofDrawBitmapString(info, processedBlobs[i].center.x + 5, processedBlobs[i].center.y - 5);
+        
     }
 
 }

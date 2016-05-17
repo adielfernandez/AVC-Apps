@@ -11,8 +11,8 @@
 	<Send_Audio_Data>0</Send_Audio_Data>
 <oscSettings>
 		<OSC_DATA/>
-		<Send_OSC>0</Send_OSC>
-		<Millis_bet__sends>39</Millis_bet__sends>
+		<Send_OSC>1</Send_OSC>
+		<Millis_bet__sends>250</Millis_bet__sends>
 		<Send_Corridor_1_Data>1</Send_Corridor_1_Data>
 		<Send_Corridor_2_Data>1</Send_Corridor_2_Data>
 		<Send_Corridor_3_Data>1</Send_Corridor_3_Data>
@@ -26,5 +26,17 @@
 	<Send_to___/>
 		<Send_to_PrevizDev>1</Send_to_PrevizDev>
 		<Send_Heartbeat>1</Send_Heartbeat>
+	<Corridors_to_include/>
+		<Lobby_1_Data>1</Lobby_1_Data>
+		<Corridor_2_Data>1</Corridor_2_Data>
+		<Corridor_3_Data>1</Corridor_3_Data>
+		<Corridor_4_Data>1</Corridor_4_Data>
+		<Corridor_5_Data>1</Corridor_5_Data>
+		<Lobby_2_Data>1</Lobby_2_Data>
+		<Master_OSC_Toggle/>
+	<PGS_Send_Rate__in_ms_>63</PGS_Send_Rate__in_ms_>
+		<Audio_Send_Rate__in_ms_>245</Audio_Send_Rate__in_ms_>
+	<PGS_Rate__in_ms_>39</PGS_Rate__in_ms_>
+		<Audio_Rate__in_ms_>257</Audio_Rate__in_ms_>
 	</oscSettings>
 </group>

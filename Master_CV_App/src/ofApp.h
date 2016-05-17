@@ -86,9 +86,22 @@ class ofApp : public ofBaseApp{
     //-----OSC Data-----
     Osc oscHandler;
     int dataPerSec;
-    unsigned long long lastSendTime;
-    float sendAlertTrans, sendTrans;
+    unsigned long long lastPGSSendTime, lastAudioSendTime;
     
+    bool audioSent, pgsSent;
+    
+    int oscBoxWidth;
+    int oscBoxHeight;
+    
+
+    
+    ofVec2f oscVizOrigin;
+
+    
+    float oscVizHeight;
+    float oscVizWidth;
+    
+    ofFbo pgsViz, audioViz;
     
 };
 
