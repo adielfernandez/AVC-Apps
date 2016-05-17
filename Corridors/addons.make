@@ -1,7 +1,0 @@
-ofxCv
-ofxGStreamer
-ofxGui
-ofxNetwork
-ofxOpenCv
-ofxOsc
-ofxXmlSettings
