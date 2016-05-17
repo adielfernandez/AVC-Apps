@@ -1,6 +1,6 @@
 //
 //  Aggregator.hpp
-//  Stitching Test
+//  Stitching Corridor
 //
 //  Created by Adiel Fernandez on 3/3/16.
 //

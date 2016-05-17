@@ -144,7 +144,7 @@ void ofApp::setup(){
     useLiveFeed = true;
     
     //set up actual feeds
-    int stagger = 250;
+    int stagger = 300;
     
     //set up the cameras
     for(int i = 0; i < numFeeds; i++){
@@ -866,25 +866,27 @@ void ofApp::draw(){
                 m.setAddress("/Corridor " + ofToString(i + 1));
                 
                 //conversion factor for scaling from pixels to "feet" (ish)
-                //for the speed value to audio
+                //for the speed value to audio:
+                //(feet per pixel, i.e. width of corridor in feet divided by width of corridor in pixels)
+                
                 switch (i) {
                     case 0:
-                        conversionFactor = 71.0 * Lobby1Aggregate.masterWidth;
+                        conversionFactor = 71.0/(float)Lobby1Aggregate.masterWidth;
                         break;
                     case 1:
-                        conversionFactor = 12.0 * scaledWidth;
+                        conversionFactor = 12.0/(float)scaledWidth;
                         break;
                     case 2:
-                        conversionFactor = 16.0 * scaledWidth;
+                        conversionFactor = 16.0/(float)scaledWidth;
                         break;
                     case 3:
-                        conversionFactor = 17.0 * scaledWidth;
+                        conversionFactor = 17.0/(float)scaledWidth;
                         break;
                     case 4:
-                        conversionFactor = 12.0 * scaledWidth;
+                        conversionFactor = 12.0/(float)scaledWidth;
                         break;
                     case 5:
-                        conversionFactor = 39.0 * Lobby2Aggregate.masterWidth;
+                        conversionFactor = 39.0/(float)Lobby2Aggregate.masterWidth;
                         break;
                 }
                 

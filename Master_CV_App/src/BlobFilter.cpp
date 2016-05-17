@@ -147,8 +147,10 @@ void BlobFilter::update(int _personRadius, int _stillTimeout, float _speedThresh
             //at this point we've gathered all the blobs that are close to i
             //(and the subBlobs that are close to those) so group them together
             int lowestID = 10000000;
+            int lowestIDIndex = 0;
             ofVec2f avgVel(0);
             ofVec2f avgPos(0);
+            ofVec2f oldestPos(0);
             
             vector<ofVec2f> thisSubBlob;
             
@@ -157,8 +159,10 @@ void BlobFilter::update(int _personRadius, int _stillTimeout, float _speedThresh
             
                 //-----label-----
                 //Grab the lowest one (oldest)
-                if(lowestID > rawContours -> getLabel(foundBlobs[b]))
+                if(lowestID > rawContours -> getLabel(foundBlobs[b])){
                     lowestID = rawContours -> getLabel(foundBlobs[b]);
+                    lowestIDIndex = b;
+                }
                 
                 //-----Position-----
                 ofVec2f thisPos = toOf(rawContours -> getCenter(foundBlobs[b]));
@@ -176,15 +180,15 @@ void BlobFilter::update(int _personRadius, int _stillTimeout, float _speedThresh
             avgPos /= (float)numSubBlobs;
             avgVel /= (float)numSubBlobs;
             
+            oldestPos = toOf(rawContours -> getCenter(lowestIDIndex));
+            
             //create a ProcessedBlob and push it into the vector
             ProcessedBlob p;
             
             p.ID = lowestID;
             
-            p.center = avgPos;
-//            cout << "newBlobStart = " << newBlobStart << ", numSubBlobs = " << numSubBlobs << endl;
-//            cout << "Adding " << p.center << " to processedBlobs\n" << endl;
-            
+//            p.center = avgPos;
+            p.center = oldestPos;
             
             p.vel = avgVel;
             p.subBlobs = thisSubBlob;

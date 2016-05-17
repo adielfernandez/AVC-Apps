@@ -32,13 +32,21 @@ void Camera::setupViewControl(int _thisView, int *_viewMode, ofVec2f _adjOrigin)
 
 void Camera::setupFeed(){
     
+    cout << "\n\n" << name << ": SET pipeline..." << endl;
     gst.setPipeline("rtspsrc location=rtsp://admin:admin@" + IP + ":554/cam/realmonitor?channel=1&subtype=1 latency=0 ! rtpjpegdepay ! jpegdec !  queue ! decodebin ! videoconvert", OF_PIXELS_MONO, true, feedWidth, feedHeight);
+
     
-    gst.startPipeline();
+    //if(thisView < 12){
+    
+        cout << "\n\n" << name << ": START pipeline..." << endl;
+        gst.startPipeline();
     
     
-    gst.play();
+        cout << "\n\n" << name << ": PLAY pipeline..." << endl;
+        gst.play();
+    //}
     
+    cout << "\n\n" << endl;
 }
 
 void Camera::setMovieFile(string file){
@@ -113,15 +121,6 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     
     
     //-----CV Objects && Image Processing-----
-    
-    //initialize imageMapPts vector with 4 points
-    //this will be overwritten by xml settings later
-//    numMapPts = 4;
-//    imageMapPts.resize(numMapPts);
-//    imageMapPts[0].set(0, 0);
-//    imageMapPts[1].set(feedWidth, 0);
-//    imageMapPts[2].set(feedWidth, feedHeight);
-//    imageMapPts[3].set(0, feedHeight);
 
     //map quad to 9 points in a rectangular 3x3 grid
     //these will be overwritten by settings loaded later
@@ -513,14 +512,14 @@ void Camera::update(){
         if(started){
 
 //            cout << name << ": updating feed" << endl;
-            gst.update();
+            if(thisView < 12){
+                gst.update();
+            }
         }
         
         if(!started && !connectionStale && ofGetElapsedTimeMillis() > staggerTime){
             started = true;
-            
-//            cout << name << ": starting feed" << endl;
-            
+
             setupFeed();
         }
 
@@ -612,6 +611,8 @@ void Camera::update(){
                     maskBoundEnd.set(0, 0);
                     maskBoundStart.set(1000000, 1000000);
                     
+                    int numWhite = 0;
+                    
                     for(int i = 0; i < fboPix.getWidth() * fboPix.getHeight(); i++){
                     
                         
@@ -633,10 +634,17 @@ void Camera::update(){
                             //also mask the image while we're here
                             fboPix[i] = 0;
 
+                            numWhite++;
                         }
                     
                     }
                     
+                    //if there are no lit pixels in the mask then make the start and end 0,0
+                    if(numWhite == 0){
+                        maskBoundEnd.set(0, 0);
+                        maskBoundStart.set(0, 0);
+                    }
+
                     maskChanged = false;
                     
                 } else {
