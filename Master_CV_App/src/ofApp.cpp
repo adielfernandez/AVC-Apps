@@ -131,7 +131,7 @@ void ofApp::setup(){
     vector<string> movieFiles;
     movieFiles.resize(14);
     
-
+    
     
     for(int i = 0; i < 14; i++){
         
@@ -144,7 +144,7 @@ void ofApp::setup(){
     useLiveFeed = true;
     
     //set up actual feeds
-    int stagger = 300;
+    int stagger = 100;
     
     //set up the cameras
     for(int i = 0; i < numFeeds; i++){
@@ -201,8 +201,20 @@ void ofApp::setup(){
     //get the IP from file
     ofBuffer buffer = ofBufferFromFile("ip.txt");
     
-    string pgs1IP, pgs2IP, previzIP, previzDevIP, audioIP, heartbeatIP;
-    int pgs1Port, pgs2Port, previzPort, previzDevPort, audioPort, heartbeatPort;
+    string pgs1IP = "";
+    string pgs2IP = "";
+    string previzIP = "";
+    string previzDevIP = "";
+    string audioIP = "";
+    string heartbeatIP = "";
+    
+    
+    int pgs1Port = 0;
+    int pgs2Port = 0;
+    int previzPort = 0;
+    int previzDevPort = 0;
+    int audioPort = 0;
+    int heartbeatPort = 0;
 
     cout << "Getting OSC Configuration from File" << endl;
     
@@ -951,7 +963,7 @@ void ofApp::draw(){
             
             
             //averaged data
-            int totalNumBlobs;
+            int totalNumBlobs = 0;
             
             totalNumBlobs += Lobby1Aggregate.contours.size();
             totalNumBlobs += cameras[6] -> contours.size();

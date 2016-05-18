@@ -27,8 +27,7 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
     
     name = _name;
     numCams = _numCams;
-    feedWidth = 640;
-    feedHeight = 512;
+
     
     cams = _cams;
     bScaleDown = _bScaleDown;
@@ -170,7 +169,7 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
     backgroundInCol.set(80);
     backgroundOutCol.set(0);
     
-    waitingToBgDiff = true;
+
     
     
     
@@ -554,18 +553,24 @@ void Aggregator::update(){
         
 
 
+
+        //intermediate variables that will overwrite the useBG and resetBG gui toggles
+        //when the masterPix dimensions are changed. This resets when there is a change
+        //to prevent thread crashes
+        bool useBG;
+        bool sendReset;
         
-        
-        bool useBg;
-        if(!waitingToBgDiff){
+        if(oldMasterHeight != masterHeight || oldMasterWidth != masterWidth){
             
-            //if we're not waiting, get the value from the gui
-            useBg = useBgDiff;
+            useBG = false;
+            sendReset = true;
+            
         } else {
             
-            //if we are waiting, then send a false to the aggregate thread
-            useBg = false;
+            sendReset = resetBG;
+            useBG = useBgDiff;
         }
+        
         
         
         //construct a vector of ints with all the settings
@@ -576,8 +581,8 @@ void Aggregator::update(){
         settings[1] = numErosionsSlider;
         settings[2] = numDilationsSlider;
         settings[3] = learningTime;
-        settings[4] = useBg;            //bool casted as int into vector
-        settings[5] = resetBG;          //bool casted as int into vector
+        settings[4] = useBG;            //bool casted as int into vector
+        settings[5] = sendReset;              //bool casted as int into vector
         settings[6] = thresholdSlider;
         settings[7] = minBlobAreaSlider;
         settings[8] = maxBlobAreaSlider;
@@ -602,17 +607,6 @@ void Aggregator::update(){
     
     //update the blob filter
     if(useBlobFilter) filteredContours.update(filterRadiusSlider, stillTimeSlider, speedThresholdSlider);
-    
-    
-    
-    
-    //don't actually start the background until a few seconds in
-    //when settings are loaded and cameras have started
-    if(ofGetElapsedTimeMillis() < 4000){
-        waitingToBgDiff = true;
-    } else {
-        waitingToBgDiff = false;
-    }
 
     
     //if we're in the right view listen to the mouse
@@ -629,11 +623,17 @@ void Aggregator::update(){
     
     //if we haven't received anything from the thread in over a second
     //assume the thread crashed and change the background color to red as a warning
-    if(!waitingToBgDiff && ofGetElapsedTimeMillis() - aggregateProcessor.lastDataSendTime > 1000){
+    if(ofGetElapsedTimeMillis() - aggregateProcessor.lastDataSendTime > 1000){
         backgroundInCol.lerp(ofColor(100, 0, 0), 0.08);
         backgroundOutCol.lerp(ofColor(10, 0, 0), 0.08);
     }
 
+    
+    
+    //store the old dimensions of masterPix so we can do things later on when/if they change
+    oldMasterWidth = masterWidth;
+    oldMasterHeight = masterHeight;
+    
     
     
 }
@@ -685,12 +685,12 @@ void Aggregator::drawMain(){
         
         string bgString;
         
-        if(waitingToBgDiff){
+        if(!useBgDiff){
             ofSetColor(255, 0, 0);
-            bgString = "Background Differencing Inactive. System not ready";
+            bgString = "Background Differencing Inactive.";
         } else {
             ofSetColor(0, 255, 0);
-            bgString = "Background Differencing Active";
+            bgString = "Background Differencing Active.";
         }
         
         font -> drawString(bgString, adjustedOrigin.x, adjustedOrigin.y + masterHeight + 115 + font -> stringHeight("A"));
@@ -908,7 +908,7 @@ void Aggregator::drawCV(int x, int y){
                 ofPushMatrix();
                 ofTranslate(center.x, center.y);
                 int label = contours.getLabel(i);
-                ofVec2f velocity = toOf(contours.getVelocity(i));
+//                ofVec2f velocity = toOf(contours.getVelocity(i));
                 
                 ofSetColor(0, 255, 0);
                 ofDrawRectangle(-3, -3, 6, 6);

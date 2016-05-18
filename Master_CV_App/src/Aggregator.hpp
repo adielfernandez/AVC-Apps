@@ -63,7 +63,8 @@ public:
     string name;
     int numCams;
     bool bScaleDown;
-    int feedWidth, feedHeight;
+    const int feedWidth = 640;
+    const int feedHeight = 512;
     int scaledWidth, scaledHeight;
     ofColor backgroundInCol, backgroundOutCol;
     ofTrueTypeFont *font;

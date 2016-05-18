@@ -17,7 +17,7 @@ localhost
 12345
 
 ##### PrevizDev IP address #####
-192.168.187.208
+192.168.187.220
 
 ##### PrevizDev Recieve Port #####
 12345

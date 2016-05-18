@@ -52,7 +52,6 @@ public:
     
     void saveAllSettings();
     
-    void setupFeed();
     void closeFeed();
     void update();
     
@@ -129,17 +128,19 @@ public:
     
     //-----Camera Stream-----
     int staggerTime;
-    bool started;
-    int timeBeforeReset;
-    bool connectionStale;
+    bool pipelineStarted, pipelineSetup;
+    bool firstUpdate;
+    unsigned long long pipelineSetTime;
+    int gstWaitToStart;
     unsigned long long lastFrameTime;
     unsigned long long numFramesRec;
-    unsigned long long connectionTime;
     int cameraFPS;
     int lastCamFPS;
     int avgCamFPS;
     
-    int feedWidth, feedHeight;
+    const int feedWidth = 640;
+    const int feedHeight = 512;
+    
     int scaledWidth, scaledHeight;
     int croppedWidth, croppedHeight;
     

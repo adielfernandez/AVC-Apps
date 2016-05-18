@@ -83,10 +83,6 @@ void BlobFilter::update(int _personRadius, int _stillTimeout, float _speedThresh
         //holds the number of subBlobs inside one processed blob
         int numSubBlobs = 0;
         
-        
-        //Determines if we'll do anything with this i value
-        bool bNewBaseBlob = true;
-        
         //go through the found blobs to see if we've found this one
         //already in the nested loop below
         if(std::find(foundBlobs.begin(), foundBlobs.end(), i) == foundBlobs.end()){
@@ -276,14 +272,20 @@ void BlobFilter::update(int _personRadius, int _stillTimeout, float _speedThresh
             pB.subBlobs = tempBlobs[i].subBlobs;
             pB.lastMoveTime = ofGetElapsedTimeMillis();
             
-            
             processedBlobs.push_back(pB);
 
         } else {
             
             //update center, velocity, subBlobs and check if the still bool needs to flip
             processedBlobs[whichOne].center = tempBlobs[i].center;
-            processedBlobs[whichOne].vel = tempBlobs[i].vel;
+            
+            //straight replacement of old velocity
+//            processedBlobs[whichOne].vel = tempBlobs[i].vel;
+            
+            //averaging of old with new velocity
+            processedBlobs[whichOne].vel = (tempBlobs[i].vel + processedBlobs[whichOne].vel)/2.0f;
+            
+            //get new subBlobs vector
             processedBlobs[whichOne].subBlobs = tempBlobs[i].subBlobs;
             
             //if we're not moving
@@ -293,7 +295,6 @@ void BlobFilter::update(int _personRadius, int _stillTimeout, float _speedThresh
                 if(ofGetElapsedTimeMillis() - processedBlobs[whichOne].lastMoveTime > stillTimeout){
                     processedBlobs[whichOne].still = true;
                 }
-
 
             } else {
 
@@ -359,7 +360,20 @@ void BlobFilter::draw(){
         //draw their info
         string info;
         info += "ID: " + ofToString(processedBlobs[i].ID) + "\n";
-        info += "Vel: " + ofToString(processedBlobs[i].vel) + "\n";
+        
+        
+        //velocity with fixed precision (for easier reading)
+
+        stringstream strX;
+        strX << fixed << setprecision(2) << processedBlobs[i].vel.x;
+        
+        stringstream strY;
+        strY << fixed << setprecision(2) << processedBlobs[i].vel.y;
+        
+        string velString = strX.str() + ", " + strY.str();
+        
+        
+        info += "Vel: " + velString + "\n";
         
         ofSetColor(255);
         ofDrawBitmapString(info, processedBlobs[i].center.x + 5, processedBlobs[i].center.y - 5);

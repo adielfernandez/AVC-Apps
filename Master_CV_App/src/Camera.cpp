@@ -30,24 +30,7 @@ void Camera::setupViewControl(int _thisView, int *_viewMode, ofVec2f _adjOrigin)
     
 }
 
-void Camera::setupFeed(){
-    
-    cout << "\n\n" << name << ": SET pipeline..." << endl;
-    gst.setPipeline("rtspsrc location=rtsp://admin:admin@" + IP + ":554/cam/realmonitor?channel=1&subtype=1 latency=0 ! rtpjpegdepay ! jpegdec !  queue ! decodebin ! videoconvert", OF_PIXELS_MONO, true, feedWidth, feedHeight);
 
-    
-    //if(thisView < 12){
-    
-        cout << "\n\n" << name << ": START pipeline..." << endl;
-        gst.startPipeline();
-    
-    
-        cout << "\n\n" << name << ": PLAY pipeline..." << endl;
-        gst.play();
-    //}
-    
-    cout << "\n\n" << endl;
-}
 
 void Camera::setMovieFile(string file){
     
@@ -86,8 +69,8 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     titleSpace = 20;
     
     //-----Camera Stream-----
-    feedWidth = 640;
-    feedHeight = 512;
+//    feedWidth = 640;
+//    feedHeight = 512;
     
     bScaleDown = _scaleDown;
     useLiveFeed = _useLiveFeed;
@@ -241,15 +224,25 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     
     
     //camera starting/restarting
-    started = false;
-    connectionStale = false;
+    pipelineStarted = false;
+    pipelineSetup = false;
+    firstUpdate = false;
     numFramesRec = 0;
     lastFrameTime = 0;
-    connectionTime = 0;
-    timeBeforeReset = 5000;
     cameraFPS = 0;
     lastCamFPS = 0;
     avgCamFPS = 0;
+    
+    
+    //Pipeline management
+    
+    //time we've actually sent the command to SET the pipeline
+    //happens later, after the staggering time has passed
+    pipelineSetTime = 0;
+    
+    //how long to wait before we try to actually START the pipeline
+    gstWaitToStart = 30;
+    
     
     //start the image processing thread
     if(soloCam) imageProcessor.setup(&threadOutput, &contours);
@@ -278,6 +271,65 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
 
 
 void Camera::update(){
+    
+    
+    //update the feed/movie
+    if(useLiveFeed){
+
+        
+        if(!pipelineSetup && ofGetElapsedTimeMillis() > staggerTime){
+            
+            cout << "\n\n" << name << ": SET pipeline at " << ofGetElapsedTimef() << endl;
+            
+            gst.setPipeline("rtspsrc location=rtsp://admin:admin@" + IP + ":554/cam/realmonitor?channel=1&subtype=1 latency=0 ! rtpjpegdepay ! jpegparse ! jpegdec ! queue2 ! decodebin ! videoconvert", OF_PIXELS_MONO, true, feedWidth, feedHeight);
+            
+            
+            pipelineSetup = true;
+            pipelineSetTime = ofGetElapsedTimeMillis();
+            
+            cout << "\n\n" << endl;
+            
+        }
+        
+        
+        if(pipelineSetup && !pipelineStarted && ofGetElapsedTimeMillis() - pipelineSetTime > gstWaitToStart){
+            
+            //----------GSTREAMER ISSUE STARTS HERE----------
+            //App crashes when opening the 13th camera, but only when running compiled app
+            //(crash does not occur in Xcode).
+            //Error happens after startPipeline() call from 13th camera.
+
+            cout << "\n\n" << name << ": START pipeline at " << ofGetElapsedTimef() << endl;
+            gst.startPipeline();
+            cout << "\n\n" << endl;
+            
+            
+            pipelineStarted = true;
+            
+        }
+        
+        
+        if(pipelineStarted){
+            
+            if(!firstUpdate){
+                cout << "\n\n" << name << ": First update at " << ofGetElapsedTimef() << endl;
+                firstUpdate = true;
+            }
+            
+            gst.update();
+            
+        }
+        
+        
+    } else {
+        
+        movie.update();
+    }
+    
+    
+    
+    
+    
     
     
     //resets the mapping points to the default
@@ -506,28 +558,7 @@ void Camera::update(){
     
     
     
-    //update the feed/movie
-    if(useLiveFeed){
-        
-        if(started){
 
-//            cout << name << ": updating feed" << endl;
-            if(thisView < 12){
-                gst.update();
-            }
-        }
-        
-        if(!started && !connectionStale && ofGetElapsedTimeMillis() > staggerTime){
-            started = true;
-
-            setupFeed();
-        }
-
-        
-    } else {
-        
-        movie.update();
-    }
     
     
     
