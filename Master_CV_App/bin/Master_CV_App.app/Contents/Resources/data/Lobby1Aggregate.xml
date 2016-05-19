@@ -1,7 +1,7 @@
 <Lobby1Aggregate>
 	<Min_Blob_Area>30</Min_Blob_Area>
 	<Max_Blob_Area>5700</Max_Blob_Area>
-	<Persistence>71</Persistence>
+	<Persistence>89</Persistence>
 	<Max_Distance>66</Max_Distance>
 	<Draw_threshold>0</Draw_threshold>
 	<Draw_Contours>1</Draw_Contours>
@@ -19,7 +19,7 @@
 	<Number_of_dilations>4</Number_of_dilations>
 <Draw_blurred>0</Draw_blurred>
 <Background_Differencing/>
-	<Frames_to_learn_BG>510</Frames_to_learn_BG>
+	<Frames_to_learn_BG>470</Frames_to_learn_BG>
 	<Use_BG_Diff>1</Use_BG_Diff>
 	<Contour_Finding/>
 <___IMAGE_MANIPULATION/>
@@ -33,8 +33,8 @@
 <Contrast_Exponent>7.335</Contrast_Exponent>
 	<Contrast_Phase>0.038</Contrast_Phase>
 <Use_Blob_Filter>1</Use_Blob_Filter>
-	<Filter_Radius>31</Filter_Radius>
+	<Filter_Radius>32</Filter_Radius>
 <Draw_Filtered_Blobs>1</Draw_Filtered_Blobs>
-<Filter_Still_Time>5000</Filter_Still_Time>
-	<Filter_Speed_Thresh>2.52</Filter_Speed_Thresh>
+<Filter_Still_Time>3150</Filter_Still_Time>
+	<Filter_Speed_Thresh>3.08</Filter_Speed_Thresh>
 </Lobby1Aggregate>

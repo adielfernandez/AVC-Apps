@@ -1403,7 +1403,7 @@ void Camera::gatherOscStats(){
         m.addFloatArg(centerNormalized.y);
         m.addFloatArg(velocity.x);
         m.addFloatArg(velocity.x);
-        m.addBoolArg(still);
+        m.addFloatArg(still ? 1.0f : 0.0f);
         
         blobsBundle.addMessage(m);
         
