@@ -141,7 +141,7 @@ void ofApp::setup(){
     
     
     //master control of live vs video
-    useLiveFeed = false;
+    useLiveFeed = true;
     
     //set up actual feeds
     int stagger = 100;

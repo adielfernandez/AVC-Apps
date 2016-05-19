@@ -232,7 +232,7 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     lastCamFPS = 0;
     avgCamFPS = 0;
     
-    timeBeforeReset = 5000;
+    timeBeforeReset = 10000;
     
     
     //Pipeline management
@@ -280,6 +280,7 @@ void Camera::update(){
         
         if(!pipelineSetup && ofGetElapsedTimeMillis() > staggerTime){
             
+//            cout << "\n" << name << ": SET Pipeline at " << ofGetElapsedTimef() << endl;
             
             gst.setPipeline("rtspsrc location=rtsp://admin:admin@" + IP + ":554/cam/realmonitor?channel=1&subtype=1 latency=0 ! rtpjpegdepay ! jpegparse ! jpegdec ! queue2 ! decodebin ! videoconvert", OF_PIXELS_MONO, true, feedWidth, feedHeight);
             
@@ -292,19 +293,47 @@ void Camera::update(){
         
         if(pipelineSetup && !pipelineStarted && ofGetElapsedTimeMillis() - pipelineSetTime > gstWaitToStart){
             
+//            cout << "\n" << name << ": START & PLAY Pipeline at " << ofGetElapsedTimef() << endl;
+            
             gst.startPipeline();
+            gst.play();
+            
             pipelineStarted = true;
             
         }
         
         
-        if(pipelineStarted){
+        if(pipelineStarted && gst.isLoaded()){
             
             gst.update();
             
         }
         
-
+        
+        
+        //if it's been too long since we've gotten the last frame
+        //close the pipeline and try to reconnect
+        if(ofGetElapsedTimeMillis() - lastFrameTime > timeBeforeReset){
+            
+//            cout << "\n" << name << ": CLOSING GST player at " << ofGetElapsedTimef() << endl;
+            
+            //close the pipeline
+            gst.stop();
+            
+//            cout << "\n" << name << ": SET Pipeline at " << ofGetElapsedTimef() << endl;
+            
+            gst.setPipeline("rtspsrc location=rtsp://admin:admin@" + IP + ":554/cam/realmonitor?channel=1&subtype=1 latency=0 ! rtpjpegdepay ! jpegparse ! jpegdec ! queue2 ! decodebin ! videoconvert", OF_PIXELS_MONO, true, feedWidth, feedHeight);
+            
+            //and prepare to reconnect
+            pipelineSetTime = ofGetElapsedTimeMillis();
+            gstWaitToStart = 5000;
+            pipelineStarted = false;
+            
+            //also pretend we've just gotten a frame so it doesn't immediately
+            //jump into this if statement again
+            lastFrameTime = ofGetElapsedTimeMillis();
+            
+        }
         
         
         
@@ -919,6 +948,7 @@ void Camera::drawMain(){
     ofDrawBitmapString(title, secondSpot.x, secondSpot.y + 10);
     
     ofDrawBitmapString("Num Frames Received: " + ofToString(numFramesRec), secondSpot.x, 15);
+    ofDrawBitmapString("Last Frame Time: " + ofToString(ofGetElapsedTimeMillis() - lastFrameTime), secondSpot.x, 30);
     
     if(soloCam){
         ofDrawBitmapString("CV Thread ID: " + ofToString(imageProcessor.getThreadId()), secondSpot.x, 30);
