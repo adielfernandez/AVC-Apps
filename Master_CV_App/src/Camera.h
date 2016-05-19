@@ -129,7 +129,6 @@ public:
     //-----Camera Stream-----
     int staggerTime;
     bool pipelineStarted, pipelineSetup;
-    bool firstUpdate;
     unsigned long long pipelineSetTime;
     int gstWaitToStart;
     unsigned long long lastFrameTime;

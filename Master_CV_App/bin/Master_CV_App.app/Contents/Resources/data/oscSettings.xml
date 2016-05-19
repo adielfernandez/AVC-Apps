@@ -25,7 +25,7 @@
 		<Send_to_Previz>1</Send_to_Previz>
 	<Send_to___/>
 		<Send_to_PrevizDev>1</Send_to_PrevizDev>
-		<Send_Heartbeat>1</Send_Heartbeat>
+		<Send_Heartbeat>0</Send_Heartbeat>
 	<Corridors_to_include/>
 		<Lobby_1_Data>1</Lobby_1_Data>
 		<Corridor_2_Data>1</Corridor_2_Data>
@@ -36,7 +36,8 @@
 		<Master_OSC_Toggle/>
 	<PGS_Send_Rate__in_ms_>63</PGS_Send_Rate__in_ms_>
 		<Audio_Send_Rate__in_ms_>245</Audio_Send_Rate__in_ms_>
-	<PGS_Rate__in_ms_>39</PGS_Rate__in_ms_>
+	<PGS_Rate__in_ms_>20</PGS_Rate__in_ms_>
 		<Audio_Rate__in_ms_>257</Audio_Rate__in_ms_>
+	<Send_to_PGS-Backup>1</Send_to_PGS-Backup>
 	</oscSettings>
 </group>

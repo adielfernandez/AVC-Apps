@@ -1,19 +1,19 @@
 ##### PGS1 IP address #####
-10.1.4.124
+192.168.187.121
 
 ##### PGS1 Recieve Port #####
 12345
 
 ##### PGS2 IP address #####
-192.168.187.124
+192.168.187.122
 
 ##### PGS2 Recieve Port #####
 12345
 
-##### Previz IP address #####
-localhost
+##### PGS BACKUP IP address #####
+192.168.187.124
 
-##### Previz Recieve Port #####
+##### PGS BACKUP Recieve Port #####
 12345
 
 ##### PrevizDev IP address #####
@@ -23,7 +23,7 @@ localhost
 12345
 
 ##### Audio System IP address #####
-192.168.32.191
+192.168.187.126
 
 ##### Audio System Receive Port #####
 12345

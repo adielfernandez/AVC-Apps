@@ -203,7 +203,7 @@ void ofApp::setup(){
     
     string pgs1IP = "";
     string pgs2IP = "";
-    string previzIP = "";
+    string pgsBackupIP = "";
     string previzDevIP = "";
     string audioIP = "";
     string heartbeatIP = "";
@@ -211,7 +211,7 @@ void ofApp::setup(){
     
     int pgs1Port = 0;
     int pgs2Port = 0;
-    int previzPort = 0;
+    int pgsBackupPort = 0;
     int previzDevPort = 0;
     int audioPort = 0;
     int heartbeatPort = 0;
@@ -235,9 +235,9 @@ void ofApp::setup(){
             } else if(lineNum == 10){
                 pgs2Port = ofToInt(line);
             } else if(lineNum == 13){
-                previzIP = line;
+                pgsBackupIP = line;
             } else if(lineNum == 16){
-                previzPort = ofToInt(line);
+                pgsBackupPort = ofToInt(line);
             } else if(lineNum == 19){
                 previzDevIP = line;
             } else if(lineNum == 22){
@@ -261,8 +261,8 @@ void ofApp::setup(){
     cout << "PGS1 Port: " << pgs1Port << endl;
     cout << "PGS2 IP: " << pgs2IP << endl;
     cout << "PGS2 Port: " << pgs2Port << endl;
-    cout << "Previz IP: " << previzIP << endl;
-    cout << "Previz Port: " << previzPort << endl;
+    cout << "PgsBackupIP IP: " << pgsBackupIP << endl;
+    cout << "PgsBackupPort Port: " << pgsBackupPort << endl;
     cout << "PrevizDev IP: " << previzDevIP << endl;
     cout << "PrevizDev Port: " << previzDevPort << endl;
     cout << "Audio IP: " << audioIP << endl;
@@ -274,7 +274,7 @@ void ofApp::setup(){
     
     oscHandler.setupPGS1(pgs1IP, pgs1Port);
     oscHandler.setupPGS2(pgs2IP, pgs2Port);
-    oscHandler.setupPreviz(previzIP, previzPort);
+    oscHandler.setupPGSBackup(pgsBackupIP, pgsBackupPort);
     oscHandler.setupPrevizDev(previzDevIP, previzDevPort);
     oscHandler.setupAudio(audioIP, audioPort);
     oscHandler.setupHeartbeat(heartbeatIP, heartbeatPort);
@@ -633,7 +633,7 @@ void ofApp::draw(){
         oscDataFormat += "---------------\n";
         oscDataFormat += "PGS-1: " + oscHandler.pgs1IP + " on port: " + ofToString(oscHandler.pgs1Port) + "\n";
         oscDataFormat += "PGS-2: " + oscHandler.pgs2IP + " on port: " + ofToString(oscHandler.pgs2Port) + "\n";
-        oscDataFormat += "Previz: " + oscHandler.previzIP + " on port: " + ofToString(oscHandler.previzPort) + "\n";
+        oscDataFormat += "PGS-Backup: " + oscHandler.pgsBackupIP + " on port: " + ofToString(oscHandler.pgsBackupPort) + "\n";
         oscDataFormat += "PrevizDev: " + oscHandler.previzDevIP + " on port: " + ofToString(oscHandler.previzDevPort) + "\n";
         oscDataFormat += "Heartbeat: " + oscHandler.heartbeatIP + " on port: " + ofToString(oscHandler.heartbeatPort) + "\n";
         oscDataFormat += "\n";
@@ -774,7 +774,7 @@ void ofApp::draw(){
         
 
         
-        float oscVizSpacerY = 30;
+        float oscVizSpacerY = 20;
         
         ofSetColor(255);
         pgsViz.draw(oscVizOrigin.x, oscVizOrigin.y + oscVizSpacerY);
@@ -998,7 +998,7 @@ void ofApp::draw(){
             //Now send it all at once
             if(oscHandler.sendPgs1) oscHandler.pgs1Sender.sendBundle(allSystemData);
             if(oscHandler.sendPgs2) oscHandler.pgs2Sender.sendBundle(allSystemData);
-            if(oscHandler.sendPreviz) oscHandler.previzSender.sendBundle(allSystemData);
+            if(oscHandler.sendPgsBackup) oscHandler.pgsBackupSender.sendBundle(allSystemData);
             if(oscHandler.sendPrevizDev) oscHandler.previzDevSender.sendBundle(allSystemData);
             
             
@@ -1062,7 +1062,6 @@ void ofApp::draw(){
         
         if(ofGetElapsedTimeMillis() - saveTime < duration){
 
-            
             float pct = ofMap(ofGetElapsedTimeMillis(), saveTime, saveTime + duration, 0.0, 1.0);
             boxCol = start.getLerped(end, pct);
             textCol = ofColor(255, 0).getLerped(ofColor(255, 255), pct);

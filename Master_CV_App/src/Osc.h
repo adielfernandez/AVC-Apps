@@ -20,7 +20,7 @@ public:
     void setupAudio(string _IP, int _port);
     void setupPGS1(string _IP, int _port);
     void setupPGS2(string _IP, int _port);
-    void setupPreviz(string _IP, int _port);
+    void setupPGSBackup(string _IP, int _port);
     void setupPrevizDev(string _IP, int _port);
     
     void setupHeartbeat(string _IP, int _port);
@@ -40,9 +40,9 @@ public:
     string pgs2IP;
     int pgs2Port;
     
-    ofxOscSender previzSender;
-    string previzIP;
-    int previzPort;
+    ofxOscSender pgsBackupSender;
+    string pgsBackupIP;
+    int pgsBackupPort;
     
     ofxOscSender previzDevSender;
     string previzDevIP;
@@ -72,7 +72,7 @@ public:
     ofxLabel receiversLabel;
     ofxToggle sendPgs1;
     ofxToggle sendPgs2;
-    ofxToggle sendPreviz;
+    ofxToggle sendPgsBackup;
     ofxToggle sendPrevizDev;
     ofxToggle sendAudioOsc;
     ofxToggle sendHeartbeat;

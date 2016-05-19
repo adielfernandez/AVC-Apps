@@ -22,11 +22,11 @@ void Osc::setupPGS2(string _IP, int _port){
     
 }
 
-void Osc::setupPreviz(string _IP, int _port){
+void Osc::setupPGSBackup(string _IP, int _port){
     
-    previzIP = _IP;
-    previzPort = _port;
-    previzSender.setup(previzIP, previzPort);
+    pgsBackupIP = _IP;
+    pgsBackupPort = _port;
+    pgsBackupSender.setup(pgsBackupIP, pgsBackupPort);
     
 }
 
@@ -74,12 +74,13 @@ void Osc::setupGui(){
     baseGui.add(receiversLabel.setup("Send to...", ""));
     baseGui.add(sendPgs1.setup("Send to PGS-1", true));
     baseGui.add(sendPgs2.setup("Send to PGS-2", true));
-    baseGui.add(sendPreviz.setup("Send to Previz", true));
+    baseGui.add(sendPgsBackup.setup("Send to PGS-Backup", true));
     baseGui.add(sendPrevizDev.setup("Send to PrevizDev", true));
-    baseGui.add(pgsSendRate.setup("PGS Rate (in ms)", 40, 20, 500));
+    baseGui.add(sendHeartbeat.setup("Send Heartbeat", false));
+    baseGui.add(pgsSendRate.setup("PGS Rate (in ms)", 40, 15, 100));
 
     baseGui.add(sendAudioOsc.setup("Send Audio Data", true));
-    baseGui.add(audioSendRate.setup("Audio Rate (in ms)", 250, 20, 500));
+    baseGui.add(audioSendRate.setup("Audio Rate (in ms)", 250, 15, 500));
     
     baseGui.add(masterToggleLabel.setup("Master OSC Toggle", ""));
     baseGui.add(sendAllOsc.setup("Send OSC", true));

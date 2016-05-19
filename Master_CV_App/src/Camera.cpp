@@ -226,7 +226,6 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     //camera starting/restarting
     pipelineStarted = false;
     pipelineSetup = false;
-    firstUpdate = false;
     numFramesRec = 0;
     lastFrameTime = 0;
     cameraFPS = 0;
@@ -279,42 +278,25 @@ void Camera::update(){
         
         if(!pipelineSetup && ofGetElapsedTimeMillis() > staggerTime){
             
-            cout << "\n\n" << name << ": SET pipeline at " << ofGetElapsedTimef() << endl;
             
             gst.setPipeline("rtspsrc location=rtsp://admin:admin@" + IP + ":554/cam/realmonitor?channel=1&subtype=1 latency=0 ! rtpjpegdepay ! jpegparse ! jpegdec ! queue2 ! decodebin ! videoconvert", OF_PIXELS_MONO, true, feedWidth, feedHeight);
             
-            
             pipelineSetup = true;
             pipelineSetTime = ofGetElapsedTimeMillis();
-            
-            cout << "\n\n" << endl;
+
             
         }
         
         
         if(pipelineSetup && !pipelineStarted && ofGetElapsedTimeMillis() - pipelineSetTime > gstWaitToStart){
             
-            //----------GSTREAMER ISSUE STARTS HERE----------
-            //App crashes when opening the 13th camera, but only when running compiled app
-            //(crash does not occur in Xcode).
-            //Error happens after startPipeline() call from 13th camera.
-
-            cout << "\n\n" << name << ": START pipeline at " << ofGetElapsedTimef() << endl;
             gst.startPipeline();
-            cout << "\n\n" << endl;
-            
-            
             pipelineStarted = true;
             
         }
         
         
         if(pipelineStarted){
-            
-            if(!firstUpdate){
-                cout << "\n\n" << name << ": First update at " << ofGetElapsedTimef() << endl;
-                firstUpdate = true;
-            }
             
             gst.update();
             
