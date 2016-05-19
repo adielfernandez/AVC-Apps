@@ -133,6 +133,7 @@ public:
     int gstWaitToStart;
     unsigned long long lastFrameTime;
     unsigned long long numFramesRec;
+    int timeBeforeReset;
     int cameraFPS;
     int lastCamFPS;
     int avgCamFPS;

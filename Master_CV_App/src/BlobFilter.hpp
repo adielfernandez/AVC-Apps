@@ -22,7 +22,7 @@
 struct ProcessedBlob{
     
     int ID;
-    ofVec2f center, vel;
+    ofVec2f center, vel, centerNorm;
     
     bool still = false;
     unsigned long long lastMoveTime = 0;
@@ -40,17 +40,25 @@ public:
     
     BlobFilter();
     
-    void setup(ofxCv::ContourFinder *_rawContours);
-    void update(int _personRadius, int _stillTimeout, float _speedThresh);
+    void setup(ofxCv::ContourFinder *_rawContours, string _corridorName);
+    void update(int _personRadius, int _stillTimeout, float _speedThresh, int _width, int _height);
     void draw();
+    
+    void setDrawInfo(bool draw);
+    
+    bool drawInfo;
+    
+    string corridorName;
     
     //mirror the ofxCv::ContourFinder style
     int size();
     ofPoint getCenter(int i);
+    ofPoint getCenterNormalized(int i);
     ofVec2f getVelocity(int i);
     int getLabel(int i);
     bool getStill(int i);
     
+    int scaledWidth, scaledHeight;
     
     float personRadius;
     int stillTimeout;
@@ -60,7 +68,17 @@ public:
     
     //vectors to hold processed blobs
     vector<ProcessedBlob> processedBlobs;
-    
     vector<ProcessedBlob> tempBlobs;
     
+    int numControlPts;
+    vector<float> controlPtsInput;
+    vector<float> controlPtsOutput;
+    
 };
+
+
+
+
+
+
+

@@ -232,6 +232,8 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     lastCamFPS = 0;
     avgCamFPS = 0;
     
+    timeBeforeReset = 5000;
+    
     
     //Pipeline management
     
@@ -253,7 +255,7 @@ void Camera::setup(string _IP, string _name, bool _scaleDown, bool _useLiveFeed)
     
     
     //Setup the blob processor
-    filteredContours.setup(&contours);
+    filteredContours.setup(&contours, name);
     
 }
 
@@ -301,6 +303,10 @@ void Camera::update(){
             gst.update();
             
         }
+        
+
+        
+        
         
         
     } else {
@@ -706,7 +712,7 @@ void Camera::update(){
             
             //update the blob filter
             if(cameraGui.useBlobFilter)
-                filteredContours.update(cameraGui.filterRadiusSlider, cameraGui.stillTimeSlider, cameraGui.speedThresholdSlider);
+                filteredContours.update(cameraGui.filterRadiusSlider, cameraGui.stillTimeSlider, cameraGui.speedThresholdSlider, scaledWidth, scaledHeight);
             
             
         } else {
@@ -1219,28 +1225,28 @@ void Camera::drawPostCvWindow(int x, int y, float scale){
         ofSetLineWidth(1.0);
         contours.draw();
         
-        for(int i = 0; i < contours.size(); i++) {
-            ofPoint center = toOf(contours.getCenter(i));
-            ofPushMatrix();
-            ofTranslate(center.x, center.y);
-            int label = contours.getLabel(i);
-            ofVec2f velocity = toOf(contours.getVelocity(i));
-            
-            ofSetColor(0, 255, 0);
-            ofDrawRectangle(-3, -3, 6, 6);
-            
-            string msg = ofToString(label);
-            
-            if(cameraGui.showInfoToggle){
-                msg = ofToString(label) + " : " + ofToString(center.x) + "," + ofToString(center.y) + " : " + ofToString(velocity.x) + "," + ofToString(velocity.y);
-            }
-            
-            ofSetColor(0, 100, 255);
-            ofDrawBitmapString(msg, 0, 0);
-            
-            ofPopMatrix();
-            
-        }
+//        for(int i = 0; i < contours.size(); i++) {
+//            ofPoint center = toOf(contours.getCenter(i));
+//            ofPushMatrix();
+//            ofTranslate(center.x, center.y);
+//            int label = contours.getLabel(i);
+//            ofVec2f velocity = toOf(contours.getVelocity(i));
+//            
+//            ofSetColor(0, 255, 0);
+//            ofDrawRectangle(-3, -3, 6, 6);
+//            
+//            string msg = ofToString(label);
+//            
+//            if(cameraGui.showInfoToggle){
+//                msg = ofToString(label) + " : " + ofToString(center.x) + "," + ofToString(center.y) + " : " + ofToString(velocity.x) + "," + ofToString(velocity.y);
+//            }
+//            
+//            ofSetColor(0, 100, 255);
+//            ofDrawBitmapString(msg, 0, 0);
+//            
+//            ofPopMatrix();
+//            
+//        }
         
         ofPopMatrix();
         
@@ -1248,6 +1254,7 @@ void Camera::drawPostCvWindow(int x, int y, float scale){
     
     //draw processed blobs
     if(cameraGui.drawFilteredBlobs && cameraGui.useBlobFilter){
+        filteredContours.setDrawInfo(cameraGui.showInfoToggle);
         filteredContours.draw();
     }
     

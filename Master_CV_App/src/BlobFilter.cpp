@@ -18,21 +18,117 @@ BlobFilter::BlobFilter(){
 }
 
 
-void BlobFilter::setup(ofxCv::ContourFinder *_rawContours){
+void BlobFilter::setup(ofxCv::ContourFinder *_rawContours, string _corridorName){
     
     rawContours = _rawContours;
+    corridorName = _corridorName;
+
     
     personRadius = 20;
     stillTimeout = 2000;
     
+    numControlPts = 11;
+    
+    //Input holds the pixel value of the blob center
+    controlPtsInput.resize(numControlPts);
+    
+    //Output holds the real point in space normalized from 0-1
+    controlPtsOutput.resize(numControlPts);
+    
+    if(corridorName == "Lobby1Aggregate"){
+        
+        controlPtsInput[0] = 21;
+        controlPtsOutput[0] = 0.0f;
+
+        controlPtsInput[1] = 92;
+        controlPtsOutput[1] = 0.1f;
+        
+        controlPtsInput[2] = 216;
+        controlPtsOutput[2] = 0.2f;
+        
+        controlPtsInput[3] = 305;
+        controlPtsOutput[3] = 0.3f;
+        
+        controlPtsInput[4] = 347;
+        controlPtsOutput[4] = 0.4f;
+        
+        controlPtsInput[5] = 454;
+        controlPtsOutput[5] = 0.5f;
+        
+        controlPtsInput[6] = 579;
+        controlPtsOutput[6] = 0.6f;
+        
+        controlPtsInput[7] = 628;  //was 618
+        controlPtsOutput[7] = 0.7f;
+        
+        controlPtsInput[8] = 694;   //was 684
+        controlPtsOutput[8] = 0.8f;
+        
+        controlPtsInput[9] = 836;   //was 819
+        controlPtsOutput[9] = 0.9f;
+
+        controlPtsInput[10] = 902;
+        controlPtsOutput[10] = 1.0f;
+        
+    } else if(corridorName == "Lobby2Aggregate"){
+        
+        controlPtsInput[0] = 0.0f;
+        controlPtsOutput[0] = 0.0f;
+        
+        controlPtsInput[1] = 0.0f;
+        controlPtsOutput[1] = 0.1f;
+        
+        controlPtsInput[2] = 0.0f;
+        controlPtsOutput[2] = 0.2f;
+        
+        controlPtsInput[3] = 0.0f;
+        controlPtsOutput[3] = 0.3f;
+        
+        controlPtsInput[4] = 0.0f;
+        controlPtsOutput[4] = 0.4f;
+        
+        controlPtsInput[5] = 0.0f;
+        controlPtsOutput[5] = 0.5f;
+        
+        controlPtsInput[6] = 0.0f;
+        controlPtsOutput[6] = 0.6f;
+        
+        controlPtsInput[7] = 0.0f;
+        controlPtsOutput[7] = 0.7f;
+        
+        controlPtsInput[8] = 0.0f;
+        controlPtsOutput[8] = 0.8f;
+        
+        controlPtsInput[9] = 0.0f;
+        controlPtsOutput[9] = 0.9f;
+        
+        controlPtsInput[10] = 0.0f;
+        controlPtsOutput[10] = 1.0f;
+        
+        
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
 }
 
-void BlobFilter::update(int _personRadius, int _stillTimeout, float _speedThresh){
+void BlobFilter::update(int _personRadius, int _stillTimeout, float _speedThresh, int _width, int _height){
     
     personRadius = _personRadius;
     stillTimeout = _stillTimeout;
     speedThresh = _speedThresh;
+    
+    scaledWidth = _width;
+    scaledHeight = _height;
     
     /*
      * Filtering workflow:
@@ -185,7 +281,7 @@ void BlobFilter::update(int _personRadius, int _stillTimeout, float _speedThresh
             
 //            p.center = avgPos;
             p.center = oldestPos;
-            
+            p.centerNorm = oldestPos/ofVec2f(scaledWidth, scaledHeight);
             p.vel = avgVel;
             p.subBlobs = thisSubBlob;
             tempBlobs.push_back(p);
@@ -268,6 +364,7 @@ void BlobFilter::update(int _personRadius, int _stillTimeout, float _speedThresh
             
             pB.ID = tempBlobs[i].ID;
             pB.center = tempBlobs[i].center;
+            pB.centerNorm = tempBlobs[i].centerNorm;
             pB.vel = tempBlobs[i].vel;
             pB.subBlobs = tempBlobs[i].subBlobs;
             pB.lastMoveTime = ofGetElapsedTimeMillis();
@@ -278,6 +375,7 @@ void BlobFilter::update(int _personRadius, int _stillTimeout, float _speedThresh
             
             //update center, velocity, subBlobs and check if the still bool needs to flip
             processedBlobs[whichOne].center = tempBlobs[i].center;
+            processedBlobs[whichOne].centerNorm = tempBlobs[i].centerNorm;
             
             //straight replacement of old velocity
 //            processedBlobs[whichOne].vel = tempBlobs[i].vel;
@@ -311,11 +409,46 @@ void BlobFilter::update(int _personRadius, int _stillTimeout, float _speedThresh
     }
     
     
+    //Blobs are updated and new, now we need to go through them and re-map
+    //their positions according to the control points we set along the way.
     
-    
+    if(corridorName == "Lobby1Aggregate"){
+        for(int i = 0; i < processedBlobs.size(); i++){
+            
+            //find the X value of the blob and find which zone it's in
+            //then remap according to points it falls between
+            int leftIndex = 0;
+            int rightIndex = 1;
+            
+            for(int j = 0; j < numControlPts; j++){
+                
+                //find the control point to the left
+                if(processedBlobs[i].center.x > controlPtsInput[j]){
+                    leftIndex = j;
+                    rightIndex = j + 1;
+                }
+            }
+            
+            //now we have the bounds so remap (and clamp)
+            float newX = ofMap(processedBlobs[i].center.x, controlPtsInput[leftIndex], controlPtsInput[rightIndex], controlPtsOutput[leftIndex], controlPtsOutput[rightIndex], true);
+            
+            //Put the mapped value back in the blob
+            processedBlobs[i].centerNorm.x = newX;
+            
+            //Since we're here, scale it up for the non normalized value
+            processedBlobs[i].center.x = newX * scaledWidth;
+            
+            
+        }
+    }
     
 }
 
+void BlobFilter::setDrawInfo(bool draw){
+    
+    drawInfo = draw;
+    
+}
 
 void BlobFilter::draw(){
 
@@ -356,28 +489,43 @@ void BlobFilter::draw(){
         
         ofDrawCircle(processedBlobs[i].center.x, processedBlobs[i].center.y, 6);
         
-        
-        //draw their info
-        string info;
-        info += "ID: " + ofToString(processedBlobs[i].ID) + "\n";
-        
-        
-        //velocity with fixed precision (for easier reading)
-
-        stringstream strX;
-        strX << fixed << setprecision(2) << processedBlobs[i].vel.x;
-        
-        stringstream strY;
-        strY << fixed << setprecision(2) << processedBlobs[i].vel.y;
-        
-        string velString = strX.str() + ", " + strY.str();
-        
-        
-        info += "Vel: " + velString + "\n";
-        
-        ofSetColor(255);
-        ofDrawBitmapString(info, processedBlobs[i].center.x + 5, processedBlobs[i].center.y - 5);
-        
+        if(drawInfo){
+            //draw their info
+            string info;
+            info += "ID: " + ofToString(processedBlobs[i].ID) + "\n";
+            
+            
+            //Pixel position
+            info += "Pos: " + ofToString(processedBlobs[i].center) + "\n";
+            
+            //Normalized position (with fixed precision)
+            stringstream posX;
+            posX << fixed << setprecision(2) << processedBlobs[i].centerNorm.x;
+            
+            stringstream posY;
+            posY << fixed << setprecision(2) << processedBlobs[i].centerNorm.y;
+            
+            string posString = posX.str() + ", " + posY.str();
+            
+            info += "Pos: " + posString + "\n";
+            
+            
+            //velocity with fixed precision (for easier reading)
+            
+            stringstream velX;
+            velX << fixed << setprecision(2) << processedBlobs[i].vel.x;
+            
+            stringstream velY;
+            velY << fixed << setprecision(2) << processedBlobs[i].vel.y;
+            
+            string velString = velX.str() + ", " + velY.str();
+            
+            
+            info += "Vel: " + velString + "\n";
+            
+            ofSetColor(255);
+            ofDrawBitmapString(info, processedBlobs[i].center.x + 5, processedBlobs[i].center.y - 5);
+        }
     }
 
 }
@@ -398,6 +546,12 @@ int BlobFilter::getLabel(int i){
 ofPoint BlobFilter::getCenter(int i){
     
     return processedBlobs[i].center;
+    
+}
+
+ofPoint BlobFilter::getCenterNormalized(int i){
+    
+    return processedBlobs[i].centerNorm;
     
 }
 

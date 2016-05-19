@@ -207,11 +207,18 @@ void Aggregator::setup(string _name, int _numCams, vector<shared_ptr<Camera>> _c
     aggregateProcessor.setup(&threadOutputPix, &contours);
     
     //Setup the blob processor
-    filteredContours.setup(&contours);
+    filteredContours.setup(&contours, name);
     
 }
 
-
+//===============================================================//
+//---------------------------------------------------------------//
+//                _  _ ___  ___  ____ ___ ____                   //
+//                |  | |__] |  \ |__|  |  |___                   //
+//                |__| |    |__/ |  |  |  |___                   //
+//                                                               //
+//---------------------------------------------------------------//
+//===============================================================//
 
 
 void Aggregator::update(){
@@ -606,7 +613,7 @@ void Aggregator::update(){
     
     
     //update the blob filter
-    if(useBlobFilter) filteredContours.update(filterRadiusSlider, stillTimeSlider, speedThresholdSlider);
+    if(useBlobFilter) filteredContours.update(filterRadiusSlider, stillTimeSlider, speedThresholdSlider, masterWidth, masterHeight);
 
     
     //if we're in the right view listen to the mouse
@@ -637,6 +644,17 @@ void Aggregator::update(){
     
     
 }
+
+
+
+//===============================================================//
+//---------------------------------------------------------------//
+//                    ___  ____ ____ _ _ _                       //
+//                    |  \ |__/ |__| | | |                       //
+//                    |__/ |  \ |  | |_|_|                       //
+//                                                               //
+//---------------------------------------------------------------//
+//===============================================================//
 
 
 void Aggregator::drawMain(){
@@ -900,30 +918,30 @@ void Aggregator::drawCV(int x, int y){
         
         contours.draw();
 
-        if(showInfoToggle){
-        
-        
-            for(int i = 0; i < contours.size(); i++) {
-                ofPoint center = toOf(contours.getCenter(i));
-                ofPushMatrix();
-                ofTranslate(center.x, center.y);
-                int label = contours.getLabel(i);
-//                ofVec2f velocity = toOf(contours.getVelocity(i));
-                
-                ofSetColor(0, 255, 0);
-                ofDrawRectangle(-3, -3, 6, 6);
-                
-                string msg = ofToString(label);
-                
-                
-                if(showInfoToggle){
-                    ofSetColor(0, 100, 255);
-                    ofDrawBitmapString(msg, 5, -5);
-                }
-                ofPopMatrix();
-                
-            }
-        }
+//        if(showInfoToggle){
+//        
+//        
+//            for(int i = 0; i < contours.size(); i++) {
+//                ofPoint center = toOf(contours.getCenter(i));
+//                ofPushMatrix();
+//                ofTranslate(center.x, center.y);
+//                int label = contours.getLabel(i);
+////                ofVec2f velocity = toOf(contours.getVelocity(i));
+//                
+//                ofSetColor(0, 255, 0);
+//                ofDrawRectangle(-3, -3, 6, 6);
+//                
+//                string msg = ofToString(label);
+//                
+//                
+//                if(showInfoToggle){
+//                    ofSetColor(0, 100, 255);
+//                    ofDrawBitmapString(msg, 5, -5);
+//                }
+//                ofPopMatrix();
+//                
+//            }
+//        }
 
         
     }
@@ -931,6 +949,7 @@ void Aggregator::drawCV(int x, int y){
     
     //draw processed blobs
     if(drawFilteredBlobs && useBlobFilter){
+        filteredContours.setDrawInfo(showInfoToggle);
         filteredContours.draw();
     }
     
@@ -1047,6 +1066,7 @@ void Aggregator::gatherOscStats(){
             //get data from the BlobFilter
             label = filteredContours.getLabel(i);
             center = filteredContours.getCenter(i);
+            centerNormalized = filteredContours.getCenterNormalized(i);
             velocity = filteredContours.getVelocity(i);
             still = filteredContours.getStill(i);
             
@@ -1055,12 +1075,12 @@ void Aggregator::gatherOscStats(){
             //get data from ContourFinder
             label = contours.getLabel(i);
             center = toOf(contours.getCenter(i));
+            centerNormalized = center/ofVec2f(masterWidth, masterHeight);
             velocity = toOf(contours.getVelocity(i));
             still = false;
             
         }
         
-        centerNormalized = center/ofVec2f(masterWidth, masterHeight);
         
         //add it to our averages
         avgVel += velocity;
