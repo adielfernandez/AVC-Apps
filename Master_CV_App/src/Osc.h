@@ -16,7 +16,8 @@ public:
     Osc();
     
     // Methods
-    void setup(string _pgsIP, string _audioIP);
+    void setup();
+    
     void setupAudio(string _IP, int _port);
     void setupPGS1(string _IP, int _port);
     void setupPGS2(string _IP, int _port);
@@ -24,9 +25,7 @@ public:
     void setupPrevizDev(string _IP, int _port);
     
     void setupHeartbeat(string _IP, int _port);
-    void setupGui();
     
-    void update();
     void drawGui(int x, int y);
 
     void saveSettings();
@@ -57,11 +56,10 @@ public:
     int heartbeatPort;
     
     ofxPanel baseGui;
+    string fileName;
     
     ofxLabel oscLabel;
     ofxLabel corridorLabel;
-    ofxLabel masterToggleLabel;
-    ofxToggle sendAllOsc;
     ofxToggle sendCorridor1;
     ofxToggle sendCorridor2;
     ofxToggle sendCorridor3;
@@ -80,7 +78,13 @@ public:
     ofxIntSlider pgsSendRate;
     ofxIntSlider audioSendRate;
     
-    string fileName;
+    ofxLabel masterToggleLabel;
+    ofxToggle sendAllOsc;
+
+
+    
+    
+
     
 };
 #endif /* osc_h */

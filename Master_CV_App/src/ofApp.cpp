@@ -279,7 +279,7 @@ void ofApp::setup(){
     oscHandler.setupAudio(audioIP, audioPort);
     oscHandler.setupHeartbeat(heartbeatIP, heartbeatPort);
     
-    oscHandler.setupGui();
+    oscHandler.setup();
     
     oscHandler.loadSettings();
 
@@ -428,10 +428,6 @@ void ofApp::update(){
 
     //Lobby 2
     Lobby2Aggregate.update();
-    
-
-    
-    
 
     
     
@@ -813,6 +809,7 @@ void ofApp::draw(){
             
             audioSent = false;
         }
+
         
         //clear the fbo when the the cursor gets to the end
         if(audioCursorX > 0.95 * oscVizWidth){
