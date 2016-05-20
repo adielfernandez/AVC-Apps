@@ -70,9 +70,12 @@ public:
     vector<ProcessedBlob> processedBlobs;
     vector<ProcessedBlob> tempBlobs;
     
-    int numControlPts;
-    vector<float> controlPtsInput;
-    vector<float> controlPtsOutput;
+    int numControlPtsX, numControlPtsY;
+    vector<float> controlPtsXInput;
+    vector<float> controlPtsXOutput;
+    
+    vector<float> controlPtsYInput;
+    vector<float> controlPtsYOutput;
     
 };
 

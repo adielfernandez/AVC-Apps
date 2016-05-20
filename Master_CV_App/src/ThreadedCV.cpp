@@ -19,17 +19,34 @@ ThreadedCV::ThreadedCV(){
 
 ThreadedCV::~ThreadedCV(){
     
+
+    closeAllChannels();
+    
+    waitForThread(true, 4000);
+    
+}
+
+void ThreadedCV::closeAllChannels(){
+    
     //close thread channels
     quadPixelsIn.close();
     settingsIn.close();
     threshPixOut.close();
     contoursOut.close();
     
-    
-    waitForThread(true, 1000);
-    
 }
 
+void ThreadedCV::emptyAllChannels(){
+    
+    cout << "Emptying all thread channels" << endl;
+    
+    //close thread channels
+    quadPixelsIn.empty();
+    settingsIn.empty();
+    threshPixOut.empty();
+    contoursOut.empty();
+    
+}
 
 void ThreadedCV::setup(ofPixels *_mainThreadPix, ofxCv::ContourFinder *_mainThreadCons){
     
@@ -44,6 +61,11 @@ void ThreadedCV::setup(ofPixels *_mainThreadPix, ofxCv::ContourFinder *_mainThre
     blurredPix.allocate(320, 256, 1);
     
     isThreadCrashed = false;
+    firstAfterCrash = true;
+    
+    firstStop = true;
+    
+    lastRestartTime = 0;
     
     startThread();
     
@@ -77,10 +99,52 @@ void ThreadedCV::update(){
     
     if(ofGetElapsedTimeMillis() - lastDataSendTime > 1000){
         isThreadCrashed = true;
+        
+        if(firstAfterCrash){
+            cout << "Stopping Thread" << endl;
+            stopThread();
+            
+            emptyAllChannels();
+            
+            background.reset();
+            
+            firstAfterCrash = false;
+        }
+        
     } else {
+        
         isThreadCrashed = false;
+        firstAfterCrash = true;
+        
     }
     
+    
+    //only try to restart the thread every 4 seconds
+    if(isThreadCrashed && ofGetElapsedTimeMillis() - lastRestartTime > 10000){
+        
+        cout << "Attempting to start thread..." << endl;
+        startThread();
+        
+        lastRestartTime = ofGetElapsedTimeMillis();
+        firstStop = true;
+        
+    }
+    
+    //if it has been 2 seconds since last restart AND we're still crashed
+    //then stop and prepare for the next restart
+    //make sure to wait longer since we have waitForThread(5000)
+    if(isThreadCrashed && ofGetElapsedTimeMillis() - lastRestartTime > 4000 && firstStop){
+        
+        cout << "Stopping Thread" << endl;
+        stopThread();
+        
+        emptyAllChannels();
+        
+        background.reset();
+        
+        firstStop = false;
+        
+    }
     
     
 }

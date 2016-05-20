@@ -801,7 +801,7 @@ void Camera::update(){
     if(soloCam)  gatherOscStats();
     
     
-    if(soloCam && ofGetElapsedTimeMillis() - imageProcessor.lastDataSendTime > 1000){
+    if(soloCam && imageProcessor.isThreadCrashed){
         backgroundInCol.lerp(ofColor(100, 0, 0), 0.08);
         backgroundOutCol.lerp(ofColor(10, 0, 0), 0.08);
     } else {
@@ -951,8 +951,8 @@ void Camera::drawMain(){
     ofDrawBitmapString("Last Frame Time: " + ofToString(ofGetElapsedTimeMillis() - lastFrameTime), secondSpot.x, 30);
     
     if(soloCam){
-        ofDrawBitmapString("CV Thread ID: " + ofToString(imageProcessor.getThreadId()), secondSpot.x, 30);
-        ofDrawBitmapString("Last Data from Thread: " + ofToString(ofGetElapsedTimeMillis() - imageProcessor.lastDataSendTime) + " ms ago", secondSpot.x, 45);
+        ofDrawBitmapString("CV Thread ID: " + ofToString(imageProcessor.getThreadId()), secondSpot.x, 45);
+        ofDrawBitmapString("Last Data from Thread: " + ofToString(ofGetElapsedTimeMillis() - imageProcessor.lastDataSendTime) + " ms ago", secondSpot.x, 60);
     }
 
     

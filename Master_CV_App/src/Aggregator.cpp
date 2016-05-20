@@ -544,8 +544,13 @@ void Aggregator::update(){
                         
                         int index = y * masterPix.getWidth() + x;
                         
-                        if(maskPix[index] == 255) masterPix[index] = 0;
+                        //prevent the mask from going through pixels that arent there
+                        //if the masterPix dimensions are smaller
+                        if(x < masterWidth && y < masterHeight){
                         
+                            if(maskPix[index] == 255) masterPix[index] = 0;
+                            
+                        }
                     }
                 }
                 
@@ -630,9 +635,12 @@ void Aggregator::update(){
     
     //if we haven't received anything from the thread in over a second
     //assume the thread crashed and change the background color to red as a warning
-    if(ofGetElapsedTimeMillis() - aggregateProcessor.lastDataSendTime > 1000){
+    if(aggregateProcessor.isThreadCrashed){
         backgroundInCol.lerp(ofColor(100, 0, 0), 0.08);
         backgroundOutCol.lerp(ofColor(10, 0, 0), 0.08);
+    } else {
+        backgroundInCol.lerp(ofColor(100), 0.2);
+        backgroundOutCol.lerp(ofColor(0), 0.2);
     }
 
     

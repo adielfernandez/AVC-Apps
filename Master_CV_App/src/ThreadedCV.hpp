@@ -42,6 +42,9 @@ public:
     
     void setup(ofPixels *_mainThreadPix, ofxCv::ContourFinder *_mainThreadCons);
     void analyze(ofPixels & pix, vector<int> & settings);
+    void closeAllChannels();
+    void emptyAllChannels();
+    
     void update();
     
     unsigned long long lastDataSendTime;
@@ -94,7 +97,14 @@ private:
     
     ofxCv::RunningBackground background;
     
+    //for restarting the background learning
     bool needsAutoReset;
+    
+    //for restarting the thread
+    unsigned long long lastRestartTime;
+    
+    bool firstAfterCrash;
+    bool firstStop;
     
 };
 

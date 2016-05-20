@@ -11,7 +11,7 @@
 	<Send_Audio_Data>0</Send_Audio_Data>
 <oscSettings>
 		<OSC_DATA/>
-		<Send_OSC>0</Send_OSC>
+		<Send_OSC>1</Send_OSC>
 		<Millis_bet__sends>250</Millis_bet__sends>
 		<Send_Corridor_1_Data>1</Send_Corridor_1_Data>
 		<Send_Corridor_2_Data>1</Send_Corridor_2_Data>

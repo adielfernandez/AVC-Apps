@@ -27,83 +27,121 @@ void BlobFilter::setup(ofxCv::ContourFinder *_rawContours, string _corridorName)
     personRadius = 20;
     stillTimeout = 2000;
     
-    numControlPts = 11;
-    
-    //Input holds the pixel value of the blob center
-    controlPtsInput.resize(numControlPts);
-    
-    //Output holds the real point in space normalized from 0-1
-    controlPtsOutput.resize(numControlPts);
     
     if(corridorName == "Lobby1Aggregate"){
-        
-        controlPtsInput[0] = 21;
-        controlPtsOutput[0] = 0.0f;
 
-        controlPtsInput[1] = 92;
-        controlPtsOutput[1] = 0.1f;
+        //----------X CONTROL POINTS----------
+        numControlPtsX = 11;
         
-        controlPtsInput[2] = 216;
-        controlPtsOutput[2] = 0.2f;
+        //Input holds the pixel value of the blob center
+        controlPtsXInput.resize(numControlPtsX);
         
-        controlPtsInput[3] = 305;
-        controlPtsOutput[3] = 0.3f;
+        //Output holds the real point in space normalized from 0-1
+        controlPtsXOutput.resize(numControlPtsX);
         
-        controlPtsInput[4] = 347;
-        controlPtsOutput[4] = 0.4f;
         
-        controlPtsInput[5] = 454;
-        controlPtsOutput[5] = 0.5f;
-        
-        controlPtsInput[6] = 579;
-        controlPtsOutput[6] = 0.6f;
-        
-        controlPtsInput[7] = 628;  //was 618
-        controlPtsOutput[7] = 0.7f;
-        
-        controlPtsInput[8] = 694;   //was 684
-        controlPtsOutput[8] = 0.8f;
-        
-        controlPtsInput[9] = 836;   //was 819
-        controlPtsOutput[9] = 0.9f;
+        controlPtsXInput[0] = 21;
+        controlPtsXOutput[0] = 0.0f;
 
-        controlPtsInput[10] = 902;
-        controlPtsOutput[10] = 1.0f;
+        controlPtsXInput[1] = 92;
+        controlPtsXOutput[1] = 0.1f;
+        
+        controlPtsXInput[2] = 216;
+        controlPtsXOutput[2] = 0.2f;
+        
+        controlPtsXInput[3] = 305;
+        controlPtsXOutput[3] = 0.3f;
+        
+        controlPtsXInput[4] = 347;
+        controlPtsXOutput[4] = 0.4f;
+        
+        controlPtsXInput[5] = 454;
+        controlPtsXOutput[5] = 0.5f;
+        
+        controlPtsXInput[6] = 579;
+        controlPtsXOutput[6] = 0.6f;
+        
+        controlPtsXInput[7] = 628;  //was 618
+        controlPtsXOutput[7] = 0.7f;
+        
+        controlPtsXInput[8] = 694;   //was 684
+        controlPtsXOutput[8] = 0.8f;
+        
+        controlPtsXInput[9] = 836;   //was 819
+        controlPtsXOutput[9] = 0.9f;
+
+        controlPtsXInput[10] = 902;
+        controlPtsXOutput[10] = 1.0f;
+        
+        //----------Y CONTROL POINTS----------
+        
+        //Lobby 1 does not do Y multi-mapping
+        numControlPtsY = 0;
+        
+        controlPtsYInput.resize(numControlPtsY);
+        controlPtsYOutput.resize(numControlPtsY);
+        
         
     } else if(corridorName == "Lobby2Aggregate"){
         
-        controlPtsInput[0] = 0.0f;
-        controlPtsOutput[0] = 0.0f;
+        //----------X CONTROL POINTS----------
+        numControlPtsX = 7;
         
-        controlPtsInput[1] = 0.0f;
-        controlPtsOutput[1] = 0.1f;
+        //Input holds the pixel value of the blob center
+        controlPtsXInput.resize(numControlPtsX);
         
-        controlPtsInput[2] = 0.0f;
-        controlPtsOutput[2] = 0.2f;
+        //Output holds the real point in space normalized from 0-1
+        controlPtsXOutput.resize(numControlPtsX);
         
-        controlPtsInput[3] = 0.0f;
-        controlPtsOutput[3] = 0.3f;
+        controlPtsXInput[0] = 0.0f;
+        controlPtsXOutput[0] = 0.0f;
         
-        controlPtsInput[4] = 0.0f;
-        controlPtsOutput[4] = 0.4f;
+        controlPtsXInput[1] = 0.0f;
+        controlPtsXOutput[1] = 0.1f;
         
-        controlPtsInput[5] = 0.0f;
-        controlPtsOutput[5] = 0.5f;
+        controlPtsXInput[2] = 0.0f;
+        controlPtsXOutput[2] = 0.2f;
         
-        controlPtsInput[6] = 0.0f;
-        controlPtsOutput[6] = 0.6f;
+        controlPtsXInput[3] = 0.0f;
+        controlPtsXOutput[3] = 0.3f;
         
-        controlPtsInput[7] = 0.0f;
-        controlPtsOutput[7] = 0.7f;
+        controlPtsXInput[4] = 0.0f;
+        controlPtsXOutput[4] = 0.4f;
         
-        controlPtsInput[8] = 0.0f;
-        controlPtsOutput[8] = 0.8f;
+        controlPtsXInput[5] = 0.0f;
+        controlPtsXOutput[5] = 0.5f;
         
-        controlPtsInput[9] = 0.0f;
-        controlPtsOutput[9] = 0.9f;
+        controlPtsXInput[6] = 0.0f;
+        controlPtsXOutput[6] = 0.6f;
         
-        controlPtsInput[10] = 0.0f;
-        controlPtsOutput[10] = 1.0f;
+        
+        //----------Y CONTROL POINTS----------
+        numControlPtsY = 5;
+        
+        //Input holds the pixel value of the blob center
+        controlPtsYInput.resize(numControlPtsY);
+        
+        //Output holds the real point in space normalized from 0-1
+        controlPtsYOutput.resize(numControlPtsY);
+        
+        
+        controlPtsYInput[0] = 21;
+        controlPtsYOutput[0] = 0.0f;
+        
+        controlPtsYInput[1] = 92;
+        controlPtsYOutput[1] = 0.1f;
+        
+        controlPtsYInput[2] = 216;
+        controlPtsYOutput[2] = 0.2f;
+        
+        controlPtsYInput[3] = 305;
+        controlPtsYOutput[3] = 0.3f;
+        
+        controlPtsYInput[4] = 347;
+        controlPtsYOutput[4] = 0.4f;
+        
+        controlPtsYInput[5] = 454;
+        controlPtsYOutput[5] = 0.5f;
         
         
     }
@@ -409,38 +447,68 @@ void BlobFilter::update(int _personRadius, int _stillTimeout, float _speedThresh
     }
     
     
-    //Blobs are updated and new, now we need to go through them and re-map
-    //their positions according to the control points we set along the way.
-    
-    if(corridorName == "Lobby1Aggregate"){
+    if(corridorName == "Lobby1Aggregate" || corridorName == "Lobby2Aggregate"){
+        
+        //Blobs are updated and new, now we need to go through them and re-map
+        //their positions according to the control points we set along the way.
         for(int i = 0; i < processedBlobs.size(); i++){
             
             //find the X value of the blob and find which zone it's in
             //then remap according to points it falls between
-            int leftIndex = 0;
-            int rightIndex = 1;
+            int firstXIndex = 0;
+            int secondXIndex = 1;
             
-            for(int j = 0; j < numControlPts; j++){
+            for(int j = 0; j < numControlPtsX; j++){
                 
                 //find the control point to the left
-                if(processedBlobs[i].center.x > controlPtsInput[j]){
-                    leftIndex = j;
-                    rightIndex = j + 1;
+                if(processedBlobs[i].center.x > controlPtsXInput[j]){
+                    firstXIndex = j;
+                    secondXIndex = j + 1;
                 }
             }
             
+
             //now we have the bounds so remap (and clamp)
-            float newX = ofMap(processedBlobs[i].center.x, controlPtsInput[leftIndex], controlPtsInput[rightIndex], controlPtsOutput[leftIndex], controlPtsOutput[rightIndex], true);
+            float newX = ofMap(processedBlobs[i].center.x, controlPtsXInput[firstXIndex], controlPtsXInput[secondXIndex], controlPtsXOutput[firstXIndex], controlPtsXOutput[secondXIndex], true);
+            
+            float newY;
+            
+            //Only corridor 2 does X and Y
+            if(corridorName == "Lobby2Aggregate"){
+
+                //find the Y value of the blob and find which zone it's in
+                //then remap according to points it falls between
+                int firstYIndex = 0;
+                int secondYIndex = 1;
+                
+                for(int j = 0; j < numControlPtsY; j++){
+                    
+                    //find the control point to the left
+                    if(processedBlobs[i].center.x > controlPtsXInput[j]){
+                        firstYIndex = j;
+                        secondYIndex = j + 1;
+                    }
+                }
+            
+                newY = ofMap(processedBlobs[i].center.y, controlPtsYInput[firstYIndex], controlPtsYInput[secondYIndex], controlPtsYOutput[firstYIndex], controlPtsYOutput[secondYIndex], true);;
+                
+            } else {
+                
+                newY = processedBlobs[i].centerNorm.y;
+                
+            }
             
             //Put the mapped value back in the blob
-            processedBlobs[i].centerNorm.x = newX;
+            processedBlobs[i].centerNorm.set(newX, newY);
             
             //Since we're here, scale it up for the non normalized value
-            processedBlobs[i].center.x = newX * scaledWidth;
-            
+            processedBlobs[i].center.set(newX * scaledWidth, newY * scaledHeight);
             
         }
+        
     }
+
+
     
 }
 
