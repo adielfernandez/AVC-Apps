@@ -93,26 +93,26 @@ void BlobFilter::setup(ofxCv::ContourFinder *_rawContours, string _corridorName)
         //Output holds the real point in space normalized from 0-1
         controlPtsXOutput.resize(numControlPtsX);
         
-        controlPtsXInput[0] = 0.0f;
-        controlPtsXOutput[0] = 0.0f;
+        controlPtsXInput[0] = 23;
+        controlPtsXOutput[0] = (0.0f/6.0f);
         
-        controlPtsXInput[1] = 0.0f;
-        controlPtsXOutput[1] = 0.1f;
+        controlPtsXInput[1] = 180;
+        controlPtsXOutput[1] = (1.0f/6.0f);
         
-        controlPtsXInput[2] = 0.0f;
-        controlPtsXOutput[2] = 0.2f;
+        controlPtsXInput[2] = 302;
+        controlPtsXOutput[2] = (2.0f/6.0f);
         
-        controlPtsXInput[3] = 0.0f;
-        controlPtsXOutput[3] = 0.3f;
+        controlPtsXInput[3] = 394;
+        controlPtsXOutput[3] = (3.0f/6.0f);
         
-        controlPtsXInput[4] = 0.0f;
-        controlPtsXOutput[4] = 0.4f;
+        controlPtsXInput[4] = 553;
+        controlPtsXOutput[4] = (4.0f/6.0f);
         
-        controlPtsXInput[5] = 0.0f;
-        controlPtsXOutput[5] = 0.5f;
+        controlPtsXInput[5] = 660;
+        controlPtsXOutput[5] = (5.0f/6.0f);
         
-        controlPtsXInput[6] = 0.0f;
-        controlPtsXOutput[6] = 0.6f;
+        controlPtsXInput[6] = 830;
+        controlPtsXOutput[6] = (6.0f/6.0f);
         
         
         //----------Y CONTROL POINTS----------
@@ -125,23 +125,20 @@ void BlobFilter::setup(ofxCv::ContourFinder *_rawContours, string _corridorName)
         controlPtsYOutput.resize(numControlPtsY);
         
         
-        controlPtsYInput[0] = 21;
+        controlPtsYInput[0] = 18;
         controlPtsYOutput[0] = 0.0f;
         
-        controlPtsYInput[1] = 92;
-        controlPtsYOutput[1] = 0.1f;
+        controlPtsYInput[1] = 200;  //174-220
+        controlPtsYOutput[1] = 0.2f;
         
-        controlPtsYInput[2] = 216;
-        controlPtsYOutput[2] = 0.2f;
+        controlPtsYInput[2] = 286;
+        controlPtsYOutput[2] = 0.4f;
         
-        controlPtsYInput[3] = 305;
-        controlPtsYOutput[3] = 0.3f;
+        controlPtsYInput[3] = 470;
+        controlPtsYOutput[3] = 0.6f;
         
-        controlPtsYInput[4] = 347;
-        controlPtsYOutput[4] = 0.4f;
-        
-        controlPtsYInput[5] = 454;
-        controlPtsYOutput[5] = 0.5f;
+        controlPtsYInput[4] = 488;  //488
+        controlPtsYOutput[4] = 0.7f;
         
         
     }
@@ -447,7 +444,7 @@ void BlobFilter::update(int _personRadius, int _stillTimeout, float _speedThresh
     }
     
     
-    if(corridorName == "Lobby1Aggregate" || corridorName == "Lobby2Aggregate"){
+    if(corridorName == "Lobby1Aggregate"){ //|| corridorName == "Lobby2Aggregate"){
         
         //Blobs are updated and new, now we need to go through them and re-map
         //their positions according to the control points we set along the way.
