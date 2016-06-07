@@ -20,6 +20,7 @@ void ofApp::setup(){
     ofSetFrameRate(200);
     
 //    ofSetLogLevel(OF_LOG_VERBOSE);
+
     
     ofSetWindowTitle("AV&C Terrell Place Sensor Processor");
     
@@ -395,6 +396,14 @@ void ofApp::setup(){
     Lobby2Aggregate.gui.minimizeAll();
     
     
+    
+    //-----ERROR LOGGING-----
+    logFileName = "logs/log_for_app_started_at_" + ofGetTimestampString() + ".txt";
+    lastLogTime = 0;
+    
+    timeBetweenLogs = 30;
+    numLogsToSave = 100;
+    
 }
 
 //===============================================================//
@@ -431,6 +440,119 @@ void ofApp::update(){
 
     
     
+    
+    //-----ERROR LOGGING-----
+    
+    //store a new log string into the vector every so often
+    if(ofGetElapsedTimeMillis() - lastLogTime > timeBetweenLogs){
+        
+        //if we've reached 10 past logs, start replacing them...
+        if(lastXLogs.size() >= numLogsToSave){
+            
+            //Delete the first entry
+            lastXLogs.erase(lastXLogs.begin());
+            
+        }
+        
+        string l = getLogString();
+        lastXLogs.push_back(l);
+        
+        //compose a buffer to save to file
+        ofBuffer stats;
+        
+        //clear buffer garbage
+        stats.clear();
+        
+        stats.append("Summary of last " + ofToString(lastXLogs.size()) + " snapshots\n");
+        stats.append("Time between snapshots: " + ofToString(timeBetweenLogs) + " ms\n");
+        stats.append("\n");
+        stats.append("Entries sorted chronologically (newest last)\n");
+        stats.append("\n\n\n");
+        
+        //now go through all the logs stored and put them in the buffer
+        for(int i = 0; i < lastXLogs.size(); i++){
+            
+            stats.append("==================================================\n");
+            stats.append("===================SNAPSHOT # " + ofToString(i + 1) + "==================\n");
+            stats.append("==================================================\n");
+            
+            stats.append(lastXLogs[i]);
+            
+        }
+        
+        
+        //overwrite file with last stats message
+        ofBufferToFile(logFileName, stats);
+        
+        cout << "Log saved" << endl;
+
+        
+        lastLogTime = ofGetElapsedTimeMillis();
+    }
+    
+    
+
+    
+    
+}
+
+
+string ofApp::getLogString(){
+    
+    string log;
+    
+    unsigned long long now = ofGetElapsedTimeMillis();
+    //heading
+    
+
+    log += "System snapshot composed...\n";
+    log += "Date (MM/DD/YYYY): " + ofToString(ofGetMonth()) + "/" + ofToString(ofGetDay()) + "/" + ofToString(ofGetYear()) + "\n";
+    log += "Time: " + ofToString(ofGetHours()) + ":" + ofToString(ofGetMinutes()) + ":" + ofToString(ofGetSeconds()) + "\n";
+    log += "\n";
+    log += "Last Framerate: " + ofToString(ofGetFrameRate()) + "\n";
+    log += "App age: " + ofToString(ofGetElapsedTimef()) + " seconds";
+    log += "\n";
+    log += "\n";
+    log += "----------LOBBY 1----------\n";
+    log += "Num Raw Blobs: " + ofToString(Lobby1Aggregate.contours.size()) + "\n";
+    log += "Num Processed Blobs: " + ofToString(Lobby1Aggregate.filteredContours.size()) + "\n";
+    log += "Last Data Received from threaded processor: " + ofToString(now - Lobby1Aggregate.aggregateProcessor.lastDataSendTime) + " ms ago\n";
+    log += "\n";
+    
+    //go through middle corridors
+    for(int i = 6; i <= 9; i++){
+        
+        log += "----------CORRIDOR " + ofToString(i - 4) + "----------\n";
+        log += "Num Raw Blobs: " + ofToString(cameras[i] -> contours.size()) + "\n";
+        log += "Num Processed Blobs: " + ofToString(cameras[i] -> filteredContours.size()) + "\n";
+        log += "Last Data Received from threaded processor: " + ofToString(now - cameras[i] -> imageProcessor.lastDataSendTime) + " ms ago\n";
+        log += "\n";
+        
+    }
+    
+    log += "----------LOBBY 2----------\n";
+    log += "Num Raw Blobs: " + ofToString(Lobby2Aggregate.contours.size()) + "\n";
+    log += "Num Processed Blobs: " + ofToString(Lobby2Aggregate.filteredContours.size()) + "\n";
+    log += "Last Data Received from threaded processor: " + ofToString(now - Lobby2Aggregate.aggregateProcessor.lastDataSendTime) + " ms ago\n";
+    
+    log += "\n";
+    log += "\n";
+    
+    log += "----------RAW CAMERA INFO----------\n";
+    log += "\n";
+    
+    for(int i = 0; i < numFeeds; i++){
+        
+        log += "-----CAM " + ofToString(i + 1) + "-----\n";
+        log += "Num frames received: " + ofToString(cameras[i] -> numFramesRec) + "\n";
+        log += "Time since last frame: " + ofToString(now - cameras[i] -> lastFrameTime) + "\n";
+        log += "\n";
+        
+    }
+    
+    log += "\n\n\n\n";
+    
+    return log;
 }
 
 

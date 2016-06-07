@@ -103,6 +103,16 @@ class ofApp : public ofBaseApp{
     
     ofFbo pgsViz, audioViz;
     
+    
+    //-----ERROR LOGGING-----
+    string logFileName;
+    unsigned long long lastLogTime;
+    int timeBetweenLogs;
+    
+    int numLogsToSave;
+    vector<string> lastXLogs;
+    
+    string getLogString();
 };
 
 
