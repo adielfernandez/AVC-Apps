@@ -85,7 +85,7 @@ void BlobFilter::setup(ofxCv::ContourFinder *_rawContours, string _corridorName)
     } else if(corridorName == "Lobby2Aggregate"){
         
         //----------X CONTROL POINTS----------
-        numControlPtsX = 7;
+        numControlPtsX = 9;
         
         //Input holds the pixel value of the blob center
         controlPtsXInput.resize(numControlPtsX);
@@ -93,30 +93,41 @@ void BlobFilter::setup(ofxCv::ContourFinder *_rawContours, string _corridorName)
         //Output holds the real point in space normalized from 0-1
         controlPtsXOutput.resize(numControlPtsX);
         
-        controlPtsXInput[0] = 23;
+        
+        //for calibration, corridor was divided into 6 zones, some zones
+        //had a map point in the middle, hence the output points below
+        
+        controlPtsXInput[0] = 30;
         controlPtsXOutput[0] = (0.0f/6.0f);
         
-        controlPtsXInput[1] = 180;
+        controlPtsXInput[1] = 168;
         controlPtsXOutput[1] = (1.0f/6.0f);
         
-        controlPtsXInput[2] = 302;
+        controlPtsXInput[2] = 297;
         controlPtsXOutput[2] = (2.0f/6.0f);
         
-        controlPtsXInput[3] = 394;
-        controlPtsXOutput[3] = (3.0f/6.0f);
+        controlPtsXInput[3] = 335;
+        controlPtsXOutput[3] = (2.5f/6.0f);
         
-        controlPtsXInput[4] = 553;
-        controlPtsXOutput[4] = (4.0f/6.0f);
+        controlPtsXInput[4] = 412;
+        controlPtsXOutput[4] = (3.0f/6.0f);
         
-        controlPtsXInput[5] = 660;
-        controlPtsXOutput[5] = (5.0f/6.0f);
+        controlPtsXInput[5] = 521;
+        controlPtsXOutput[5] = (3.5f/6.0f);
         
-        controlPtsXInput[6] = 830;
-        controlPtsXOutput[6] = (6.0f/6.0f);
+        
+        controlPtsXInput[6] = 550;
+        controlPtsXOutput[6] = (4.0f/6.0f);
+        
+        controlPtsXInput[7] = 680;
+        controlPtsXOutput[7] = (5.0f/6.0f);
+        
+        controlPtsXInput[8] = 830;
+        controlPtsXOutput[8] = (6.0f/6.0f);
         
         
         //----------Y CONTROL POINTS----------
-        numControlPtsY = 5;
+        numControlPtsY = 6;
         
         //Input holds the pixel value of the blob center
         controlPtsYInput.resize(numControlPtsY);
@@ -125,20 +136,23 @@ void BlobFilter::setup(ofxCv::ContourFinder *_rawContours, string _corridorName)
         controlPtsYOutput.resize(numControlPtsY);
         
         
-        controlPtsYInput[0] = 18;
-        controlPtsYOutput[0] = 0.0f;
+        controlPtsYInput[0] = 31;
+        controlPtsYOutput[0] = (0.0f/4.0f);
         
-        controlPtsYInput[1] = 200;  //174-220
-        controlPtsYOutput[1] = 0.2f;
+        controlPtsYInput[1] = 210;
+        controlPtsYOutput[1] = (1.0f/4.0f);
         
-        controlPtsYInput[2] = 286;
-        controlPtsYOutput[2] = 0.4f;
+        controlPtsYInput[2] = 225;
+        controlPtsYOutput[2] = (1.5f/4.0f);
         
-        controlPtsYInput[3] = 470;
-        controlPtsYOutput[3] = 0.6f;
+        controlPtsYInput[3] = 247;
+        controlPtsYOutput[3] = (2.0f/4.0f);
         
-        controlPtsYInput[4] = 488;  //488
-        controlPtsYOutput[4] = 0.7f;
+        controlPtsYInput[4] = 401;
+        controlPtsYOutput[4] = (3.0f/4.0f);
+        
+        controlPtsYInput[5] = 478;
+        controlPtsYOutput[5] = (4.0f/4.0f);
         
         
     }
@@ -444,7 +458,7 @@ void BlobFilter::update(int _personRadius, int _stillTimeout, float _speedThresh
     }
     
     
-    if(corridorName == "Lobby1Aggregate"){ //|| corridorName == "Lobby2Aggregate"){
+    if(corridorName == "Lobby1Aggregate" || corridorName == "Lobby2Aggregate"){
         
         //Blobs are updated and new, now we need to go through them and re-map
         //their positions according to the control points we set along the way.
@@ -461,6 +475,7 @@ void BlobFilter::update(int _personRadius, int _stillTimeout, float _speedThresh
                 if(processedBlobs[i].center.x > controlPtsXInput[j]){
                     firstXIndex = j;
                     secondXIndex = j + 1;
+
                 }
             }
             
@@ -480,8 +495,8 @@ void BlobFilter::update(int _personRadius, int _stillTimeout, float _speedThresh
                 
                 for(int j = 0; j < numControlPtsY; j++){
                     
-                    //find the control point to the left
-                    if(processedBlobs[i].center.x > controlPtsXInput[j]){
+                    //find the control point above
+                    if(processedBlobs[i].center.y > controlPtsYInput[j]){
                         firstYIndex = j;
                         secondYIndex = j + 1;
                     }

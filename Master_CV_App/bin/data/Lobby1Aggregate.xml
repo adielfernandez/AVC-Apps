@@ -35,6 +35,6 @@
 <Use_Blob_Filter>1</Use_Blob_Filter>
 	<Filter_Radius>56</Filter_Radius>
 <Draw_Filtered_Blobs>1</Draw_Filtered_Blobs>
-<Filter_Still_Time>3150</Filter_Still_Time>
+<Filter_Still_Time>900</Filter_Still_Time>
 	<Filter_Speed_Thresh>3.32</Filter_Speed_Thresh>
 </Lobby1Aggregate>
