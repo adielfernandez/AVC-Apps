@@ -31,6 +31,7 @@ void Osc::setup(){
     baseGui.add(pgsSendRate.setup("PGS Rate (in ms)", 40, 15, 100));
     
     baseGui.add(sendAudioOsc.setup("Send Audio Data", true));
+    baseGui.add(sendAudioBackupOsc.setup("Send Audio Backup Data", true));
     baseGui.add(audioSendRate.setup("Audio Rate (in ms)", 250, 15, 500));
     
     baseGui.add(masterToggleLabel.setup("Master OSC Toggle", ""));
@@ -83,6 +84,14 @@ void Osc::setupAudio(string _IP, int _port){
     audioIP = _IP;
     audioPort = _port;
     audioSender.setup(audioIP, audioPort);
+    
+}
+
+void Osc::setupAudioBackup(string _IP, int _port){
+    
+    audioBackupIP = _IP;
+    audioBackupPort = _port;
+    audioBackupSender.setup(audioBackupIP, audioBackupPort);
     
 }
 

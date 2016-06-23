@@ -25,6 +25,12 @@
 ##### Audio System IP address #####
 192.168.187.126
 
+##### Audio Backup Receive Port #####
+12345
+
+##### Audio Backup IP address #####
+192.168.187.127
+
 ##### Audio System Receive Port #####
 12345
 

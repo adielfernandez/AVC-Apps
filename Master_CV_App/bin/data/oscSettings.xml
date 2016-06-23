@@ -39,5 +39,6 @@
 	<PGS_Rate__in_ms_>20</PGS_Rate__in_ms_>
 		<Audio_Rate__in_ms_>257</Audio_Rate__in_ms_>
 	<Send_to_PGS-Backup>1</Send_to_PGS-Backup>
+	<Send_Audio_Backup_Data>1</Send_Audio_Backup_Data>
 	</oscSettings>
 </group>

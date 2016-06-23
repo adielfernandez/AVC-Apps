@@ -207,6 +207,7 @@ void ofApp::setup(){
     string pgsBackupIP = "";
     string previzDevIP = "";
     string audioIP = "";
+    string audioBackupIP = "";
     string heartbeatIP = "";
     
     
@@ -215,6 +216,7 @@ void ofApp::setup(){
     int pgsBackupPort = 0;
     int previzDevPort = 0;
     int audioPort = 0;
+    int audioBackupPort = 0;
     int heartbeatPort = 0;
 
     cout << "Getting OSC Configuration from File" << endl;
@@ -248,8 +250,12 @@ void ofApp::setup(){
             } else if(lineNum == 28){
                 audioPort = ofToInt(line);
             } else if(lineNum == 31){
-                heartbeatIP = line;
+                audioBackupIP = line;
             } else if(lineNum == 34){
+                audioBackupPort = ofToInt(line);
+            } else if(lineNum == 37){
+                heartbeatIP = line;
+            } else if(lineNum == 40){
                 heartbeatPort = ofToInt(line);
             }
             
@@ -268,6 +274,8 @@ void ofApp::setup(){
     cout << "PrevizDev Port: " << previzDevPort << endl;
     cout << "Audio IP: " << audioIP << endl;
     cout << "Audio Port: " << audioPort << endl;
+    cout << "Audio Backup IP: " << audioBackupIP << endl;
+    cout << "Audio Backup Port: " << audioBackupPort << endl;
     cout << "Heartbeat IP: " << heartbeatIP << endl;
     cout << "Heartbeat Port: " << heartbeatPort << endl;
     
@@ -278,6 +286,7 @@ void ofApp::setup(){
     oscHandler.setupPGSBackup(pgsBackupIP, pgsBackupPort);
     oscHandler.setupPrevizDev(previzDevIP, previzDevPort);
     oscHandler.setupAudio(audioIP, audioPort);
+    oscHandler.setupAudioBackup(audioBackupIP, audioBackupPort);
     oscHandler.setupHeartbeat(heartbeatIP, heartbeatPort);
     
     oscHandler.setup();
@@ -808,7 +817,9 @@ void ofApp::draw(){
         
         audioDataFormat += "OSC Data to Audio System\n";
         audioDataFormat += "---------------\n";
-        audioDataFormat += "Sending to \"" + oscHandler.audioIP + "\"\n";
+        audioDataFormat += "Sending to Primary Audio \"" + oscHandler.audioIP + "\"\n";
+        audioDataFormat += "on port 12345\n";
+        audioDataFormat += "And to Backup Audio \"" + oscHandler.audioBackupIP + "\"\n";
         audioDataFormat += "on port 12345\n";
         audioDataFormat += "\n";
         audioDataFormat += "DATA FORMAT\n";
@@ -1046,7 +1057,8 @@ void ofApp::draw(){
             }
             
             oscHandler.audioSender.sendBundle(audioBundle);
-         
+            oscHandler.audioBackupSender.sendBundle(audioBundle);
+            
             lastAudioSendTime = ofGetElapsedTimeMillis();
             audioSent = true;
             

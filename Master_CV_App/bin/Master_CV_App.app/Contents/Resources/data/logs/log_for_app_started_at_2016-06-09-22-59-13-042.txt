@@ -1,0 +1,110 @@
+Summary of last 1 snapshots
+Time between snapshots: 30 ms
+
+Entries sorted chronologically (newest last)
+
+
+
+==================================================
+===================SNAPSHOT # 1==================
+==================================================
+System snapshot composed...
+Date (MM/DD/YYYY): 6/9/2016
+Time: 22:59:13
+
+Last Framerate: 60
+App age: 0.521232 seconds
+
+----------LOBBY 1----------
+Num Raw Blobs: 0
+Num Processed Blobs: 0
+Last Data Received from threaded processor: 522 ms ago
+
+----------CORRIDOR 2----------
+Num Raw Blobs: 0
+Num Processed Blobs: 0
+Last Data Received from threaded processor: 522 ms ago
+
+----------CORRIDOR 3----------
+Num Raw Blobs: 0
+Num Processed Blobs: 0
+Last Data Received from threaded processor: 522 ms ago
+
+----------CORRIDOR 4----------
+Num Raw Blobs: 0
+Num Processed Blobs: 0
+Last Data Received from threaded processor: 522 ms ago
+
+----------CORRIDOR 5----------
+Num Raw Blobs: 0
+Num Processed Blobs: 0
+Last Data Received from threaded processor: 522 ms ago
+
+----------LOBBY 2----------
+Num Raw Blobs: 0
+Num Processed Blobs: 0
+Last Data Received from threaded processor: 522 ms ago
+
+
+----------RAW CAMERA INFO----------
+
+-----CAM 1-----
+Num frames received: 0
+Time since last frame: 522
+
+-----CAM 2-----
+Num frames received: 0
+Time since last frame: 522
+
+-----CAM 3-----
+Num frames received: 0
+Time since last frame: 522
+
+-----CAM 4-----
+Num frames received: 0
+Time since last frame: 522
+
+-----CAM 5-----
+Num frames received: 0
+Time since last frame: 522
+
+-----CAM 6-----
+Num frames received: 0
+Time since last frame: 522
+
+-----CAM 7-----
+Num frames received: 0
+Time since last frame: 522
+
+-----CAM 8-----
+Num frames received: 0
+Time since last frame: 522
+
+-----CAM 9-----
+Num frames received: 0
+Time since last frame: 522
+
+-----CAM 10-----
+Num frames received: 0
+Time since last frame: 522
+
+-----CAM 11-----
+Num frames received: 0
+Time since last frame: 522
+
+-----CAM 12-----
+Num frames received: 0
+Time since last frame: 522
+
+-----CAM 13-----
+Num frames received: 0
+Time since last frame: 522
+
+-----CAM 14-----
+Num frames received: 0
+Time since last frame: 522
+
+
+
+
+

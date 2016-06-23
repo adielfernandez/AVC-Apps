@@ -19,6 +19,7 @@ public:
     void setup();
     
     void setupAudio(string _IP, int _port);
+    void setupAudioBackup(string _IP, int _port);
     void setupPGS1(string _IP, int _port);
     void setupPGS2(string _IP, int _port);
     void setupPGSBackup(string _IP, int _port);
@@ -50,6 +51,10 @@ public:
     ofxOscSender audioSender;
     string audioIP;
     int audioPort;
+    
+    ofxOscSender audioBackupSender;
+    string audioBackupIP;
+    int audioBackupPort;
 
     ofxOscSender heartbeatSender;
     string heartbeatIP;
@@ -73,6 +78,7 @@ public:
     ofxToggle sendPgsBackup;
     ofxToggle sendPrevizDev;
     ofxToggle sendAudioOsc;
+    ofxToggle sendAudioBackupOsc;
     ofxToggle sendHeartbeat;
     
     ofxIntSlider pgsSendRate;
